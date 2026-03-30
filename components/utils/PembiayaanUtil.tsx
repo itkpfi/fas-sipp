@@ -50,45 +50,6 @@ export function GetMaxPlafond(
   return maxPlafond;
 }
 
-// export const GetAngsuran = (
-//   dapem:IDapem
-// ) => {
-//   if (dapem.margin_type === "FLAT") {
-//     const pokok = dapem.plafond / dapem.tenor;
-//     const mg = dapem.c_margin+dapem.c_margin_sumdan;
-//     const margin = (dapem.plafond * (mg / 100)) / 12;
-//     const angsuran = pokok + margin;
-//     return {
-//       pokok,
-//       margin,
-//       angsuran: round
-//         ? Math.round(angsuran / rounded) * rounded
-//         : Math.ceil(angsuran / rounded) * rounded,
-//     };
-//   } else if (type === "ANUITAS") {
-//     const r = bunga / 12 / 100;
-
-//     const angsuran =
-//       (plafond * (r * Math.pow(1 + r, tenor))) / (Math.pow(1 + r, tenor) - 1);
-//     const pokok = plafond / tenor;
-//     const margin = angsuran - pokok;
-
-//     return {
-//       angsuran: round
-//         ? Math.round(angsuran / rounded) * rounded
-//         : Math.ceil(angsuran / rounded) * rounded,
-//       pokok,
-//       margin,
-//     };
-//   } else {
-//     return {
-//       pokok: 0,
-//       margin: 0,
-//       angsuran: 0,
-//     };
-//   }
-// };
-
 export const GetAngsuran = (
   plafond: number,
   tenor: number,
@@ -135,9 +96,67 @@ export const GetAngsuran = (
 export const GetBiaya = (data: IDapem) => {
   const adm = data.plafond * ((data.c_adm + data.c_adm_sumdan) / 100);
   const asuransi = data.plafond * (data.c_insurance / 100);
+  const angs = GetAngsuran(
+    data.plafond,
+    data.tenor,
+    data.c_margin + data.c_margin_sumdan,
+    data.margin_type,
+    data.rounded,
+  ).angsuran;
+  const blok = data.c_blokir * angs;
   return (
-    adm + asuransi + data.c_gov + data.c_account + data.c_stamp + data.c_mutasi
+    adm +
+    asuransi +
+    data.c_gov +
+    data.c_account +
+    data.c_stamp +
+    data.c_mutasi +
+    data.c_infomation +
+    data.c_provisi +
+    blok
   );
+};
+
+export const GetSisaPokokMargin = (data: IDapem) => {
+  const periode = data.Angsuran.find((d) =>
+    moment(d.date_pay).isSame(moment().toDate(), "month"),
+  );
+  const prev = data.Angsuran.filter(
+    (d) =>
+      moment(d.date_pay).isBefore(moment().toDate(), "month") &&
+      d.date_paid === null,
+  );
+  return {
+    principal: periode
+      ? periode.date_paid
+        ? periode.remaining
+        : periode.remaining + periode.principal
+      : 0,
+    count: periode
+      ? periode.date_paid
+        ? periode.counter
+        : periode.counter + 1
+      : 0,
+    prevcount: periode
+      ? periode.date_paid
+        ? prev.length
+        : prev.length + 1
+      : 0,
+    prevvalueprincipal: periode
+      ? periode.date_paid
+        ? prev.reduce((acc, curr) => acc + curr.principal, 0)
+        : prev.reduce((acc, curr) => acc + curr.principal, 0) +
+          periode.principal
+      : 0,
+    prevvalueall: periode
+      ? periode.date_paid
+        ? prev.reduce((acc, curr) => acc + curr.principal + curr.margin, 0)
+        : prev.reduce((acc, curr) => acc + curr.principal + curr.margin, 0) +
+          periode.margin +
+          periode.principal
+      : 0,
+    install: periode ? periode.principal + periode.margin : 0,
+  };
 };
 
 export function GetRoman(number: number): string {

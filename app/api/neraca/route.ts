@@ -11,18 +11,6 @@ export const GET = async (request: NextRequest) => {
         where: {
           type: "ASSET",
           parentId: null,
-          // ...(backdate && {
-          //   JournalDetail: {
-          //     some: {
-          //       JournalEntry: {
-          //         date: {
-          //           gte: moment(backdate.split(",")[0]).toDate(),
-          //           lte: moment(backdate.split(",")[1]).toDate(),
-          //         },
-          //       },
-          //     },
-          //   },
-          // }),
         },
         include: {
           Parent: true,
@@ -49,18 +37,6 @@ export const GET = async (request: NextRequest) => {
         where: {
           type: "KEWAJIBAN",
           parentId: null,
-          // ...(backdate && {
-          //   JournalDetail: {
-          //     some: {
-          //       JournalEntry: {
-          //         date: {
-          //           gte: moment(backdate.split(",")[0]).toDate(),
-          //           lte: moment(backdate.split(",")[1]).toDate(),
-          //         },
-          //       },
-          //     },
-          //   },
-          // }),
         },
         include: {
           Parent: true,
@@ -87,18 +63,6 @@ export const GET = async (request: NextRequest) => {
         where: {
           type: "MODAL",
           parentId: null,
-          // ...(backdate && {
-          //   JournalDetail: {
-          //     some: {
-          //       JournalEntry: {
-          //         date: {
-          //           gte: moment(backdate.split(",")[0]).toDate(),
-          //           lte: moment(backdate.split(",")[1]).toDate(),
-          //         },
-          //       },
-          //     },
-          //   },
-          // }),
         },
         include: {
           Parent: true,
@@ -133,6 +97,7 @@ export const GET = async (request: NextRequest) => {
             },
           }),
         },
+        include: { CategoryOfAccount: true },
       }),
       prisma.journalDetail.findMany({
         where: {
@@ -146,6 +111,7 @@ export const GET = async (request: NextRequest) => {
             },
           }),
         },
+        include: { CategoryOfAccount: true },
       }),
     ]);
 
@@ -157,13 +123,14 @@ export const GET = async (request: NextRequest) => {
     (acc, curr) => acc + (curr.debit - curr.credit),
     0,
   );
-
   return NextResponse.json(
     {
       data: serializeForApi({
         asset,
         kewajiban,
         modal,
+        pendapatan,
+        beban,
         shu: nomPendapatan - nomBeban,
       }),
       status: 200,
@@ -180,18 +147,6 @@ export const POST = async (request: NextRequest) => {
       where: {
         type: "PENDAPATAN",
         parentId: { not: null },
-        // ...(backdate && {
-        //   JournalDetail: {
-        //     some: {
-        //       JournalEntry: {
-        //         date: {
-        //           gte: moment(backdate.split(",")[0]).toDate(),
-        //           lte: moment(backdate.split(",")[1]).toDate(),
-        //         },
-        //       },
-        //     },
-        //   },
-        // }),
       },
       include: {
         JournalDetail: {
@@ -213,18 +168,6 @@ export const POST = async (request: NextRequest) => {
       where: {
         type: "BEBAN",
         parentId: { not: null },
-        // ...(backdate && {
-        //   JournalDetail: {
-        //     some: {
-        //       JournalEntry: {
-        //         date: {
-        //           gte: moment(backdate.split(",")[0]).toDate(),
-        //           lte: moment(backdate.split(",")[1]).toDate(),
-        //         },
-        //       },
-        //     },
-        //   },
-        // }),
       },
       include: {
         JournalDetail: {

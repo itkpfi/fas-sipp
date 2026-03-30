@@ -92,6 +92,7 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
         width={collapsed ? 80 : 250}
         className={collapsed ? "flex flex-col justify-center items-center" : ""}
         hidden={window && window.innerWidth < 600}
+        theme="light"
       >
         <div
           className="flex gap-3 bg-linear-to-br from-green-500 to-gray-500 rounded p-2"
@@ -139,7 +140,7 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
         )}
         {user && (
           <Menu
-            theme="dark"
+            theme="light"
             inlineCollapsed={collapsed}
             mode="inline"
             style={{

@@ -125,7 +125,7 @@ export default function Page() {
         return (
           <div>
             <p>{record.fullname}</p>
-            <div className="text-xs italic text-blue-400">
+            <div className="text-xs text-blue-400">
               @{record.username}
               <div>NIK: {record.nik}</div>
             </div>
@@ -139,7 +139,7 @@ export default function Page() {
       key: "kontak",
       render(value, record, index) {
         return (
-          <div className="text-xs italic text-blue-400">
+          <div className="text-xs text-blue-400">
             <div>
               <MailOutlined /> {record.email}
             </div>
@@ -162,7 +162,7 @@ export default function Page() {
         return (
           <div>
             <Tag color={"blue"}>{record.position}</Tag>
-            <div className="text-xs italic text-blue-400">
+            <div className="text-xs text-blue-400">
               <div>
                 <EnvironmentOutlined /> {record.Cabang.name}
               </div>
@@ -188,10 +188,10 @@ export default function Page() {
         <div className="flex gap-2">
           <div>
             <div className="font-bold">{record.pkwt_status}</div>
-            <div className="text-xs italic opacity-70">
+            <div className="text-xs opacity-80">
               {moment(record.start_pkwt).format("DD/MM/YYYY")}
             </div>
-            <div className="text-xs italic opacity-70">
+            <div className="text-xs opacity-80">
               {moment(record.end_pkwt).format("DD/MM/YYYY")}
             </div>
           </div>
@@ -210,7 +210,7 @@ export default function Page() {
       key: "salary",
       render(value, record, index) {
         return (
-          <div className="text-xs italic text-blue-400">
+          <div className="text-xs text-blue-400">
             <div>NIP: {record.nip}</div>
             <div>Salary: {IDRFormat(record.salary)}</div>
             <div>T_Transport: {IDRFormat(record.t_transport)}</div>
@@ -222,7 +222,7 @@ export default function Page() {
       title: "Updated",
       dataIndex: "updated_at",
       key: "updated_at",
-      render: (date) => moment(date).format("DD-MM-YYYY HH:mm:ss"),
+      render: (date) => moment(date).format("DD-MM-YYYY"),
     },
     {
       title: "Aksi",

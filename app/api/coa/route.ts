@@ -21,6 +21,7 @@ export const GET = async (request: NextRequest) => {
     take: parseInt(limit),
     include: { Children: true, Parent: true },
   });
+
   return NextResponse.json(
     { data: serializeForApi(find), status: 200 },
     { status: 200 },
@@ -49,6 +50,7 @@ export const POST = async (req: NextRequest) => {
     );
   }
 };
+
 export const PUT = async (req: NextRequest) => {
   const data: CategoryOfAccount = await req.json();
   const id = req.nextUrl.searchParams.get("id") || "1";
@@ -82,9 +84,20 @@ export const DELETE = async (req: NextRequest) => {
       { status: 404 },
     );
   try {
-    await prisma.categoryOfAccount.update({
+    const find = await prisma.categoryOfAccount.findFirst({
       where: { id },
-      data: { status: false },
+      include: { JournalDetail: true },
+    });
+    if (find && find.JournalDetail.length !== 0)
+      return NextResponse.json(
+        {
+          msg: "COA ini memiliki journal yang terhubung. tidak dapat hapus data!",
+          status: 400,
+        },
+        { status: 400 },
+      );
+    await prisma.categoryOfAccount.delete({
+      where: { id },
     });
 
     return NextResponse.json({ msg: "OK", status: 200 }, { status: 200 });

@@ -304,7 +304,7 @@ const columnDapem: TableProps<IDapem>["columns"] = [
       return (
         <div>
           <p>{record.Debitur.fullname}</p>
-          <p className="opacity-70">{record.nopen}</p>
+          <p className="opacity-80 text-xs">@{record.nopen}</p>
         </div>
       );
     },

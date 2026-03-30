@@ -2,8 +2,10 @@
 
 import { useUser } from "@/components/UserContext";
 import {
+  ExportToExcel,
   FilterData,
   GetStatusTag,
+  MappingToProsesDapem,
   ProsesPembiayaan,
 } from "@/components/utils/CompUtils";
 import { DetailDapem } from "@/components/utils/LayoutUtils";
@@ -17,6 +19,7 @@ import {
   FolderOutlined,
   FormOutlined,
   PayCircleOutlined,
+  PrinterOutlined,
   SwapOutlined,
 } from "@ant-design/icons";
 import { JenisPembiayaan, Sumdan } from "@prisma/client";
@@ -121,7 +124,7 @@ export default function Page() {
         return (
           <div>
             <div>{(pageProps.page - 1) * pageProps.limit + index + 1}</div>
-            <div className="opacity-70 text-xs italic">{record.id}</div>
+            <div className="opacity-80 text-xs">{record.id}</div>
           </div>
         );
       },
@@ -134,7 +137,7 @@ export default function Page() {
         return (
           <div>
             <p className="font-bold">{record.Debitur.fullname}</p>
-            <div className="text-xs opacity-70">
+            <div className="text-xs opacity-80">
               <p>@{record.Debitur.nopen}</p>
             </div>
           </div>
@@ -175,15 +178,15 @@ export default function Page() {
           record.tenor,
           record.c_margin_sumdan,
           record.margin_type,
-          record.rounded,
+          record.rounded_sumdan,
         ).angsuran;
         return (
           <div className="text-xs">
             <div>
-              Mitra : <Tag color={"blue"}> {IDRFormat(mitra)}</Tag>
+              Total : <Tag color={"blue"}>{IDRFormat(total)}</Tag>
             </div>
             <div>
-              Total : <Tag color={"blue"}>{IDRFormat(total)}</Tag>
+              Mitra : <Tag color={"blue"}> {IDRFormat(mitra)}</Tag>
             </div>
           </div>
         );
@@ -197,9 +200,10 @@ export default function Page() {
         return (
           <div>
             <p>
-              {record.ProdukPembiayaan.id} {record.ProdukPembiayaan.name}
+              {record.ProdukPembiayaan.name}{" "}
+              <span>({record.ProdukPembiayaan.Sumdan.code})</span>
             </p>
-            <p className="opacity-70">{record.JenisPembiayaan.name}</p>
+            <p className="opacity-80 text-xs">{record.JenisPembiayaan.name}</p>
           </div>
         );
       },
@@ -212,7 +216,7 @@ export default function Page() {
         return (
           <div>
             <div>{record.AO.fullname}</div>
-            <div className="text-xs opacity-70">
+            <div className="text-xs opacity-80">
               {record.AO.Cabang.name} | {record.AO.Cabang.Area.name}
             </div>
           </div>
@@ -286,7 +290,16 @@ export default function Page() {
       title: "Created",
       dataIndex: "created_at",
       key: "created_at",
-      render: (date) => moment(date).format("DD-MM-YYYY"),
+      render(value, record, index) {
+        return (
+          <div>
+            <div>{record.CreatedBy.fullname}</div>
+            <div className="opacity-80 text-xs">
+              {moment(record.created_at).format("DD/MM/YYYY")}
+            </div>
+          </div>
+        );
+      },
     },
     {
       title: "Aksi",
@@ -400,14 +413,58 @@ export default function Page() {
             }
           />
         </div>
-        <Input.Search
-          size="small"
-          style={{ width: 170 }}
-          placeholder="Cari nama..."
-          onChange={(e) =>
-            setPageProps({ ...pageProps, search: e.target.value })
-          }
-        />
+        <div className="flex gap-2 items-center">
+          <Button
+            icon={<PrinterOutlined />}
+            size="small"
+            type="primary"
+            onClick={() =>
+              ExportToExcel(
+                [
+                  {
+                    sheetname: "alldata",
+                    data: MappingToProsesDapem(pageProps.data),
+                  },
+                  {
+                    sheetname: "antri",
+                    data: MappingToProsesDapem(
+                      pageProps.data.filter(
+                        (d) => d.verif_status === "PENDING",
+                      ),
+                    ),
+                  },
+                  {
+                    sheetname: "setuju",
+                    data: MappingToProsesDapem(
+                      pageProps.data.filter(
+                        (d) => d.verif_status === "APPROVED",
+                      ),
+                    ),
+                  },
+                  {
+                    sheetname: "tolak",
+                    data: MappingToProsesDapem(
+                      pageProps.data.filter(
+                        (d) => d.verif_status === "REJECTED",
+                      ),
+                    ),
+                  },
+                ],
+                "proses_permohonan",
+              )
+            }
+          >
+            Excel
+          </Button>
+          <Input.Search
+            size="small"
+            style={{ width: 170 }}
+            placeholder="Cari nama..."
+            onChange={(e) =>
+              setPageProps({ ...pageProps, search: e.target.value })
+            }
+          />
+        </div>
       </div>
 
       <Table
@@ -444,6 +501,18 @@ export default function Page() {
               ).angsuran,
             0,
           );
+          const angssudan = pageData.reduce(
+            (acc, item) =>
+              acc +
+              GetAngsuran(
+                item.plafond,
+                item.tenor,
+                item.c_margin_sumdan,
+                item.margin_type,
+                item.rounded_sumdan,
+              ).angsuran,
+            0,
+          );
 
           return (
             <Table.Summary.Row className="text-xs bg-blue-400">
@@ -457,10 +526,13 @@ export default function Page() {
                   )}{" "}
                 </b>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={4} className="text-center">
-                <b>
-                  <div>{IDRFormat(angsuran)}</div>
-                </b>
+              <Table.Summary.Cell index={4} className="text-center font-bold">
+                <div>
+                  {IDRFormat(angsuran)} - {IDRFormat(angssudan)}
+                </div>
+                <div className="border-t border-gray-500">
+                  {IDRFormat(angsuran - angssudan)}
+                </div>
               </Table.Summary.Cell>
             </Table.Summary.Row>
           );

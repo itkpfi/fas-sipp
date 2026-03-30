@@ -35,7 +35,7 @@ export const JadwalAngsuran = (record: IDapem, sub?: string) => {
       <div class="flex gap-2">
         <div class="w-32">Plafond</div>
         <div class="w-4">:</div>
-        <div>${IDRFormat(record.plafond)}</div>
+        <div>Rp. ${IDRFormat(record.plafond)}</div>
       </div>
       <div class="flex gap-2">
         <div class="w-32">Tanggal Akad</div>
@@ -52,7 +52,7 @@ export const JadwalAngsuran = (record: IDapem, sub?: string) => {
       <div class="flex gap-2">
         <div class="w-32">Angsuran</div>
         <div class="w-4">:</div>
-        <div>${IDRFormat(angsuran)}</div>
+        <div>Rp. ${IDRFormat(angsuran)}</div>
       </div>
       <div class="flex gap-2">
         <div class="w-32">Petugas</div>

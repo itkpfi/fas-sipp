@@ -62,6 +62,12 @@ export const listMenuUI: IMenuType[] = [
     needaccess: true,
   },
   {
+    label: "Pending Data",
+    key: "/pendingdata",
+    icon: <ReadOutlined />,
+    needaccess: true,
+  },
+  {
     label: "Proses Pembiayaan",
     key: "/proses",
     icon: <FileProtectOutlined />,
@@ -276,6 +282,10 @@ export const listMenuServer: { key: string; needaccess: boolean }[] = [
   },
   {
     key: "/monitoring",
+    needaccess: true,
+  },
+  {
+    key: "/pendingdata",
     needaccess: true,
   },
   {

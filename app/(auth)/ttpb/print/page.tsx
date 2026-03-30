@@ -304,7 +304,7 @@ const columnDapem: TableProps<IDapem>["columns"] = [
       return (
         <div>
           <p>{record.Debitur.fullname}</p>
-          <p className="opacity-70">{record.nopen}</p>
+          <p className="opacity-80 text-xs">@{record.nopen}</p>
         </div>
       );
     },
@@ -328,7 +328,7 @@ const columnDapem: TableProps<IDapem>["columns"] = [
     dataIndex: "tgl",
     render(value, record, index) {
       return (
-        <div className="text-xs italic opacity-70">
+        <div className="text-xs opacity-80">
           <div>Akad {moment(record.date_contract).format("DD/MM/YYYY")}</div>
           <div>
             Realisai {moment(record.Dropping?.process_at).format("DD/MM/YYYY")}

@@ -127,7 +127,7 @@ export default function Page() {
       title: "Updated",
       dataIndex: "updated_at",
       key: "updated_at",
-      render: (date) => moment(date).format("DD-MM-YYYY HH:mm:ss"),
+      render: (date) => moment(date).format("DD-MM-YYYY"),
     },
     {
       title: "Aksi",

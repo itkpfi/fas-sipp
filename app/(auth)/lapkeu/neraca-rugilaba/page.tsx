@@ -1,8 +1,10 @@
 "use client";
 
+import { printRL } from "@/components/pdfutils/lapkeu/rugilaba";
 import { GetAngsuran, IDRFormat } from "@/components/utils/PembiayaanUtil";
 import { ICategoryOfAccount, IDapem, IPageProps } from "@/libs/IInterfaces";
-import { DatePicker, Spin } from "antd";
+import { PrinterOutlined } from "@ant-design/icons";
+import { Button, DatePicker, Spin } from "antd";
 import { useEffect, useState } from "react";
 const { RangePicker } = DatePicker;
 
@@ -39,8 +41,8 @@ export default function Page() {
     <Spin spinning={loading}>
       <div className="bg-white p-4">
         <div className="flex flex-col font-bold items-center text-center">
-          <p className="text-2xl">LAPORAN RUGI/LABA</p>
-          <p className="text-xl ">{process.env.NEXT_PUBLIC_APP_FULLNAME}</p>
+          <p className="text-lg">LAPORAN RUGI/LABA</p>
+          <p className="text-lg">{process.env.NEXT_PUBLIC_APP_FULLNAME}</p>
           <div>
             Periode :{" "}
             <RangePicker
@@ -51,31 +53,42 @@ export default function Page() {
               style={{ width: 170 }}
             />
           </div>
+          <Button
+            size="small"
+            type="primary"
+            icon={<PrinterOutlined />}
+            onClick={() =>
+              printRL(data.pendapatan, data.beban, backdate || undefined)
+            }
+            className="my-2"
+          >
+            Cetak
+          </Button>
         </div>
-        <div className="flex gap-8 sm:flex-row flex-col">
-          <div className="flex-1 ">
+        <div className="flex gap-8 sm:flex-row flex-co border-t">
+          <div className="flex-1 flex flex-col justify-between">
             <p className="font-bold text-lg my-2">PENDAPATAN</p>
-            {data.pendapatan.map((d) => (
-              <div
-                className="flex gap-2 border-b border-dashed border-gray-300"
-                key={d.id}
-              >
-                <p className="w-52">{d.name}</p>
-                <p className="w-4">:</p>
-                <p className="flex-1 text-right">
-                  {IDRFormat(
-                    d.JournalDetail.reduce(
-                      (acc, curr) => acc + (curr.credit - curr.debit),
-                      0,
-                    ),
-                  )}
-                </p>
-              </div>
-            ))}
+            <div>
+              {data.pendapatan.map((d) => (
+                <div
+                  className="flex gap-2 border-b border-dashed border-gray-300"
+                  key={d.id}
+                >
+                  <p className="flex-1">{d.name}</p>
+                  <p className="flex-1 text-right">
+                    {IDRFormat(
+                      d.JournalDetail.reduce(
+                        (acc, curr) => acc + (curr.credit - curr.debit),
+                        0,
+                      ),
+                    )}
+                  </p>
+                </div>
+              ))}
+            </div>
 
             <div className="flex gap-2 border-b border-dashed border-gray-300 font-bold my-2">
-              <p className="w-52">TOTAL PENDAPATAN</p>
-              <p className="w-4">:</p>
+              <p className="flex-1">TOTAL PENDAPATAN</p>
               <p className="flex-1 text-right">
                 {IDRFormat(
                   data.pendapatan
@@ -85,28 +98,28 @@ export default function Page() {
               </p>
             </div>
           </div>
-          <div className="flex-1 ">
+          <div className="flex-1 flex flex-col justify-between">
             <p className="font-bold text-lg my-2">BEBAN</p>
-            {data.beban.map((d) => (
-              <div
-                className="flex gap-2 border-b border-dashed border-gray-300"
-                key={d.id}
-              >
-                <p className="w-52">{d.name}</p>
-                <p className="w-4">:</p>
-                <p className="flex-1 text-right">
-                  {IDRFormat(
-                    d.JournalDetail.reduce(
-                      (acc, curr) => acc + (curr.debit - curr.credit),
-                      0,
-                    ),
-                  )}
-                </p>
-              </div>
-            ))}
+            <div>
+              {data.beban.map((d) => (
+                <div
+                  className="flex gap-2 border-b border-dashed border-gray-300"
+                  key={d.id}
+                >
+                  <p className="flex-1">{d.name}</p>
+                  <p className="flex-1 text-right">
+                    {IDRFormat(
+                      d.JournalDetail.reduce(
+                        (acc, curr) => acc + (curr.debit - curr.credit),
+                        0,
+                      ),
+                    )}
+                  </p>
+                </div>
+              ))}
+            </div>
             <div className="flex gap-2 border-b border-dashed border-gray-300 font-bold my-2">
-              <p className="w-52">TOTAL BEBAN</p>
-              <p className="w-4">:</p>
+              <p className="flex-1">TOTAL BEBAN</p>
               <p className="flex-1 text-right">
                 {IDRFormat(
                   data.beban

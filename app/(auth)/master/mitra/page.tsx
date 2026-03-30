@@ -103,7 +103,7 @@ export default function Page() {
         return (
           <div>
             <p>{record.name}</p>
-            <p className="text-xs italic text-blue-500">@{record.code}</p>
+            <p className="text-xs text-blue-400">@{record.code}</p>
           </div>
         );
       },
@@ -115,7 +115,7 @@ export default function Page() {
       render(value, record, index) {
         return (
           <div>
-            <div className="text-xs italic text-blue-500">
+            <div className="text-xs  text-blue-400">
               <p>
                 <EnvironmentOutlined /> {record.address}
               </p>
@@ -134,7 +134,7 @@ export default function Page() {
       render(value, record, index) {
         return (
           <div>
-            <div className="text-xs italic text-blue-500">
+            <div className="text-xs  text-blue-400">
               <p>Rounded : {IDRFormat(record.rounded)}</p>
               <p>DSR : {IDRFormat(record.dsr)}</p>
               <p>TBO : {record.tbo} Bulan</p>
@@ -151,12 +151,13 @@ export default function Page() {
       render(value, record, index) {
         return (
           <div>
-            <div className="text-xs italic text-blue-500">
+            <div className="text-xs text-blue-400">
               <p>Margin : {record.c_margin} %</p>
               <p>Admin : {record.c_adm} %</p>
               <p>Tatalaksana : {IDRFormat(record.c_gov)}</p>
               <p>Rekening : {IDRFormat(record.c_account)}</p>
               <p>Materai : {IDRFormat(record.c_stamps)}</p>
+              <p>Data Informasi : {IDRFormat(record.c_information)}</p>
             </div>
           </div>
         );
@@ -176,8 +177,8 @@ export default function Page() {
             (dpa) => dpa.Angsuran,
           ),
         )
-          .filter((a) => a.date_paid === null)
-          .reduce((acc, curr) => acc + curr.principal, 0);
+          .filter((a) => a.date_paid !== null)
+          .sort((a, b) => b.counter - a.counter)[0].remaining;
         return (
           <div className="flex flex-col">
             <Progress
@@ -185,10 +186,10 @@ export default function Page() {
                 ((total / Number(record.limit)) * 100).toFixed(2),
               )}
             />
-            <div className="italic text-xs opacity-70">
+            <div className="text-xs opacity-80">
               {IDRFormat(total)} | {IDRFormat(Number(record.limit))}
             </div>
-            <div className="italic text-xs opacity-70 text-center">
+            <div className="text-xs opacity-80 text-center">
               OS {IDRFormat(os)}
             </div>
           </div>
@@ -391,11 +392,11 @@ function UpsertSumdan({
       onCancel={() => setOpen(false)}
       footer={[]}
       loading={loading}
-      width={1000}
-      style={{ top: 20 }}
+      width={1200}
+      style={{ top: 10 }}
     >
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 flex flex-col gap-3">
+      <div className="flex flex-col sm:flex-row gap-8">
+        <div className="flex-1 flex flex-col gap-1">
           <div className="hidden">
             <FormInput
               data={{
@@ -459,21 +460,74 @@ function UpsertSumdan({
           />
           <FormInput
             data={{
-              label: "Suku Bunga",
+              label: "No SK",
               mode: "horizontal",
-              type: "number",
-              value: data.c_margin,
-              onChange: (e: any) =>
-                setData({ ...data, c_margin: parseFloat(e) }),
+              required: true,
+              type: "text",
+              value: data.sk_no,
+              onChange: (e: string) => setData({ ...data, sk_no: e }),
             }}
           />
           <FormInput
             data={{
-              label: "Biaya Admin",
+              label: "Tanggal SK",
               mode: "horizontal",
-              type: "number",
-              value: data.c_adm,
-              onChange: (e: any) => setData({ ...data, c_adm: parseFloat(e) }),
+              required: true,
+              type: "date",
+              value: moment(data.sk_date).format("YYYY-MM-DD"),
+              onChange: (e: string) =>
+                setData({ ...data, sk_date: new Date(e) }),
+            }}
+          />
+          <FormInput
+            data={{
+              label: "PIC 1",
+              mode: "horizontal",
+              required: true,
+              type: "text",
+              value: data.pic1,
+              onChange: (e: string) => setData({ ...data, pic1: e }),
+            }}
+          />
+          <FormInput
+            data={{
+              label: "PIC 2",
+              mode: "horizontal",
+              required: true,
+              type: "text",
+              value: data.pic2,
+              onChange: (e: string) => setData({ ...data, pic2: e }),
+            }}
+          />
+          <FormInput
+            data={{
+              label: "Keterangan",
+              mode: "horizontal",
+              required: true,
+              type: "textarea",
+              value: data.description,
+              onChange: (e: string) => setData({ ...data, description: e }),
+            }}
+          />
+          <FormInput
+            data={{
+              label: "Logo Mitra",
+              mode: "horizontal",
+              type: "upload",
+              accept: "image/png,image/jpg,image/jpeg",
+              value: data.logo,
+              onChange: (e: string) => setData({ ...data, logo: e }),
+            }}
+          />
+        </div>
+        <div className="flex-1 flex flex-col gap-1">
+          <FormInput
+            data={{
+              label: "Biaya Tatalaksana",
+              mode: "horizontal",
+              type: "text",
+              value: IDRFormat(data.c_gov || 0),
+              onChange: (e: any) => setData({ ...data, c_gov: IDRToNumber(e) }),
             }}
           />
           <FormInput
@@ -486,15 +540,24 @@ function UpsertSumdan({
                 setData({ ...data, c_account: IDRToNumber(e) }),
             }}
           />
-        </div>
-        <div className="flex-1 flex flex-col gap-3">
           <FormInput
             data={{
-              label: "Biaya Tatalaksana",
+              label: "Biaya Provisi",
               mode: "horizontal",
               type: "text",
-              value: IDRFormat(data.c_gov || 0),
-              onChange: (e: any) => setData({ ...data, c_gov: IDRToNumber(e) }),
+              value: IDRFormat(data.c_provisi),
+              onChange: (e: any) =>
+                setData({ ...data, c_provisi: IDRToNumber(e) }),
+            }}
+          />
+          <FormInput
+            data={{
+              label: "Biaya Data Informasi",
+              mode: "horizontal",
+              type: "text",
+              value: IDRFormat(data.c_information),
+              onChange: (e: any) =>
+                setData({ ...data, c_information: IDRToNumber(e) }),
             }}
           />
           <FormInput
@@ -505,6 +568,26 @@ function UpsertSumdan({
               value: IDRFormat(data.c_stamps),
               onChange: (e: any) =>
                 setData({ ...data, c_stamps: IDRToNumber(e) }),
+            }}
+          />
+
+          <FormInput
+            data={{
+              label: "Biaya Admin",
+              mode: "horizontal",
+              type: "number",
+              value: data.c_adm,
+              onChange: (e: any) => setData({ ...data, c_adm: parseFloat(e) }),
+            }}
+          />
+          <FormInput
+            data={{
+              label: "Suku Bunga",
+              mode: "horizontal",
+              type: "number",
+              value: data.c_margin,
+              onChange: (e: any) =>
+                setData({ ...data, c_margin: parseFloat(e) }),
             }}
           />
           <FormInput
@@ -528,6 +611,16 @@ function UpsertSumdan({
           />
           <FormInput
             data={{
+              label: "Pembulatan Mitra",
+              mode: "horizontal",
+              type: "text",
+              value: IDRFormat(data.rounded_sumdan || 0),
+              onChange: (e: any) =>
+                setData({ ...data, rounded_sumdan: IDRToNumber(e || "0") }),
+            }}
+          />
+          <FormInput
+            data={{
               label: "DebtService Ratio",
               mode: "horizontal",
               type: "number",
@@ -543,47 +636,6 @@ function UpsertSumdan({
               value: IDRFormat(Number(data.limit) || 0),
               onChange: (e: any) =>
                 setData({ ...data, limit: BigInt(IDRToNumber(e || "0")) }),
-            }}
-          />
-          <FormInput
-            data={{
-              label: "No SK",
-              mode: "horizontal",
-              required: true,
-              type: "text",
-              value: data.sk_no,
-              onChange: (e: string) => setData({ ...data, sk_no: e }),
-            }}
-          />
-          <FormInput
-            data={{
-              label: "Tanggal SK",
-              mode: "horizontal",
-              required: true,
-              type: "date",
-              value: moment(data.sk_date).format("YYYY-MM-DD"),
-              onChange: (e: string) =>
-                setData({ ...data, sk_date: new Date(e) }),
-            }}
-          />
-          <FormInput
-            data={{
-              label: "Keterangan",
-              mode: "horizontal",
-              required: true,
-              type: "textarea",
-              value: data.description,
-              onChange: (e: string) => setData({ ...data, description: e }),
-            }}
-          />
-          <FormInput
-            data={{
-              label: "Logo BPR/Bank",
-              mode: "horizontal",
-              type: "upload",
-              accept: "image/png,image/jpg,image/jpeg",
-              value: data.logo,
-              onChange: (e: string) => setData({ ...data, logo: e }),
             }}
           />
         </div>
@@ -707,7 +759,7 @@ function TableProduk({
       key: "kriteria",
       render(value, record, index) {
         return (
-          <div className="text-xs italic text-blue-500">
+          <div className="text-xs text-blue-400">
             <p>
               Usia Pengajuan : {record.min_age} - {record.max_age}
             </p>
@@ -724,15 +776,16 @@ function TableProduk({
       key: "biaya",
       render(value, record, index) {
         return (
-          <div className="text-xs italic text-blue-500">
-            <p>
+          <div className="text-xs text-blue-400">
+            <div>
               Margin : {record.c_margin} % ({record.c_margin + records.c_margin}
               %)
-            </p>
-            <p>
-              Admin : {record.c_adm} % ({record.c_adm + records.c_adm} %)
-            </p>
-            <p>Asuransi : {record.c_insurance} %</p>
+            </div>
+            <div>
+              Admin : {record.c_adm} % ({record.c_adm + records.c_adm}%)
+            </div>
+            <div>Asuransi : {record.c_insurance}%</div>
+            <div>Janis Margin : {record.margin_type}</div>
           </div>
         );
       },
@@ -742,9 +795,7 @@ function TableProduk({
       dataIndex: "updated_at",
       key: "updated_at",
       render: (date) => (
-        <div className="text-xs">
-          {moment(date).format("DD-MM-YYYY HH:mm:ss")}
-        </div>
+        <div className="text-xs">{moment(date).format("DD-MM-YYYY")}</div>
       ),
     },
     {
@@ -881,11 +932,11 @@ function UpsertProduk({
       onCancel={() => setOpen(false)}
       footer={[]}
       loading={loading}
-      width={1000}
+      width={1200}
       style={{ top: 20 }}
     >
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 flex flex-col gap-3">
+      <div className="flex flex-col sm:flex-row gap-8">
+        <div className="flex-1 flex flex-col gap-1">
           <div className="hidden">
             <FormInput
               data={{
@@ -960,7 +1011,7 @@ function UpsertProduk({
             }}
           />
         </div>
-        <div className="flex-1 flex flex-col gap-3">
+        <div className="flex-1 flex flex-col gap-1">
           <FormInput
             data={{
               label: "Margin",
@@ -993,6 +1044,20 @@ function UpsertProduk({
               value: data.c_insurance,
               onChange: (e: any) =>
                 setData({ ...data, c_insurance: parseFloat(e) }),
+            }}
+          />
+          <FormInput
+            data={{
+              label: "Jenis Margin",
+              mode: "horizontal",
+              type: "select",
+              required: true,
+              options: [
+                { label: "FLAT", value: "FLAT" },
+                { label: "ANUITAS", value: "ANUITAS" },
+              ],
+              value: data.margin_type,
+              onChange: (e: any) => setData({ ...data, margin_type: e }),
             }}
           />
         </div>
@@ -1109,6 +1174,7 @@ const defaultSumdan: ISumdan = {
   logo: null,
   tbo: 3,
   rounded: 1000,
+  rounded_sumdan: 1,
   c_margin: 0,
   c_adm: 0,
   limit: BigInt(0),
@@ -1116,9 +1182,13 @@ const defaultSumdan: ISumdan = {
   c_gov: 0,
   c_account: 0,
   c_stamps: 0,
+  c_information: 0,
+  c_provisi: 0,
   sk_no: "",
   sk_date: new Date(),
   ProdukPembiayaan: [],
+  pic1: null,
+  pic2: null,
 
   status: true,
   created_at: new Date(),

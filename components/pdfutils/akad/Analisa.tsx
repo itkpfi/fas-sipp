@@ -37,6 +37,9 @@ export const AnalisaPerhitungan = (record: IDapem) => {
     record.c_gov +
     record.c_account +
     record.c_stamp +
+    record.c_infomation +
+    record.c_provisi +
+    blokir +
     record.c_mutasi;
 
   return `
@@ -72,7 +75,10 @@ export const AnalisaPerhitungan = (record: IDapem) => {
       <div class="flex gap-2">
         <div class="w-32">Gaji Pensiun</div>
         <div class="w-4">:</div>
-        <div>${IDRFormat(record.Debitur.salary)}</div>
+        <div class="flex-1 flex justify-between gap-2">
+          <p class="w-4">Rp. </p>
+          <p class="flex-1 text-right">${IDRFormat(record.Debitur.salary)}</p>
+        </div>
       </div>
     </div>
     <div class="flex-1">
@@ -99,7 +105,10 @@ export const AnalisaPerhitungan = (record: IDapem) => {
       <div class="flex gap-2">
         <div class="w-32">Plafond</div>
         <div class="w-4">:</div>
-        <div>${IDRFormat(record.plafond)}</div>
+        <div class="flex-1 flex justify-between gap-2">
+          <p class="w-4">Rp. </p>
+          <p class="flex-1 text-right">${IDRFormat(record.plafond)}</p>
+        </div>
       </div>
       <div class="flex gap-2">
         <div class="w-32">Jangka Waktu</div>
@@ -119,12 +128,18 @@ export const AnalisaPerhitungan = (record: IDapem) => {
       <div class="flex gap-2">
         <div class="w-32">Angsuran Perbulan</div>
         <div class="w-4">:</div>
-        <div>${IDRFormat(angsuran)}</div>
+        <div class="flex-1 flex justify-between gap-2">
+          <p class="w-4">Rp. </p>
+          <p class="flex-1 text-right">${IDRFormat(angsuran)}</p>
+        </div>
       </div>
       <div class="flex gap-2">
         <div class="w-32">Sisa Gaji</div>
         <div class="w-4">:</div>
-        <div>${IDRFormat(record.Debitur.salary - angsuran)}</div>
+        <div class="flex-1 flex justify-between gap-2">
+          <p class="w-4">Rp. </p>
+          <p class="flex-1 text-right">${IDRFormat(record.Debitur.salary - angsuran)}</p>
+        </div>
       </div>
       <div class="flex gap-2">
         <div class="w-32">Debt Service Ratio</div>
@@ -152,62 +167,119 @@ export const AnalisaPerhitungan = (record: IDapem) => {
     <div class="flex gap-4 items-end">
       <div class="flex-1">
         <div class="flex gap-4">
-          <div class="w-52">Biaya Administrasi</div>
+          <div class="w-44">Biaya Administrasi</div>
           <div class="w-4">:</div>
-          <div class="flex-1 text-right">${IDRFormat(biayaAdm)}</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(biayaAdm)}</p>
+          </div>
         </div>
         <div class="flex gap-4">
-          <div class="w-52">Biaya Asuransi</div>
+          <div class="w-44">Biaya Asuransi</div>
           <div class="w-4">:</div>
-          <div class="flex-1 text-right">${IDRFormat(biayaAsuransi)}</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(biayaAsuransi)}</p>
+          </div>
         </div>
         <div class="flex gap-4">
-          <div class="w-52">Biaya Tatalaksana</div>
+          <div class="w-44">Biaya Tatalaksana</div>
           <div class="w-4">:</div>
-          <div class="flex-1 text-right">${IDRFormat(record.c_gov)}</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(record.c_gov)}</p>
+          </div>
         </div>
         <div class="flex gap-4">
-          <div class="w-52">Biaya Materai</div>
+          <div class="w-44">Biaya Buka Rekening</div>
           <div class="w-4">:</div>
-          <div class="flex-1 text-right">${IDRFormat(record.c_stamp)}</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(record.c_account)}</p>
+          </div>
         </div>
         <div class="flex gap-4">
-          <div class="w-52">Biaya Buka Rekening</div>
+          <div class="w-44">Biaya Materai</div>
           <div class="w-4">:</div>
-          <div class="flex-1 text-right">${IDRFormat(record.c_account)}</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(record.c_stamp)}</p>
+          </div>
         </div>
         <div class="flex gap-4">
-          <div class="w-52">Biaya Mutasi</div>
+          <div class="w-44">Biaya Provisi</div>
           <div class="w-4">:</div>
-          <div class="flex-1 text-right">${IDRFormat(record.c_mutasi)}</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(record.c_provisi)}</p>
+          </div>
         </div>
-        <div class="flex gap-4 text-red-500 border-t font-bold">
-          <div class="w-52">TOTAL BIAYA</div>
+        <div class="flex gap-4">
+          <div class="w-44">Biaya Data Informasi</div>
           <div class="w-4">:</div>
-          <div class="flex-1 text-right">${IDRFormat(biayaTotal)}</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(record.c_infomation)}</p>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <div class="w-44">Biaya Mutasi</div>
+          <div class="w-4">:</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(record.c_mutasi)}</p>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <div class="w-44">Blokir Angsuran (${record.c_blokir}x)</div>
+          <div class="w-4">:</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(blokir)}</p>
+          </div>
+        </div>
+        <div class="flex gap-4 border-t font-bold">
+          <div class="w-44">TOTAL BIAYA</div>
+          <div class="w-4">:</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(biayaTotal)}</p>
+          </div>
         </div>
       </div>
 
-      <div class="flex-1 font-bold">
-        <div class="flex gap-4 text-blue-500">
-          <div class="w-52">Terima Kotor</div>
+      <div class="flex-1">
+        <div class="flex gap-4 font-bold">
+          <div class="w-44">Terima Kotor</div>
           <div class="w-4">:</div>
-          <div class="flex-1 text-right">${IDRFormat(record.plafond - biayaTotal)}</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(record.plafond - biayaTotal)}</p>
+          </div>
         </div>
-        <div class="flex gap-4 text-red-500">
-          <div class="w-52">Nominal Takeover</div>
+        <div class="flex gap-4">
+          <div class="w-44">Bpp</div>
           <div class="w-4">:</div>
-          <div class="flex-1 text-right">${IDRFormat(record.c_takeover)}</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(record.c_bpp)}</p>
+          </div>
         </div>
-        <div class="flex gap-4 text-red-500">
-          <div class="w-52">Blokir Angsuran ${record.c_blokir}x</div>
+        <div class="flex gap-4">
+          <div class="w-44">Nominal Takeover</div>
           <div class="w-4">:</div>
-          <div class="flex-1 text-right">${IDRFormat(blokir)}</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(record.c_takeover)}</p>
+          </div>
         </div>
-        <div class="flex gap-4 text-green-500 border-t font-bold">
-          <div class="w-52">TERIMA BERSIH</div>
+        <div class="flex gap-4 border-t font-bold">
+          <div class="w-44">TERIMA BERSIH</div>
           <div class="w-4">:</div>
-          <div class="flex-1 text-right">${IDRFormat(record.plafond - (biayaTotal + record.c_takeover + blokir))}</div>
+          <div class="flex-1 flex justify-between gap-2">
+            <p class="w-4">Rp. </p>
+            <p class="flex-1 text-right">${IDRFormat(record.plafond - (biayaTotal + record.c_bpp + record.c_takeover))}</p>
+          </div>
         </div>
       </div>
     </div>

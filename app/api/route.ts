@@ -33,9 +33,7 @@ export const GET = async (req: NextRequest) => {
         include: {
           Dropping: true,
           Debitur: true,
-          Angsuran: {
-            where: { date_paid: null },
-          },
+          Angsuran: true,
         },
       }),
       prisma.dapem.findMany({

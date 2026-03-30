@@ -186,7 +186,7 @@ export default function Page() {
         setOpen={(v: boolean) => setUpsert({ ...upsert, upsert: v })}
         getData={getData}
         record={upsert.selected}
-        key={upsert.selected ? "upsert" + upsert.selected.id : "create"}
+        key={upsert.selected ? "upsertarea" + upsert.selected.id : "createarea"}
         modal={modal}
       />
       <DeleteArea
@@ -194,7 +194,7 @@ export default function Page() {
         setOpen={(v: boolean) => setUpsert({ ...upsert, delete: v })}
         getData={getData}
         record={upsert.selected}
-        key={upsert.selected ? "delete" + upsert.selected.id : "delete"}
+        key={upsert.selected ? "deletearea" + upsert.selected.id : "deletearea"}
         modal={modal}
       />
     </Card>
@@ -405,7 +405,7 @@ function TableCabang({
       title: "Updated",
       dataIndex: "updated_at",
       key: "updated_at",
-      render: (date) => moment(date).format("DD-MM-YYYY HH:mm:ss"),
+      render: (date) => moment(date).format("DD-MM-YYYY"),
     },
     {
       title: "Aksi",
@@ -468,7 +468,9 @@ function TableCabang({
         getData={getData}
         areaId={areaId}
         modal={modal}
-        key={upsert.selected ? upsert.selected.id : "createCabang"}
+        key={
+          upsert.selected ? "upsertcabang" + upsert.selected.id : "createCabang"
+        }
       />
       <DeleteCabang
         open={upsert.delete}
@@ -476,7 +478,9 @@ function TableCabang({
         getData={getData}
         modal={modal}
         record={upsert.selected}
-        key={upsert.selected ? upsert.selected.id : "deleteCabang"}
+        key={
+          upsert.selected ? "deletecabang" + upsert.selected.id : "deleteCabang"
+        }
       />
     </div>
   );

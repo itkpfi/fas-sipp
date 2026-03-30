@@ -304,7 +304,7 @@ const columnDapem: TableProps<IDapem>["columns"] = [
       return (
         <div>
           <p>{record.Debitur.fullname}</p>
-          <p className="opacity-70">{record.nopen}</p>
+          <p className="opacity-80 text-xs">@{record.nopen}</p>
         </div>
       );
     },
@@ -334,7 +334,7 @@ const columnDapem: TableProps<IDapem>["columns"] = [
           <Tag color={isTbo ? "red" : "blue"} variant="solid">
             {isTbo ? "LEWAT TBO" : "MASA TBO"}
           </Tag>
-          <div className="italic text-xs opacity-70">
+          <div className="text-xs opacity-80">
             <div>Akad {moment(record.date_contract).format("DD/MM/YYYY")}</div>
             <div>TBO Month ({record.tbo} Bln)</div>
             <div>Tgl TBO {created.format("DD/MM/YYYY")}</div>

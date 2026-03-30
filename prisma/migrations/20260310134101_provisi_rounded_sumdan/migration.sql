@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `sumdan` ADD COLUMN `c_provisi` INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN `rounded_sumdan` INTEGER NOT NULL DEFAULT 1;

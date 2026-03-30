@@ -91,7 +91,7 @@ export default function Page() {
         return (
           <div>
             <div>{record.fullname}</div>
-            <div className="text-xs opacity-70 italic">@{record.nopen}</div>
+            <div className="text-xs opacity-80  ">@{record.nopen}</div>
           </div>
         );
       },
@@ -294,7 +294,7 @@ const columnDapem: TableProps<IDapem>["columns"] = [
           <div>
             {record.ProdukPembiayaan.id} {record.ProdukPembiayaan.name}
           </div>
-          <div className="text-xs italic opacity-70">
+          <div className="text-xs opacity-80">
             {record.JenisPembiayaan.name}
           </div>
         </div>
@@ -309,7 +309,7 @@ const columnDapem: TableProps<IDapem>["columns"] = [
       return (
         <div>
           <div>{record.AO.fullname}</div>
-          <div className="text-xs opacity-70">
+          <div className="text-xs opacity-80">
             <span>{record.AO.Cabang.name}</span> |{" "}
             <span>{record.AO.Cabang.Area.name}</span>
           </div>
@@ -353,7 +353,7 @@ const columnDapem: TableProps<IDapem>["columns"] = [
       return (
         <div>
           <div>{record.no_contract}</div>
-          <div className="opacity-80 italic text-xs">
+          <div className="opacity-80  text-xs">
             {moment(record.date_contract).format("DD/MM/YYYY")}
           </div>
         </div>

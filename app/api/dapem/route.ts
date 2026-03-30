@@ -26,6 +26,7 @@ export const GET = async (request: NextRequest) => {
   const flagging_status = request.nextUrl.searchParams.get("flagging_status");
   const paid_status = request.nextUrl.searchParams.get("paid_status");
   const backdate = request.nextUrl.searchParams.get("backdate");
+  const currmont = request.nextUrl.searchParams.get("currmont");
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
   const session = await getSession();
@@ -100,12 +101,21 @@ export const GET = async (request: NextRequest) => {
         Pelunasan: { status_paid: paid_status as ESubmissionStatus },
       }),
       ...(user.sumdanId && { ProdukPembiayaan: { sumdanId: user.sumdanId } }),
-      ...(backdate && {
-        created_at: {
-          gte: moment(backdate.split(",")[0]).toDate(),
-          lte: moment(backdate.split(",")[1]).toDate(),
-        },
-      }),
+      ...(backdate
+        ? {
+            created_at: {
+              gte: moment(backdate.split(",")[0]).toDate(),
+              lte: moment(backdate.split(",")[1]).toDate(),
+            },
+          }
+        : currmont
+          ? {
+              created_at: {
+                gte: moment().startOf("month").toDate(),
+                lte: moment().endOf("month").toDate(),
+              },
+            }
+          : {}),
       status: true,
     },
     skip: skip,
@@ -204,12 +214,21 @@ export const GET = async (request: NextRequest) => {
         Pelunasan: { status_paid: paid_status as ESubmissionStatus },
       }),
       ...(user.sumdanId && { ProdukPembiayaan: { sumdanId: user.sumdanId } }),
-      ...(backdate && {
-        created_at: {
-          gte: moment(backdate.split(",")[0]).toDate(),
-          lte: moment(backdate.split(",")[1]).toDate(),
-        },
-      }),
+      ...(backdate
+        ? {
+            created_at: {
+              gte: moment(backdate.split(",")[0]).toDate(),
+              lte: moment(backdate.split(",")[1]).toDate(),
+            },
+          }
+        : currmont
+          ? {
+              created_at: {
+                gte: moment().startOf("month").toDate(),
+                lte: moment().endOf("month").toDate(),
+              },
+            }
+          : {}),
       status: true,
     },
   });

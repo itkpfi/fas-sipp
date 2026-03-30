@@ -72,7 +72,7 @@ export const Header = (
       <p class="text-center ">${subtitle ? subtitle : ""}</p>
       <p class="text-center ">${subtitlemore ? subtitlemore : ""}</p>
     </div>
-    ${rightlogo ? `<img src="${rightlogo}" alt="Logo" class="h-16 mr-4" />` : ""}
+    ${rightlogo ? `<img src="${rightlogo}" alt="Logo" class="h-16 mr-4" />` : '<div class="h-16 mr-4"></div>'}
   </div>`;
 
 export const ListStyle = (
@@ -119,16 +119,31 @@ export const ListStyle = (
 };
 
 export const ListNonStyle = (
-  list: { key: string; value: any; classStyle?: any }[],
+  list: {
+    key: string;
+    value: any;
+    classStyle?: any;
+    valuStyle?: any;
+    currency?: boolean;
+  }[],
 ) => {
   return `
     ${list
       .map(
         (d) => `
         <div class="flex gap-2 ${d.classStyle ? d.classStyle : ""}">
-          <p class="w-52">${d.key}</p>
+          <p class="w-44">${d.key}</p>
           <p class="w-4">:</p>
-          <p class="flex-1">${d.value}</p>
+          ${
+            d.currency
+              ? `
+              <div class="w-28 flex justify-between gap-2">
+                <p class="w-4">Rp. </p>
+                <p class="flex-1 text-right ${d.valuStyle}">${d.value}</p>
+              </div>
+            `
+              : `<div class="flex-1 ${d.valuStyle}">${d.value}</div>`
+          }
         </div>
       `,
       )
@@ -137,3 +152,33 @@ export const ListNonStyle = (
 };
 
 export const alplhabet = "abcdefghijklmnopqrstuvwxyz";
+
+export const FormList = (
+  data: { key: string; value: string; option?: string[] }[],
+) =>
+  `<div class="flex-1">
+    ${data
+      .map(
+        (d) => `
+      <div class="flex gap-2">
+        <p class="w-32 font-bold">${d.key}</p>
+        <p class="w-3">:</p>
+        <div class="flex-1 border-b border-dashed ${d.option ? "flex justify-between gap-2" : ""}">${
+          d.option
+            ? `
+            ${d.option
+              .map(
+                (op) => `<div class="flex-1 flex gap-1 items-center">
+              <div class="border h-5 w-5 flex justify-center items-center">${d.value.toLowerCase() === op.toLowerCase() ? "x" : ""}</div>
+              <p>${op}</p>
+            </div>`,
+              )
+              .join("")}
+          `
+            : d.value
+        }</div>
+      </div>
+    `,
+      )
+      .join("")}
+  </div>`;

@@ -137,6 +137,20 @@ export const PUT = async (req: NextRequest) => {
   }
 };
 
+export const DELETE = async (req: NextRequest) => {
+  const id = req.nextUrl.searchParams.get("id");
+  if (!id)
+    return NextResponse.json(
+      { msg: "ID Not found", status: 404 },
+      { status: 404 },
+    );
+
+  await prisma.journalDetail.deleteMany({ where: { journalEntryId: id } });
+  await prisma.journalEntry.delete({ where: { id } });
+
+  return NextResponse.json({ msg: "OK", status: 200 }, { status: 200 });
+};
+
 async function generateJurnalId() {
   const prefix = `TX`;
   const padLength = 4;

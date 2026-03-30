@@ -9,6 +9,7 @@ import {
 import {
   GetAngsuran,
   GetBiaya,
+  GetSisaPokokMargin,
   IDRFormat,
 } from "@/components/utils/PembiayaanUtil";
 import { ICashDesc, IDapem } from "@/libs/IInterfaces";
@@ -89,13 +90,13 @@ export default function Page() {
             name="Number Of Account"
             all={data.droppingall.length.toString() + " NOA"}
             month={"+ " + data.droppingmonthly.length.toString() + " NOA"}
-            color="text-blue-500"
+            color="text-gray-700"
             icon={<TeamOutlined />}
           />
           <StaticticItemCustom
             name="Data Instansi"
             all={
-              <div className="flex flex-col text-sm">
+              <div className="flex flex-col text-sm text-gray-700">
                 <div className="flex gap-2">
                   <span className="w-30">Taspen</span>
                   <span className="w-4">:</span>
@@ -145,15 +146,30 @@ export default function Page() {
                 .filter((f) => f.dropping_status === "APPROVED")
                 .reduce(
                   (acc, curr) =>
-                    acc +
-                    curr.Angsuran.filter((a) => a.date_paid !== null).sort(
-                      (a, b) => b.counter - a.counter,
-                    )[0]?.remaining,
+                    acc + GetSisaPokokMargin(curr as IDapem).principal,
                   0,
                 ),
             )}`}
-            month={`Lunas : ${data.droppingall.filter((d) => d.dropping_status === "PAID_OFF").length} NOA`}
-            color="text-blue-500"
+            month={`NOA Aktif : ${data.droppingall.filter((d) => d.dropping_status === "APPROVED").length}`}
+            color="text-gray-700"
+            icon={<MoneyCollectOutlined />}
+          />
+          <StaticticItem
+            name="Lunas & Tunggakan"
+            all={`${data.droppingall.filter((d) => d.dropping_status === "PAID_OFF").length} NOA`}
+            month={`(${data.droppingall.filter((d) => d.dropping_status === "APPROVED").reduce((acc, curr) => acc + GetSisaPokokMargin(curr as IDapem).prevcount, 0)}x) Rp. ${IDRFormat(data.droppingall.filter((d) => d.dropping_status === "APPROVED").reduce((acc, curr) => acc + GetSisaPokokMargin(curr as IDapem).prevvalueall, 0))}`}
+            color="text-gray-700"
+            classi="text-sm"
+            monthcolor="text-red-600"
+            icon={<PayCircleOutlined />}
+          />
+          <StaticticItem
+            name="Tagihan Bulan Berjalan"
+            all={`${data.droppingall.filter((d) => d.dropping_status === "APPROVED").length} NOA | Rp. ${IDRFormat(data.droppingall.filter((d) => d.dropping_status === "APPROVED").reduce((acc, curr) => acc + GetSisaPokokMargin(curr as IDapem).install, 0))}`}
+            // month={`Rp. ${IDRFormat(data.droppingall.filter((d) => d.dropping_status === "APPROVED").reduce((acc, curr) => acc + GetSisaPokokMargin(curr as IDapem).prevvalueall, 0))}`}
+            color="text-gray-700"
+            classi="text-sm"
+            monthcolor="text-red-600"
             icon={<MoneyCollectOutlined />}
           />
           <StaticticItem
@@ -168,38 +184,21 @@ export default function Page() {
                 .reduce((acc, curr) => acc + curr.c_takeover, 0),
             )}`}
             month={`${data.droppingall.filter((d) => d.takeover_status !== "APPROVED" && d.dropping_status === "APPROVED").length} NOA`}
-            color="text-red-500"
+            color="text-gray-700"
+            classi="text-sm"
             icon={<PayCircleOutlined />}
           />
           <StaticticItem
             name="Pending Mutasi & Flagging"
-            all={`Rp. ${IDRFormat(
-              data.droppingall
-                .filter(
-                  (f) =>
-                    f.mutasi_status !== "APPROVED" &&
-                    f.dropping_status === "APPROVED",
-                )
-                .reduce((acc, curr) => acc + curr.c_mutasi, 0),
-            )}`}
-            month={`Mutasi ${
-              data.droppingall.filter(
-                (d) =>
-                  d.mutasi_status !== "APPROVED" &&
-                  d.dropping_status === "APPROVED",
-              ).length
-            } | Flagging ${
-              data.droppingall.filter(
-                (d) =>
-                  d.flagging_status !== "APPROVED" &&
-                  d.dropping_status === "APPROVED",
-              ).length
-            }`}
-            color="text-red-500"
+            all={`
+              Mutasi ${data.droppingall.filter((d) => d.mutasi_status !== "APPROVED").length} NOA `}
+            color="text-gray-700"
+            classi="text-sm"
             icon={<SwapOutlined />}
+            month={`Flagging ${data.droppingall.filter((d) => d.flagging_status !== "APPROVED").length} NOA`}
           />
           <StaticticItem
-            name="Pending TB"
+            name="Pending Terima Bersih"
             all={`Rp. ${IDRFormat(
               (() => {
                 const dataTb = data.droppingall.filter(
@@ -243,14 +242,16 @@ export default function Page() {
                   d.dropping_status === "APPROVED",
               ).length
             } NOA`}
-            color="text-red-500"
+            color="text-gray-700"
+            classi="text-sm"
             icon={<KeyOutlined />}
           />
           <StaticticItem
             name="Pending Berkas & Jaminan"
             all={`Jaminan ${data.droppingall.filter((d) => d.guarantee_status !== "MITRA" && d.dropping_status === "APPROVED").length} NOA`}
             month={`Berkas ${data.droppingall.filter((d) => d.document_status !== "MITRA" && d.dropping_status === "APPROVED").length} NOA`}
-            color="text-red-500"
+            color="text-gray-700"
+            classi="text-sm"
             icon={<FolderOpenOutlined />}
           />
         </div>
@@ -313,7 +314,7 @@ export default function Page() {
           {user && !user.sumdanId && (
             <Col xs={24} sm={12}>
               <div className="bg-white p-3 rounded shadow">
-                <p className="font-bold text-lg">Grafik Pembiayaan By Sumdan</p>
+                <p className="font-bold text-lg">Grafik Pembiayaan By Mitra</p>
                 <div className="h-64 rounded-lg flex items-center justify-center mt-2">
                   <BarChart
                     data={data.bysumdan.map((j) => ({
@@ -353,12 +354,16 @@ const StaticticItem = ({
   month,
   color,
   icon,
+  classi,
+  monthcolor,
 }: {
   name: string;
   all: string;
   month?: string;
   color?: string;
   icon?: React.ReactNode;
+  classi?: string;
+  monthcolor?: string;
 }) => {
   return (
     <div className="bg-white rounded-lg p-3 card-shadow">
@@ -368,12 +373,16 @@ const StaticticItem = ({
             {icon ? icon : <DollarOutlined />} {name}
           </p>
           <p
-            className={`text-xl font-bold ${color ? color : "text-green-500"}`}
+            className={`${classi ? classi : "text-lg"} font-bold ${color ? color : "text-green-600"}`}
           >
             {all}
           </p>
           <Divider style={{ margin: 8, padding: 0 }} />
-          <p className="text-sm font-bold text-green-500">{month}</p>
+          <p
+            className={`text-sm font-bold ${monthcolor ? monthcolor : "text-green-600"}`}
+          >
+            {month}
+          </p>
         </div>
       </div>
     </div>

@@ -141,12 +141,12 @@ export default function Page() {
         );
         return (
           <div>
-            <div>
-              <span className="italic text-xs opacity-70">Plafond:</span>{" "}
+            <div className="flex justify-between gap-2">
+              <span className="text-xs opacity-80">Plafond:</span>{" "}
               <Tag color={"blue"}>{IDRFormat(total)}</Tag>
             </div>
-            <div>
-              <span className="italic text-xs opacity-70">Dropping:</span>{" "}
+            <div className="flex justify-between gap-2">
+              <span className="text-xs opacity-80">Dropping:</span>{" "}
               <Tag color={"blue"}>{IDRFormat(total - biaya)}</Tag>
             </div>
           </div>
@@ -163,17 +163,23 @@ export default function Page() {
           0,
         );
         const rek = record.Dapem.reduce((acc, curr) => acc + curr.c_account, 0);
+        const prov = record.Dapem.reduce(
+          (acc, curr) => acc + curr.c_provisi,
+          0,
+        );
         return (
-          <div>
-            <div>
-              <span className="italic text-xs opacity-70">
-                Admin ({record.Sumdan.c_adm}%):
-              </span>{" "}
-              <Tag color={"blue"}>{IDRFormat(adm)}</Tag>
+          <div className="text-xs">
+            <div className="flex justify-between gap-4s">
+              <span className="w-20">Admin :</span>
+              <span>{IDRFormat(adm)}</span>
             </div>
-            <div>
-              <span className="italic text-xs opacity-70">Rek:</span>{" "}
-              <Tag color={"blue"}>{IDRFormat(rek)}</Tag>
+            <div className="flex justify-between gap-4s">
+              <span className="w-20">Rek :</span>
+              <span>{IDRFormat(rek)}</span>
+            </div>
+            <div className="flex justify-between gap-4s">
+              <span className="w-20">Provisi :</span>
+              <span>{IDRFormat(prov)}</span>
             </div>
           </div>
         );
@@ -185,11 +191,11 @@ export default function Page() {
       key: "pencairan_status",
       width: 180,
       render: (_, record, i) => (
-        <div className="">
+        <div className="flex gap-2">
           <Tag color={record.status ? "green" : "orange"} variant="solid">
             {record.status ? "PAID" : "PENDING"}
           </Tag>
-          <span className="text-xs italic opacity-70">
+          <span className="text-xs opacity-80">
             {record.process_at
               ? moment(record.process_at).format("DD-MM-YYYY HH:mm")
               : ""}
@@ -379,6 +385,63 @@ export default function Page() {
         expandable={{
           expandedRowRender: (record) => <TableDapem data={record.Dapem} />,
           rowExpandable: (record) => record.Dapem.length !== 0,
+        }}
+        summary={(pageData) => {
+          const plaf = pageData
+            .flatMap((p) => p.Dapem)
+            .reduce((acc, curr) => acc + curr.plafond, 0);
+          const drop = pageData
+            .flatMap((p) => p.Dapem)
+            .reduce(
+              (acc, curr) =>
+                acc +
+                (curr.plafond -
+                  (curr.plafond * (curr.c_adm_sumdan / 100) +
+                    curr.c_account +
+                    curr.c_provisi)),
+              0,
+            );
+          const adm = pageData
+            .flatMap((p) => p.Dapem)
+            .reduce(
+              (acc, curr) => acc + curr.plafond * (curr.c_adm_sumdan / 100),
+              0,
+            );
+          const rek = pageData
+            .flatMap((p) => p.Dapem)
+            .reduce((acc, curr) => acc + curr.c_account, 0);
+          const prov = pageData
+            .flatMap((p) => p.Dapem)
+            .reduce((acc, curr) => acc + curr.c_provisi, 0);
+
+          return (
+            <Table.Summary.Row className="text-xs bg-blue-400">
+              <Table.Summary.Cell index={0} colSpan={4} className="text-center">
+                <b>SUMMARY</b>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={5} className="text-right font-bold">
+                <div>{IDRFormat(plaf)}</div>
+                <div>{IDRFormat(drop)}</div>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={6} className="text-right font-bold">
+                <div className="flex justify-between gap-2">
+                  <div>Admin :</div>
+                  <div className="text-right">{IDRFormat(adm)}</div>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <div>Rek :</div>
+                  <div className="text-right">{IDRFormat(rek)}</div>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <div>Provisi :</div>
+                  <div className="text-right">{IDRFormat(prov)}</div>
+                </div>
+                <div className="border-t border-dashed">
+                  {IDRFormat(adm + rek + prov)}
+                </div>
+              </Table.Summary.Cell>
+            </Table.Summary.Row>
+          );
         }}
       />
       <ViewFiles
@@ -688,26 +751,28 @@ const TableDapem = ({ data }: { data: IDapem[] }) => {
         return (
           <div>
             <div>{record.Debitur.fullname}</div>
-            <div className="opacity-70">@{record.nopen}</div>
+            <div className="opacity-80 text-xs">@{record.nopen}</div>
           </div>
         );
       },
     },
     {
-      title: "ProdukPembiayaan",
+      title: "Produk Pembiayaan",
       key: "produk",
       dataIndex: "produk",
       render(value, record, index) {
         return (
           <div>
             <div>{record.ProdukPembiayaan.name}</div>
-            <div className="opacity-70">{record.JenisPembiayaan.name}</div>
+            <div className="opacity-80 text-xs">
+              {record.JenisPembiayaan.name}
+            </div>
           </div>
         );
       },
     },
     {
-      title: "Plafond",
+      title: "Pembiayaan",
       key: "plafond",
       dataIndex: "plafond",
       render(value, record, index) {
@@ -727,13 +792,13 @@ const TableDapem = ({ data }: { data: IDapem[] }) => {
         return (
           <div>
             <div>
-              <span className="text-xs italic opacity-70">Adm:</span>
+              <span className="text-xs opacity-80">Adm:</span>
               <Tag color={"blue"}>
                 {IDRFormat(record.plafond * (record.c_adm_sumdan / 100))}
               </Tag>
             </div>
             <div>
-              <span className="text-xs italic opacity-70">Rek:</span>
+              <span className="text-xs opacity-80">Rek:</span>
               <Tag color={"blue"}>{IDRFormat(record.c_account)}</Tag>
             </div>
           </div>

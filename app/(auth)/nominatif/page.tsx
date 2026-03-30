@@ -167,7 +167,7 @@ export default function Page() {
         return (
           <div>
             <div>{(pageProps.page - 1) * pageProps.limit + index + 1}</div>
-            <div className="opacity-70 text-xs italic">{record.id}</div>
+            <div className="opacity-80 text-xs">{record.id}</div>
           </div>
         );
       },
@@ -176,11 +176,12 @@ export default function Page() {
       title: "Pemohon",
       dataIndex: "pemohon",
       key: "pemohon",
+      fixed: window.innerWidth < 600 ? false : true,
       render(value, record, index) {
         return (
           <div>
             <p className="font-bold">{record.Debitur.fullname}</p>
-            <div className="text-xs opacity-70">
+            <div className="text-xs opacity-80">
               <p>@{record.Debitur.nopen}</p>
             </div>
           </div>
@@ -221,15 +222,15 @@ export default function Page() {
           record.tenor,
           record.c_margin_sumdan,
           record.margin_type,
-          record.rounded,
+          record.rounded_sumdan,
         ).angsuran;
         return (
           <div className="text-xs">
             <div>
-              Mitra : <Tag color={"blue"}> {IDRFormat(mitra)}</Tag>
+              Total : <Tag color={"blue"}>{IDRFormat(total)}</Tag>
             </div>
             <div>
-              Total : <Tag color={"blue"}>{IDRFormat(total)}</Tag>
+              Mitra : <Tag color={"blue"}> {IDRFormat(mitra)}</Tag>
             </div>
           </div>
         );
@@ -243,9 +244,10 @@ export default function Page() {
         return (
           <div>
             <p>
-              {record.ProdukPembiayaan.id} {record.ProdukPembiayaan.name}
+              {record.ProdukPembiayaan.name}{" "}
+              <span>({record.ProdukPembiayaan.Sumdan.code})</span>
             </p>
-            <p className="opacity-70">{record.JenisPembiayaan.name}</p>
+            <p className="opacity-80 text-xs">{record.JenisPembiayaan.name}</p>
           </div>
         );
       },
@@ -258,7 +260,7 @@ export default function Page() {
         return (
           <div>
             <div>{record.AO.fullname}</div>
-            <div className="text-xs opacity-70">
+            <div className="text-xs opacity-80">
               {record.AO.Cabang.name} | {record.AO.Cabang.Area.name}
             </div>
           </div>
@@ -291,7 +293,7 @@ export default function Page() {
                   })
                 }
               ></Button>
-              <span className="italic text-xs opacity-70">
+              <span className=" text-xs opacity-80">
                 {moment(record.takeover_date_exc).format("DD/MM/YYYY")}
               </span>
             </div>
@@ -334,7 +336,7 @@ export default function Page() {
                   })
                 }
               ></Button>
-              <span className="italic text-xs opacity-70">
+              <span className="text-xs opacity-80">
                 {moment(record.mutasi_date_exc).format("DD/MM/YYYY")}
               </span>
             </div>
@@ -377,7 +379,7 @@ export default function Page() {
                   })
                 }
               ></Button>
-              <span className="italic text-xs opacity-70">
+              <span className="text-xs opacity-80">
                 {moment(record.flagging_date_exc).format("DD/MM/YYYY")}
               </span>
             </div>
@@ -431,7 +433,7 @@ export default function Page() {
                   })
                 }
               ></Button>
-              <span className="italic text-xs opacity-70">
+              <span className="text-xs opacity-80">
                 {IDRFormat(total)}/{IDRFormat(record.plafond - biaya)} (
                 {((total / (record.plafond - biaya)) * 100).toFixed(2)}%) (
                 {IDRFormat(record.plafond - biaya - total)})
@@ -486,7 +488,7 @@ export default function Page() {
                 }
               ></Button>
               {record.Berkas && record.Berkas.process_at && (
-                <span className="italic text-xs opacity-70">
+                <span className="text-xs opacity-80">
                   Send : {moment(record.Berkas.process_at).format("DD/MM/YYYY")}
                 </span>
               )}
@@ -541,7 +543,7 @@ export default function Page() {
                   })
                 }
               ></Button>
-              <div className="italic text-xs opacity-70">
+              <div className="text-xs opacity-80">
                 <div>
                   TBO :{" "}
                   {moment(record.date_contract)
@@ -578,7 +580,7 @@ export default function Page() {
           <div>
             {record.no_contract && <div>{record.no_contract}</div>}
             {record.date_contract && (
-              <div className="italic text-xs opacity-70">
+              <div className="text-xs opacity-80">
                 {moment(record.date_contract).format("DD/MM/YYYY")}
               </div>
             )}
@@ -668,6 +670,99 @@ export default function Page() {
               )}
             />
           </Tooltip>
+        );
+      },
+    },
+    {
+      title: "Biaya Biaya",
+      dataIndex: "biaya",
+      key: "biaya",
+      render(value, record, index) {
+        const adm = record.plafond * (record.c_adm / 100);
+        const insurance = record.plafond * (record.c_insurance / 100);
+        const total =
+          adm +
+          insurance +
+          record.c_gov +
+          record.c_stamp +
+          record.c_infomation +
+          record.c_mutasi;
+        return (
+          <div className="text-xs">
+            <div className="flex justify-between gap-4">
+              <span className="w-20">Admin</span>
+              <span>{IDRFormat(adm)}</span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="w-20">Asuransi</span>
+              <span>{IDRFormat(insurance)}</span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="w-20">Tatalaksana</span>
+              <span>{IDRFormat(record.c_gov)}</span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="w-20">Materai</span>
+              <span>{IDRFormat(record.c_stamp)}</span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="w-20">Informasi</span>
+              <span>{IDRFormat(record.c_infomation)}</span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="w-20">Mutasi</span>
+              <span>{IDRFormat(record.c_mutasi)}</span>
+            </div>
+            <div className="flex justify-between gap-4 border-t border-dashed">
+              <span className="w-20"></span>
+              <span>{IDRFormat(total)}</span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Biaya Mitra",
+      dataIndex: "biayamitra",
+      key: "biayamitra",
+      render(value, record, index) {
+        const adm = record.plafond * (record.c_adm_sumdan / 100);
+        return (
+          <div className="text-xs">
+            <div className="flex justify-between gap-4">
+              <span className="w-20">Admin</span>
+              <span className="text-right">{IDRFormat(adm)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="w-20">Rek</span>
+              <span className="text-right">{IDRFormat(record.c_account)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="w-20">Provisi</span>
+              <span className="text-right">{IDRFormat(record.c_provisi)}</span>
+            </div>
+            <div className="flex justify-between border-t border-dashed">
+              <span className="w-20"></span>
+              <span className="text-right">
+                {IDRFormat(adm + record.c_account + record.c_provisi)}
+              </span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Created",
+      dataIndex: "created_at",
+      key: "created_at",
+      render(value, record, index) {
+        return (
+          <div>
+            <div>{record.CreatedBy.fullname}</div>
+            <div className="opacity-80 text-xs">
+              {moment(record.created_at).format("DD/MM/YYYY")}
+            </div>
+          </div>
         );
       },
     },
@@ -939,7 +1034,7 @@ export default function Page() {
               ).angsuran,
             0,
           );
-          const angsuran_sumdan = pageData.reduce(
+          const angssudan = pageData.reduce(
             (acc, item) =>
               acc +
               GetAngsuran(
@@ -947,8 +1042,32 @@ export default function Page() {
                 item.tenor,
                 item.c_margin_sumdan,
                 item.margin_type,
-                item.rounded,
+                item.rounded_sumdan,
               ).angsuran,
+            0,
+          );
+          const adm = pageData.reduce(
+            (acc, curr) => acc + curr.plafond * (curr.c_adm / 100),
+            0,
+          );
+          const asuransi = pageData.reduce(
+            (acc, curr) => acc + curr.plafond * (curr.c_insurance / 100),
+            0,
+          );
+          const tatalaksana = pageData.reduce(
+            (acc, curr) => acc + curr.c_gov,
+            0,
+          );
+          const materai = pageData.reduce((acc, curr) => acc + curr.c_stamp, 0);
+          const inform = pageData.reduce(
+            (acc, curr) => acc + curr.c_infomation,
+            0,
+          );
+          const mutasi = pageData.reduce((acc, curr) => acc + curr.c_mutasi, 0);
+          const rek = pageData.reduce((acc, curr) => acc + curr.c_account, 0);
+          const prov = pageData.reduce((acc, curr) => acc + curr.c_provisi, 0);
+          const adm_mitra = pageData.reduce(
+            (acc, curr) => acc + curr.plafond * (curr.c_adm_sumdan / 100),
             0,
           );
 
@@ -964,12 +1083,67 @@ export default function Page() {
                   )}{" "}
                 </b>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={4} className="text-center">
-                <b>
-                  <div>
-                    {IDRFormat(angsuran_sumdan)}/{IDRFormat(angsuran)}
-                  </div>
-                </b>
+              <Table.Summary.Cell index={4} className="text-center font-bold">
+                <div>
+                  {IDRFormat(angsuran)} - {IDRFormat(angssudan)}
+                </div>
+                <div className="border-t border-gray-500">
+                  {IDRFormat(angsuran - angssudan)}
+                </div>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell
+                index={5}
+                colSpan={13}
+                className="text-center font-bold"
+              ></Table.Summary.Cell>
+
+              <Table.Summary.Cell index={18} className="font-bold">
+                <div className="flex justify-between">
+                  <p className="w-20">Admin</p>
+                  <p className="text-right">{IDRFormat(adm)}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="w-20">Asuransi</p>
+                  <p className="text-right">{IDRFormat(asuransi)}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="w-20">Tatalaksana</p>
+                  <p className="text-right">{IDRFormat(tatalaksana)}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="w-20">Materai</p>
+                  <p className="text-right">{IDRFormat(materai)}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="w-20">Informasi</p>
+                  <p className="text-right">{IDRFormat(inform)}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="w-20">Mutasi</p>
+                  <p className="text-right">{IDRFormat(mutasi)}</p>
+                </div>
+                <div className="border-t border-gray-500 text-right">
+                  {IDRFormat(
+                    adm + asuransi + tatalaksana + materai + inform + mutasi,
+                  )}
+                </div>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={18} className="font-bold">
+                <div className="flex justify-between">
+                  <p className="w-20">Admin</p>
+                  <p className="text-right">{IDRFormat(adm_mitra)}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="w-20">Rek</p>
+                  <p className="text-right">{IDRFormat(rek)}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="w-20">Provisi</p>
+                  <p className="text-right">{IDRFormat(prov)}</p>
+                </div>
+                <div className="border-t border-gray-500 text-right">
+                  {IDRFormat(adm_mitra + rek + prov)}
+                </div>
               </Table.Summary.Cell>
             </Table.Summary.Row>
           );

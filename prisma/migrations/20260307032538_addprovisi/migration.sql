@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `dapem` ADD COLUMN `c_provisi` INTEGER NOT NULL DEFAULT 0;

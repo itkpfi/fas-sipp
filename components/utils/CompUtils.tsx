@@ -233,9 +233,17 @@ export const ProsesPembiayaan = ({
           data={{
             label: "Keterangan",
             type: "textarea",
-            required: true,
             value: desc.desc,
             onChange: (e: string) => setDesc({ ...desc, desc: e }),
+          }}
+        />
+        <FormInput
+          data={{
+            label: "File (PDF)",
+            type: "upload",
+            accept: "application/pdf",
+            value: temp.file_proses,
+            onChange: (e: string) => setTemp({ ...temp, file_proses: e }),
           }}
         />
       </div>
@@ -304,13 +312,17 @@ export const MappingToExcelDapem = (data: IDapem[]) => {
     cabang: d.AO.Cabang.name,
     area: d.AO.Cabang.Area.name,
     admin: d.CreatedBy.fullname,
-    by_admin: d.c_adm + d.c_adm_sumdan,
-    by_admin_rp: d.plafond * ((d.c_adm + d.c_adm_sumdan) / 100),
+    by_admin: d.c_adm,
+    by_admin_rp: d.plafond * (d.c_adm / 100),
+    adm_mitra: d.c_adm_sumdan,
+    adm_mitra_rp: d.plafond * (d.c_adm_sumdan / 100),
     by_asuransi: d.c_insurance,
     by_asuransi_rp: d.plafond * (d.c_insurance / 100),
     by_tatalaksana: d.c_gov,
     by_tabungan: d.c_account,
     by_materai: d.c_stamp,
+    by_provisi: d.c_provisi,
+    by_infomasi: d.c_infomation,
     by_mutasi: d.c_mutasi,
     blokir: d.c_blokir,
     blokir_rp:
@@ -322,8 +334,7 @@ export const MappingToExcelDapem = (data: IDapem[]) => {
         d.rounded,
       ).angsuran * d.c_blokir,
     by_takeover: d.c_takeover,
-    adm_mitra: d.c_adm_sumdan,
-    adm_mitra_rp: d.plafond * (d.c_adm_sumdan / 100),
+    by_bpp: d.c_bpp,
     angs: GetAngsuran(
       d.plafond,
       d.tenor,
@@ -336,8 +347,87 @@ export const MappingToExcelDapem = (data: IDapem[]) => {
       d.tenor,
       d.c_margin_sumdan,
       d.margin_type,
+      d.rounded_sumdan,
+    ).angsuran,
+  }));
+};
+
+export const MappingToProsesDapem = (data: IDapem[]) => {
+  return data.map((d, i) => ({
+    no: i + 1,
+    pemohon: d.Debitur.fullname,
+    nopen: d.nopen,
+    jenis_pembiayaan: d.JenisPembiayaan.name,
+    produk_pembiayaan: d.ProdukPembiayaan.name,
+    mitra_pembiayaan: d.ProdukPembiayaan.Sumdan.code,
+    plafond: d.plafond,
+    tenor: d.tenor,
+    created_at: d.created_at,
+    verif_status: d.verif_status,
+    slik_status: d.slik_status,
+    approval_status: d.approv_status,
+    verif_desc: d.verif_desc,
+    slik_desc: d.slik_desc,
+    approval_desc: d.approv_desc,
+    ao: d.AO.fullname,
+    cabang: d.AO.Cabang.name,
+    area: d.AO.Cabang.Area.name,
+    admin: d.CreatedBy.fullname,
+  }));
+};
+
+export const MappingToTagihan = (data: IDapem[], periode?: string) => {
+  return data.map((d, i) => ({
+    no: i + 1,
+    pemohon: d.Debitur.fullname,
+    nopen: d.nopen,
+    no_pk: d.no_contract,
+    date_pk: d.date_contract,
+    plafond: d.plafond,
+    tenor: d.tenor,
+    angs: GetAngsuran(
+      d.plafond,
+      d.tenor,
+      d.c_margin + d.c_margin_sumdan,
+      d.margin_type,
       d.rounded,
     ).angsuran,
+    angs_mitra: GetAngsuran(
+      d.plafond,
+      d.tenor,
+      d.c_margin_sumdan,
+      d.margin_type,
+      d.rounded_sumdan,
+    ).angsuran,
+    selisih_angs:
+      GetAngsuran(
+        d.plafond,
+        d.tenor,
+        d.c_margin + d.c_margin_sumdan,
+        d.margin_type,
+        d.rounded,
+      ).angsuran -
+      GetAngsuran(
+        d.plafond,
+        d.tenor,
+        d.c_margin_sumdan,
+        d.margin_type,
+        d.rounded_sumdan,
+      ).angsuran,
+    angs_ke: d.Angsuran.find((a) =>
+      moment(a.date_pay).isSame(periode || new Date(), "month"),
+    )?.counter,
+    pokok: d.Angsuran.find((a) =>
+      moment(a.date_pay).isSame(periode || new Date(), "month"),
+    )?.principal,
+    margin: d.Angsuran.find((a) =>
+      moment(a.date_pay).isSame(periode || new Date(), "month"),
+    )?.margin,
+    status: d.Angsuran.find((a) =>
+      moment(a.date_pay).isSame(periode || new Date(), "month"),
+    )?.date_paid
+      ? "PAID"
+      : "UNPAID",
   }));
 };
 

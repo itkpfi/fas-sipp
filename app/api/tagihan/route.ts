@@ -1,8 +1,8 @@
 import { serializeForApi } from "@/components/utils/PembiayaanUtil";
 import { getSession } from "@/libs/Auth";
-import { IAngsuran } from "@/libs/IInterfaces";
+import { IAngsuran, IJournalEntry } from "@/libs/IInterfaces";
 import prisma from "@/libs/Prisma";
-import { Angsuran } from "@prisma/client";
+import { Angsuran, JournalDetail } from "@prisma/client";
 import moment from "moment";
 import { NextRequest, NextResponse } from "next/server";
 

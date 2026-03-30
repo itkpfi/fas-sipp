@@ -5,6 +5,7 @@ import { User } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { getSession } from "@/libs/Auth";
+import { serializeForApi } from "@/components/utils/PembiayaanUtil";
 
 export const GET = async (request: NextRequest) => {
   const page = request.nextUrl.searchParams.get("page") || "1";
@@ -78,7 +79,7 @@ export const GET = async (request: NextRequest) => {
 
   return NextResponse.json({
     status: 200,
-    data: find,
+    data: serializeForApi(find),
     total: total,
   });
 };

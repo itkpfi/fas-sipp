@@ -56,7 +56,7 @@ export const FormCeklist1 = (record: IDapem) => {
       <div class="flex gap-2">
         <p class="w-40">Plafond</p>
         <p class="w-4">:</p>
-        <p class="flex-1">${IDRFormat(record.plafond)}</p>
+        <p class="flex-1">Rp. ${IDRFormat(record.plafond)}</p>
       </div>
       <div class="flex gap-2">
         <p class="w-40">Tenor</p>
@@ -66,7 +66,7 @@ export const FormCeklist1 = (record: IDapem) => {
       <div class="flex gap-2">
         <p class="w-40">Angsuran</p>
         <p class="w-4">:</p>
-        <p class="flex-1">${IDRFormat(angsuran)} Bulan</p>
+        <p class="flex-1">Rp. ${IDRFormat(angsuran)}</p>
       </div>
       <div class="flex gap-2">
         <p class="w-40">Petugas</p>

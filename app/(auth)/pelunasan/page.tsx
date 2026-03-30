@@ -6,6 +6,7 @@ import { useUser } from "@/components/UserContext";
 import { FilterData } from "@/components/utils/CompUtils";
 import {
   GetAngsuran,
+  GetSisaPokokMargin,
   IDRFormat,
   IDRToNumber,
 } from "@/components/utils/PembiayaanUtil";
@@ -143,7 +144,7 @@ export default function Page() {
         return (
           <div>
             <div>{(pageProps.page - 1) * pageProps.limit + index + 1}</div>
-            <div className="text-xs italic opacity-70">{record.id}</div>
+            <div className="text-xs opacity-80">{record.id}</div>
           </div>
         );
       },
@@ -156,7 +157,7 @@ export default function Page() {
         return (
           <div>
             <div>{record.Dapem.Debitur.fullname}</div>
-            <div className="text-xs opacity-70">
+            <div className="text-xs opacity-80">
               @{record.Dapem.Debitur.nopen}
             </div>
           </div>
@@ -229,7 +230,7 @@ export default function Page() {
               {record.Dapem.ProdukPembiayaan.id}{" "}
               {record.Dapem.ProdukPembiayaan.name}
             </div>
-            <div className="text-xs italic opacity-70">
+            <div className="text-xs opacity-80">
               {record.Dapem.JenisPembiayaan.name}
             </div>
           </div>
@@ -277,9 +278,9 @@ export default function Page() {
           >
             {record.status_paid}
           </Tag>
-          <div className="text-xs italic opacity-70">
+          <div className="text-xs opacity-80">
             {record.process_at
-              ? moment(record.process_at).format("DD-MM-YYYY HH:mm")
+              ? moment(record.process_at).format("DD-MM-YYYY")
               : ""}
           </div>
         </div>
@@ -317,7 +318,7 @@ export default function Page() {
             <Tag color={"blue"}>
               {IDRFormat(record.amount + record.penalty)}
             </Tag>
-            <div className="italic opacity-70 text-xs">
+            <div className="opacity-80 text-xs">
               <div>Pokok: {IDRFormat(record.amount)}</div>
               <div>Penalty: {IDRFormat(record.penalty)}</div>
             </div>
@@ -654,13 +655,7 @@ const UpsertData = ({
   dapems: IDapem[];
 }) => {
   const [data, setData] = useState<IPelunasan>(record || defaultData);
-  const [temp, setTemp] = useState({
-    sisaAngsuran: 0,
-    pokok: 0,
-    margin: 0,
-    angsuranbulan: 0,
-    angsuranmitra: 0,
-  });
+
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -688,39 +683,6 @@ const UpsertData = ({
     setLoading(false);
   };
 
-  useEffect(() => {
-    if (data.Dapem && data.Dapem.Angsuran) {
-      const sisaangsuran = data.Dapem.Angsuran.filter(
-        (d) => d.date_paid === null,
-      );
-      const nom = sisaangsuran.reduce((acc, curr) => acc + curr.principal, 0);
-      const margin = sisaangsuran.reduce((acc, curr) => acc + curr.margin, 0);
-      const angsuranbulan = GetAngsuran(
-        data.Dapem.plafond,
-        data.Dapem.tenor,
-        data.Dapem.c_margin + data.Dapem.c_margin_sumdan,
-        data.Dapem.margin_type,
-        data.Dapem.rounded,
-      ).angsuran;
-      const angsuranmitra = GetAngsuran(
-        data.Dapem.plafond,
-        data.Dapem.tenor,
-        data.Dapem.c_margin_sumdan,
-        data.Dapem.margin_type,
-        data.Dapem.rounded,
-      ).angsuran;
-      setData((prev) => ({ ...prev, amount: nom, penalty: nom * (5 / 100) }));
-      setTemp((prev) => ({
-        ...prev,
-        pokok: nom,
-        margin: margin,
-        angsuranbulan,
-        angsuranmitra,
-        sisaAngsuran: sisaangsuran.length,
-      }));
-    }
-  }, [data.dapemId]);
-
   return (
     <Modal
       open={open}
@@ -739,7 +701,7 @@ const UpsertData = ({
               label: "Pemohon",
               type: "select",
               options: dapems.map((d) => ({
-                label: d.Debitur.fullname,
+                label: `${d.Debitur.fullname} (${d.nopen})`,
                 value: d.id,
               })),
               required: true,
@@ -766,6 +728,15 @@ const UpsertData = ({
               required: true,
               disabled: true,
               value: data.Dapem?.no_contract,
+            }}
+          />
+          <FormInput
+            data={{
+              label: "Pembiayaan",
+              type: "text",
+              required: true,
+              disabled: true,
+              value: `${IDRFormat(data.Dapem.plafond || 0)} / ${data.Dapem.tenor || 0} Bulan`,
             }}
           />
           <FormInput
@@ -806,6 +777,14 @@ const UpsertData = ({
           />
           <FormInput
             data={{
+              label: "Total",
+              type: "text",
+              disabled: true,
+              value: IDRFormat(data.penalty + data.amount),
+            }}
+          />
+          <FormInput
+            data={{
               label: "Keterangan",
               type: "textarea",
               required: true,
@@ -817,11 +796,32 @@ const UpsertData = ({
         <div className="flex-1 flex flex-col gap-2">
           <FormInput
             data={{
-              label: "Sisa Angsuran",
-              type: "number",
+              label: "Angsuran",
+              type: "text",
               required: true,
               disabled: true,
-              value: temp.sisaAngsuran,
+              value: data.dapemId
+                ? IDRFormat(
+                    GetAngsuran(
+                      data.Dapem.plafond,
+                      data.Dapem.tenor,
+                      data.Dapem.c_margin + data.Dapem.c_margin_sumdan,
+                      data.Dapem.margin_type,
+                      data.Dapem.rounded,
+                    ).angsuran,
+                  )
+                : 0,
+            }}
+          />
+          <FormInput
+            data={{
+              label: "Angsuran Ke",
+              type: "text",
+              required: true,
+              disabled: true,
+              value: data.dapemId
+                ? `${GetSisaPokokMargin(data.Dapem).count} / ${data.Dapem.tenor}`
+                : 0,
             }}
           />
           <FormInput
@@ -830,25 +830,52 @@ const UpsertData = ({
               type: "text",
               required: true,
               disabled: true,
-              value: IDRFormat(temp.pokok),
+              value: IDRFormat(
+                data.dapemId ? GetSisaPokokMargin(data.Dapem).principal : 0,
+              ),
             }}
           />
           <FormInput
             data={{
-              label: "Sisa Margin",
+              label: "Tunggakan",
               type: "text",
               required: true,
               disabled: true,
-              value: IDRFormat(temp.margin),
+              value: data.dapemId
+                ? (() => {
+                    const val = GetSisaPokokMargin(data.Dapem);
+                    return `(${val.prevcount}) P: ${IDRFormat(val.prevvalueprincipal)} | All: ${IDRFormat(val.prevvalueall)}`;
+                  })()
+                : 0,
             }}
           />
           <FormInput
             data={{
-              label: "Angsuran",
+              label: "Penalty (5%)",
               type: "text",
               required: true,
               disabled: true,
-              value: `Mitra ${IDRFormat(temp.angsuranmitra)} | Total ${IDRFormat(temp.angsuranbulan)}`,
+              value: data.dapemId
+                ? (() => {
+                    const val = GetSisaPokokMargin(data.Dapem);
+                    return `${IDRFormat(val.principal * (5 / 100))}`;
+                  })()
+                : 0,
+            }}
+          />
+          <FormInput
+            data={{
+              label: "Est Total",
+              type: "text",
+              required: true,
+              disabled: true,
+              value: data.dapemId
+                ? (() => {
+                    const val = GetSisaPokokMargin(data.Dapem);
+                    const penalty = val.principal * (5 / 100);
+                    return `${IDRFormat(val.principal + penalty + val.prevvalueall)}`;
+                  })()
+                : 0,
             }}
           />
           <FormInput
@@ -953,7 +980,7 @@ const ProsesData = ({
         data.Dapem.tenor,
         data.Dapem.c_margin_sumdan,
         data.Dapem.margin_type,
-        data.Dapem.rounded,
+        data.Dapem.rounded_sumdan,
       ).angsuran;
       setData((prev) => ({ ...prev, amount: nom, penalty: nom * (5 / 100) }));
       setTemp((prev) => ({
@@ -1099,7 +1126,7 @@ const ProsesData = ({
               type: "text",
               required: true,
               disabled: true,
-              value: `Mitra ${IDRFormat(temp.angsuranmitra)} | Total ${IDRFormat(temp.angsuranbulan)}`,
+              value: `Total: ${IDRFormat(temp.angsuranbulan)} | Mitra: ${IDRFormat(temp.angsuranmitra)}`,
             }}
           />
           <FormInput

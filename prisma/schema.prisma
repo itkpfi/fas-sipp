@@ -67,25 +67,30 @@ model Role {
 }
 
 model Sumdan {
-  id          String    @id @default(uuid())
-  name        String
-  code        String
-  description String?   @db.Text
-  logo        String?
-  address     String?   @db.Text
-  phone       String?
-  email       String?
-  tbo         Int       @default(3)
-  rounded     Int       @default(1000)
-  limit       BigInt    @default(0)
-  c_margin    Float
-  c_adm       Float
-  c_gov       Int
-  c_stamps    Int
-  c_account   Int
-  dsr         Float
-  sk_no       String?
-  sk_date     DateTime?
+  id             String    @id @default(uuid())
+  name           String
+  code           String
+  description    String?   @db.Text
+  logo           String?
+  address        String?   @db.Text
+  phone          String?
+  email          String?
+  tbo            Int       @default(3)
+  rounded        Int       @default(1000)
+  rounded_sumdan Int       @default(1)
+  limit          BigInt    @default(0)
+  c_margin       Float
+  c_adm          Float
+  c_gov          Int
+  c_stamps       Int
+  c_account      Int
+  c_information  Int
+  c_provisi      Int       @default(0)
+  dsr            Float
+  sk_no          String?
+  sk_date        DateTime?
+  pic1           String?
+  pic2           String?
 
   status           Boolean            @default(true)
   created_at       DateTime           @default(now())
@@ -242,8 +247,12 @@ model Dapem {
   c_mutasi        Int
   c_blokir        Int
   c_takeover      Int
+  c_bpp           Int
+  c_provisi       Int         @default(0)
+  c_infomation    Int
   tbo             Int
   rounded         Int
+  rounded_sumdan  Int         @default(0)
   margin_type     EMarginType
 
   takeover_from String?
@@ -273,6 +282,7 @@ model Dapem {
   aw_job          String?
   aw_address      String?
   aw_relate       String?
+  aw_phone        String?
 
   f_name    String?
   f_relate  String?
@@ -307,6 +317,7 @@ model Dapem {
   date_contract DateTime?
 
   file_slik       String?
+  file_proses     String?
   file_submission String?
   video_interview String?
   video_insurance String?
@@ -394,15 +405,17 @@ model Pelunasan {
 }
 
 model Angsuran {
-  id        String    @id @default(uuid())
-  counter   Int
-  principal Int
-  margin    Int
-  date_pay  DateTime
-  date_paid DateTime?
-  remaining Int
-  Dapem     Dapem     @relation(fields: [dapemId], references: [id])
-  dapemId   String
+  id          String    @id @default(uuid())
+  counter     Int
+  principal   Int
+  margin      Int
+  date_pay    DateTime
+  date_paid   DateTime?
+  remaining   Int
+  inst_sumdan Int       @default(0)
+  fee_banpot  Int       @default(0)
+  Dapem       Dapem     @relation(fields: [dapemId], references: [id])
+  dapemId     String
 }
 
 // AKUNTING

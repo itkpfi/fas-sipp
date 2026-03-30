@@ -107,6 +107,18 @@ export default function Page() {
               </p>
             </div>
             <div className="flex gap-2 border-b border-dashed border-gray-300">
+              <p className="w-52">Data Informasi</p>
+              <p className="w-4">:</p>
+              <p className="flex-1 text-right">
+                {IDRFormat(
+                  pageProps.data.reduce(
+                    (acc, curr) => acc + curr.c_infomation,
+                    0,
+                  ),
+                )}
+              </p>
+            </div>
+            <div className="flex gap-2 border-b border-dashed border-gray-300">
               <p className="w-52">Materai</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -121,6 +133,18 @@ export default function Page() {
               <p className="flex-1 text-right">
                 {IDRFormat(
                   pageProps.data.reduce((acc, curr) => acc + curr.c_mutasi, 0),
+                )}
+              </p>
+            </div>
+            <div className="flex gap-2 border-b border-dashed border-gray-300">
+              <p className="w-52">Pelunasan</p>
+              <p className="w-4">:</p>
+              <p className="flex-1 text-right">
+                {IDRFormat(
+                  pageProps.data.reduce(
+                    (acc, curr) => acc + curr.c_takeover,
+                    0,
+                  ),
                 )}
               </p>
             </div>
@@ -166,8 +190,10 @@ export default function Page() {
                       (adm +
                         asuransi +
                         curr.c_gov +
+                        curr.c_infomation +
                         curr.c_stamp +
                         curr.c_mutasi +
+                        curr.c_takeover +
                         blokir)
                     );
                   }, 0),
@@ -195,6 +221,27 @@ export default function Page() {
               </div>
             ))}
             <div className="flex gap-2 border-b border-dashed border-gray-300">
+              <p className="w-52">BLOKIR ANGSURAN</p>
+              <p className="w-4">:</p>
+              <p className="flex-1 text-right">
+                {IDRFormat(
+                  pageProps.data.reduce(
+                    (acc, curr) =>
+                      acc +
+                      GetAngsuran(
+                        curr.plafond,
+                        curr.tenor,
+                        curr.c_margin_sumdan,
+                        curr.margin_type,
+                        curr.rounded,
+                      ).angsuran *
+                        curr.c_blokir,
+                    0,
+                  ),
+                )}
+              </p>
+            </div>
+            <div className="flex gap-2 border-b border-dashed border-gray-300">
               <p className="w-52">PELUNASAN</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -219,6 +266,19 @@ export default function Page() {
                     ) +
                     pageProps.data.reduce(
                       (acc, curr) => acc + curr.c_takeover,
+                      0,
+                    ) +
+                    pageProps.data.reduce(
+                      (acc, curr) =>
+                        acc +
+                        GetAngsuran(
+                          curr.plafond,
+                          curr.tenor,
+                          curr.c_margin_sumdan,
+                          curr.margin_type,
+                          curr.rounded,
+                        ).angsuran *
+                          curr.c_blokir,
                       0,
                     ),
                 )}
@@ -246,8 +306,10 @@ export default function Page() {
                   (adm +
                     asuransi +
                     curr.c_gov +
+                    curr.c_infomation +
                     curr.c_stamp +
                     curr.c_mutasi +
+                    curr.c_takeover +
                     blokir)
                 );
               }, 0);
@@ -255,7 +317,20 @@ export default function Page() {
                 bebans
                   .flatMap((b) => b.JournalDetail)
                   .reduce((acc, curr) => acc + (curr.debit - curr.credit), 0) +
-                pageProps.data.reduce((acc, curr) => acc + curr.c_takeover, 0);
+                pageProps.data.reduce((acc, curr) => acc + curr.c_takeover, 0) +
+                pageProps.data.reduce(
+                  (acc, curr) =>
+                    acc +
+                    GetAngsuran(
+                      curr.plafond,
+                      curr.tenor,
+                      curr.c_margin_sumdan,
+                      curr.margin_type,
+                      curr.rounded,
+                    ).angsuran *
+                      curr.c_blokir,
+                  0,
+                );
               return pend - beb;
             })(),
           )}

@@ -22,15 +22,7 @@ import {
   ProdukPembiayaan,
   Sumdan,
 } from "@prisma/client";
-import {
-  Button,
-  Card,
-  Descriptions,
-  Divider,
-  Input,
-  Modal,
-  Select,
-} from "antd";
+import { Button, Card, Divider, Image, Input, Modal, Select } from "antd";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
@@ -273,6 +265,8 @@ export default function Page() {
                       c_gov: findSumdan.c_gov,
                       c_account: findSumdan.c_account,
                       c_stamp: findSumdan.c_stamps,
+                      c_information: findSumdan.c_information,
+                      c_provisi: findSumdan.c_provisi,
                     });
                   }
                 }
@@ -385,7 +379,7 @@ export default function Page() {
               suffix={<span className="text-xs italic opacity-70">%</span>}
               value={data.c_adm}
               onChange={(e) =>
-                setData({ ...data, c_adm: Number(e.target.value || 0) })
+                setData({ ...data, c_adm: Number(e.target.value || "0") })
               }
               type={"number"}
             />
@@ -407,7 +401,10 @@ export default function Page() {
               suffix={<span className="text-xs italic opacity-70">%</span>}
               value={data.c_insurance}
               onChange={(e) =>
-                setData({ ...data, c_insurance: Number(e.target.value || 0) })
+                setData({
+                  ...data,
+                  c_insurance: Number(e.target.value || "0"),
+                })
               }
               type={"number"}
             />
@@ -428,7 +425,7 @@ export default function Page() {
               value={IDRFormat(data.c_gov)}
               style={{ textAlign: "right", color: "black" }}
               onChange={(e) =>
-                setData({ ...data, c_gov: Number(e.target.value || 0) })
+                setData({ ...data, c_gov: IDRToNumber(e.target.value || "0") })
               }
             />
           </div>
@@ -442,7 +439,44 @@ export default function Page() {
               value={IDRFormat(data.c_account)}
               style={{ textAlign: "right", color: "black" }}
               onChange={(e) =>
-                setData({ ...data, c_account: Number(e.target.value || 0) })
+                setData({
+                  ...data,
+                  c_account: IDRToNumber(e.target.value || "0"),
+                })
+              }
+            />
+          </div>
+        </div>
+        <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
+          <div className="flex-1">Biaya Provisi</div>
+          <div className="flex gap-2 flex-2">
+            <Input
+              size="small"
+              disabled={!hasAccess}
+              value={IDRFormat(data.c_provisi)}
+              style={{ textAlign: "right", color: "black" }}
+              onChange={(e) =>
+                setData({
+                  ...data,
+                  c_provisi: IDRToNumber(e.target.value || "0"),
+                })
+              }
+            />
+          </div>
+        </div>
+        <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
+          <div className="flex-1">Biaya Data Informasi</div>
+          <div className="flex gap-2 flex-2">
+            <Input
+              size="small"
+              disabled={!hasAccess}
+              value={IDRFormat(data.c_information)}
+              style={{ textAlign: "right", color: "black" }}
+              onChange={(e) =>
+                setData({
+                  ...data,
+                  c_information: IDRToNumber(e.target.value || "0"),
+                })
               }
             />
           </div>
@@ -456,7 +490,10 @@ export default function Page() {
               value={IDRFormat(data.c_stamp)}
               style={{ textAlign: "right", color: "black" }}
               onChange={(e) =>
-                setData({ ...data, c_stamp: Number(e.target.value || 0) })
+                setData({
+                  ...data,
+                  c_stamp: IDRToNumber(e.target.value || "0"),
+                })
               }
             />
           </div>
@@ -470,8 +507,35 @@ export default function Page() {
               value={IDRFormat(data.c_mutasi)}
               style={{ textAlign: "right", color: "black" }}
               onChange={(e) =>
-                setData({ ...data, c_mutasi: Number(e.target.value || 0) })
+                setData({
+                  ...data,
+                  c_mutasi: IDRToNumber(e.target.value || "0"),
+                })
               }
+            />
+          </div>
+        </div>
+        <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
+          <div className="flex-1">Blokir Angsuran</div>
+          <div className="flex gap-2 flex-2">
+            <Input
+              size="small"
+              style={{ width: 80 }}
+              suffix={<span className="text-xs italic opacity-70">%</span>}
+              value={data.c_blokir}
+              onChange={(e) =>
+                setData({
+                  ...data,
+                  c_blokir: IDRToNumber(e.target.value || "0"),
+                })
+              }
+              type={"number"}
+            />
+            <Input
+              size="small"
+              disabled
+              value={IDRFormat(data.c_blokir * data.angsuran)}
+              style={{ textAlign: "right", color: "black" }}
             />
           </div>
         </div>
@@ -489,23 +553,18 @@ export default function Page() {
           </div>
         </div>
         <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
-          <div className="flex-1">Blokir Angsuran</div>
+          <div className="flex-1">BPP</div>
           <div className="flex gap-2 flex-2">
             <Input
               size="small"
-              style={{ width: 80 }}
-              suffix={<span className="text-xs italic opacity-70">%</span>}
-              value={data.c_blokir}
-              onChange={(e) =>
-                setData({ ...data, c_blokir: Number(e.target.value || 0) })
-              }
-              type={"number"}
-            />
-            <Input
-              size="small"
-              disabled
-              value={IDRFormat(data.c_blokir * data.angsuran)}
+              value={IDRFormat(data.c_bpp || 0)}
               style={{ textAlign: "right", color: "black" }}
+              onChange={(e) =>
+                setData({
+                  ...data,
+                  c_bpp: IDRToNumber(e.target.value || "0"),
+                })
+              }
             />
           </div>
         </div>
@@ -529,10 +588,7 @@ export default function Page() {
           <div className="flex-1">Terima Bersih</div>
           <div className="text-right">
             {IDRFormat(
-              data.plafon -
-                (GetBiaya(data) +
-                  data.c_takeover +
-                  data.c_blokir * data.angsuran),
+              data.plafon - (GetBiaya(data) + data.c_bpp + data.c_takeover),
             )}
           </div>
         </div>
@@ -586,25 +642,16 @@ const ModalDetailPembiayaan = ({
   const handleDownloadImage = async () => {
     if (printRef.current === null) return;
 
-    const originalWidth = printRef.current.style.width;
-
     try {
-      printRef.current.style.width = "1050px";
-
       const dataUrl = await toPng(printRef.current, {
         cacheBust: true,
         pixelRatio: 2,
-        style: {
-          padding: "20px",
-          background: "#fff",
-        },
       });
 
       const link = document.createElement("a");
       link.download = `Analisa-${data?.fullname || "Pembiayaan"}.png`;
       link.href = dataUrl;
       link.click();
-      printRef.current.style.width = originalWidth;
     } catch (err) {
       console.error("Gagal mendownload gambar", err);
     }
@@ -615,69 +662,49 @@ const ModalDetailPembiayaan = ({
       onCancel={() => setOpen(false)}
       footer={[]}
       width={1100}
-      style={{ top: 15 }}
+      style={{ top: 10 }}
     >
-      <div ref={printRef} style={{ padding: "10px", backgroundColor: "#fff" }}>
-        <p className="font-bold text-lg mb-1">ANALISA PEMBIAYAAN</p>
-        <div className="flex gap-4 flex-wrap justify-between">
-          <div className="w-122.5">
-            <Descriptions bordered column={1} size="small">
-              <Descriptions.Item
-                label="Tanggal Simulasi"
-                style={{ padding: 5 }}
-              >
-                {moment(data.created_at).format("DD/MM/YYYY")}
-              </Descriptions.Item>
-              <Descriptions.Item label="Nomor Pensiun" style={{ padding: 5 }}>
-                {data.nopen}
-              </Descriptions.Item>
-              <Descriptions.Item label="Nama Lengkap" style={{ padding: 5 }}>
-                {data.fullname}
-              </Descriptions.Item>
-              <Descriptions.Item label="Gaji Pensiun" style={{ padding: 5 }}>
-                {IDRFormat(data.salary)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Tanggal Lahir" style={{ padding: 5 }}>
-                {moment(data.birthdate).format("DD/MM/YYYY")}
-              </Descriptions.Item>
-              <Descriptions.Item label="Usia Pemohon" style={{ padding: 5 }}>
+      <div
+        ref={printRef}
+        style={{ padding: "5px", backgroundColor: "#fff" }}
+        className="text-gray-700"
+      >
+        <div className="flex items-center ">
+          <Image src={process.env.NEXT_PUBLIC_APP_LOGO} width={60} />
+          <p className="font-bold text-lg mb-1">ANALISA PEMBIAYAAN</p>
+        </div>
+        <div className="flex flex-wrap my-2 gap-4">
+          <div className="w-full sm:flex-1">
+            <div className="p-2 bg-green-500 font-bold text-white text-center">
+              <p>DATA PEMBIAYAAN</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
+              <p>Tanggal Simulasi</p>
+              <p>{moment(data.created_at).format("DD-MM-YYYY")}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
+              <p>Nama Pemohon</p>
+              <p>{data.fullname}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
+              <p>Nomor Pensiun</p>
+              <p>{data.nopen}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
+              <p>Usia Masuk</p>
+              <p>
                 {(() => {
                   const { year, month, day } = GetFullAge(
                     data.birthdate,
-                    data.created_at,
+                    moment(data.created_at).add(data.tenor, "month").toDate(),
                   );
-                  return `${year} Thn ${month} Bln ${day} Hr`;
+                  return `${year} Thn ${month} Bln ${day} Hr (${moment(data.created_at).format("DD/MM/YYYY")})`;
                 })()}
-              </Descriptions.Item>
-            </Descriptions>
-          </div>
-          <div className="w-122.5">
-            <Descriptions bordered column={1} size="small">
-              <Descriptions.Item
-                label="Jenis Pembiayaan"
-                style={{ padding: 5 }}
-              >
-                {data.Jenis.name}
-              </Descriptions.Item>
-              <Descriptions.Item
-                label="Produk Pembiayaan"
-                style={{ padding: 5 }}
-              >
-                {data.Produk.name} ({data.Produk.id})
-              </Descriptions.Item>
-              <Descriptions.Item label="Margin" style={{ padding: 5 }}>
-                {data.margin} %
-              </Descriptions.Item>
-              <Descriptions.Item label="Plafond" style={{ padding: 5 }}>
-                {IDRFormat(data.plafon)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Tenor" style={{ padding: 5 }}>
-                {data.tenor}
-              </Descriptions.Item>
-              <Descriptions.Item
-                label="Usia/Tanggal Lunas"
-                style={{ fontSize: 12, padding: 5 }}
-              >
+              </p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
+              <p>Usia Lunas</p>
+              <p>
                 {(() => {
                   const { year, month, day } = GetFullAge(
                     data.birthdate,
@@ -685,99 +712,114 @@ const ModalDetailPembiayaan = ({
                   );
                   return `${year} Thn ${month} Bln ${day} Hr (${moment(data.created_at).add(data.tenor, "month").format("DD/MM/YYYY")})`;
                 })()}
-              </Descriptions.Item>
-            </Descriptions>
+              </p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 ">
+              <p>Jenis Pembiayaan</p>
+              <p>{data.Jenis.name}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 ">
+              <p>Produk Pembiayaan</p>
+              <p>
+                {data.Produk.name} <span>({data.Sumdan.name})</span>
+              </p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 text-green-500 font-bold">
+              <p>Gaji Bersih</p>
+              <p>{IDRFormat(data.salary)}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 ">
+              <p>Tenor</p>
+              <p>{data.tenor} Bulan</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 ">
+              <p>Plafond</p>
+              <p>{IDRFormat(data.plafon)}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 ">
+              <p>Margin Bunga</p>
+              <p>{data.margin.toFixed(2)}%</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 ">
+              <p>Angsuran</p>
+              <p>{IDRFormat(data.angsuran)}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 ">
+              <p>Sisa Gaji</p>
+              <p>{IDRFormat(data.salary - data.angsuran)}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 ">
+              <p>DSR</p>
+              <p>
+                {((data.angsuran / data.salary) * 100).toFixed(2)}% /{" "}
+                {data.Sumdan.dsr}%
+              </p>
+            </div>
           </div>
-        </div>
-
-        <div className="flex gap-4 flex-wrap my-2 justify-between">
-          <div className="w-122.5">
-            <div className="font-bold italic p-2 bg-red-600 text-gray-50 rounded my-2">
-              Rincian Biaya
+          <div className="w-full sm:flex-1">
+            <div className="p-2 bg-green-500 font-bold text-white text-center">
+              <p>RINCIAN PEMBIAYAAN</p>
             </div>
-            <div className="flex flex-col gap-1">
-              <div className="flex justify-between gap-2 border-b border-dashed">
-                <span>Administrasi</span>
-                <span>{IDRFormat((data.plafon * data.c_adm) / 100)}</span>
-              </div>
-              <div className="flex justify-between gap-2 border-b border-dashed">
-                <span>Asuransi</span>
-                <span>{IDRFormat((data.plafon * data.c_insurance) / 100)}</span>
-              </div>
-              <div className="flex justify-between gap-2 border-b border-dashed">
-                <span>Tatalaksana</span>
-                <span>{IDRFormat(data.c_gov)}</span>
-              </div>
-              <div className="flex justify-between gap-2 border-b border-dashed">
-                <span>Buka Rekening</span>
-                <span>{IDRFormat(data.c_account)}</span>
-              </div>
-              <div className="flex justify-between gap-2 border-b border-dashed">
-                <span>Materai</span>
-                <span>{IDRFormat(data.c_stamp)}</span>
-              </div>
-              <div className="flex justify-between gap-2 border-b border-dashed">
-                <span>Mutasi</span>
-                <span>{IDRFormat(data.c_mutasi)}</span>
-              </div>
-              <div className="flex justify-between gap-2 font-bold text-red-500 border-t mt-2">
-                <span>TOTAL BIAYA</span>
-                <span>{IDRFormat(GetBiaya(data))}</span>
-              </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
+              <p>Administrasi</p>
+              <p>{IDRFormat(data.plafon * (data.c_adm / 100))}</p>
             </div>
-          </div>
-          <div className="w-122.5">
-            <div className="italic mb-1 border-b rounded p-1">
-              <div className="flex justify-between border-b border-dashed">
-                <div>Angsuran</div>
-                <div>{IDRFormat(data.angsuran)}</div>
-              </div>
-              <div className="flex justify-between border-b border-dashed">
-                <div>Sisa Gaji</div>
-                <div>{IDRFormat(data.salary - data.angsuran)}</div>
-              </div>
-              <div className="flex justify-between">
-                <div>Debt Service Ratio</div>
-                <div>
-                  {((data.angsuran / data.salary) * 100).toFixed(2)} % /{" "}
-                  {data.Sumdan.dsr} %
-                </div>
-              </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
+              <p>Asuransi</p>
+              <p>{IDRFormat(data.plafon * (data.c_insurance / 100))}</p>
             </div>
-            <Descriptions
-              bordered
-              column={1}
-              size="small"
-              title="Analisa Akhir"
-              styles={{ header: { marginBottom: 2 } }}
-            >
-              <Descriptions.Item label="Terima Kotor" style={{ padding: 5 }}>
-                {IDRFormat(data.plafon - GetBiaya(data))}
-              </Descriptions.Item>
-              <Descriptions.Item
-                label={`Blokir Angsuran ${data.c_blokir}X`}
-                style={{ padding: 5 }}
-              >
-                {IDRFormat(data.c_blokir * data.angsuran)}
-              </Descriptions.Item>
-              <Descriptions.Item
-                label="Nominal Takeover"
-                style={{ padding: 5 }}
-              >
-                {IDRFormat(data.c_takeover)}
-              </Descriptions.Item>
-              <Descriptions.Item
-                label="Terima Bersih"
-                style={{ fontWeight: "bold", color: "green", padding: 5 }}
-              >
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
+              <p>Tatalaksana</p>
+              <p>{IDRFormat(data.c_gov)}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
+              <p>Buka Rekening</p>
+              <p>{IDRFormat(data.c_account)}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
+              <p>Materai</p>
+              <p>{IDRFormat(data.c_stamp)}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
+              <p>Provisi</p>
+              <p>{IDRFormat(0)}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
+              <p>Data Informasi</p>
+              <p>{IDRFormat(data.c_information)}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
+              <p>Mutasi</p>
+              <p>{IDRFormat(data.c_mutasi)}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
+              <p>Blokir Angsuran ({data.c_blokir}x)</p>
+              <p>{IDRFormat(data.c_blokir * data.angsuran)}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed text-red">
+              <p>Total Biaya</p>
+              <p>{IDRFormat(GetBiaya(data))}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed font-bold text-blue-400">
+              <p>Terima Kotor</p>
+              <p>{IDRFormat(data.plafon - GetBiaya(data))}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
+              <p>BPP</p>
+              <p>{IDRFormat(data.c_bpp)}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
+              <p>Pelunasan</p>
+              <p>{IDRFormat(data.c_takeover)}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed font-bold text-green-500">
+              <p>Terima Bersih</p>
+              <p>
                 {IDRFormat(
-                  data.plafon -
-                    (GetBiaya(data) +
-                      data.c_takeover +
-                      data.c_blokir * data.angsuran),
+                  data.plafon - (GetBiaya(data) + data.c_bpp + data.c_takeover),
                 )}
-              </Descriptions.Item>
-            </Descriptions>
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -786,6 +828,7 @@ const ModalDetailPembiayaan = ({
           type="primary"
           icon={<PrinterOutlined />}
           onClick={handleDownloadImage}
+          size="small"
         >
           Cetak
         </Button>
@@ -813,6 +856,9 @@ interface ISimulasi {
   c_mutasi: number;
   c_blokir: number;
   c_takeover: number;
+  c_information: number;
+  c_provisi: number;
+  c_bpp: number;
   created_at: Date;
   angsuran: number;
   max_plafond: number;
@@ -838,6 +884,9 @@ const defaultData: ISimulasi = {
   c_mutasi: 0,
   c_blokir: 0,
   c_takeover: 0,
+  c_information: 0,
+  c_provisi: 0,
+  c_bpp: 0,
   angsuran: 0,
   max_plafond: 0,
   max_tenor: 0,
@@ -848,7 +897,16 @@ const defaultData: ISimulasi = {
 const GetBiaya = (data: ISimulasi) => {
   const adm = (data.plafon * data.c_adm) / 100;
   const asuransi = (data.plafon * data.c_insurance) / 100;
+  const blok = data.angsuran * data.c_blokir;
   return (
-    adm + asuransi + data.c_gov + data.c_account + data.c_stamp + data.c_mutasi
+    adm +
+    asuransi +
+    data.c_gov +
+    data.c_account +
+    data.c_stamp +
+    data.c_mutasi +
+    data.c_information +
+    data.c_provisi +
+    blok
   );
 };

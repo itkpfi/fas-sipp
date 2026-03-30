@@ -2,9 +2,14 @@
 
 import { FormInput } from "@/components";
 import { useUser } from "@/components/UserContext";
-import { FilterData } from "@/components/utils/CompUtils";
+import {
+  ExportToExcel,
+  FilterData,
+  MappingToTagihan,
+} from "@/components/utils/CompUtils";
 import {
   GetAngsuran,
+  GetSisaPokokMargin,
   IDRFormat,
   IDRToNumber,
 } from "@/components/utils/PembiayaanUtil";
@@ -20,11 +25,13 @@ import {
   CheckCircleOutlined,
   CloudUploadOutlined,
   DollarCircleOutlined,
+  DownloadOutlined,
   EditOutlined,
   FormOutlined,
   HistoryOutlined,
   MoneyCollectOutlined,
   PayCircleOutlined,
+  PrinterOutlined,
 } from "@ant-design/icons";
 import { Angsuran, ESettleStatus, Sumdan } from "@prisma/client";
 import {
@@ -74,6 +81,22 @@ export default function Page() {
   const { modal } = App.useApp();
   const { hasAccess } = useAccess("/tagihan");
   const user = useUser();
+  const [selecteds, setSelecteds] = useState<IDapem[]>([]);
+  const rowSelection: TableProps<IDapem>["rowSelection"] = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: IDapem[]) => {
+      if (selectedRows.length !== 0) {
+        const last = selectedRows[selectedRows.length - 1];
+        setSelecteds(
+          selectedRows.filter(
+            (s) =>
+              s.ProdukPembiayaan.sumdanId === last.ProdukPembiayaan.sumdanId,
+          ),
+        );
+      } else {
+        setSelecteds(selectedRows);
+      }
+    },
+  };
 
   useEffect(() => {
     (async () => {
@@ -129,7 +152,7 @@ export default function Page() {
         return (
           <div>
             <div>{(pageProps.page - 1) * pageProps.limit + index + 1}</div>
-            <div className="text-xs italic opacity-70">{record.id}</div>
+            <div className="text-xs opacity-80">{record.id}</div>
           </div>
         );
       },
@@ -142,7 +165,7 @@ export default function Page() {
         return (
           <div>
             <div>{record.Debitur.fullname}</div>
-            <div className="text-xs opacity-70">@{record.Debitur.nopen}</div>
+            <div className="text-xs opacity-80">@{record.Debitur.nopen}</div>
           </div>
         );
       },
@@ -173,7 +196,7 @@ export default function Page() {
         return (
           <div>
             <div>{record.no_contract}</div>
-            <div className="text-xs opacity-70">
+            <div className="text-xs opacity-80">
               {moment(record.date_contract).format("DD/MM/YYY")}
             </div>
           </div>
@@ -197,7 +220,7 @@ export default function Page() {
           record.tenor,
           record.c_margin_sumdan,
           record.margin_type,
-          record.rounded,
+          record.rounded_sumdan,
         ).angsuran;
         const find = record.Angsuran.find((f) =>
           moment(f.date_pay).isSame(pageProps.backdate || new Date(), "month"),
@@ -205,12 +228,32 @@ export default function Page() {
         return (
           <div className="flex flex-col gap-1">
             <div className="flex gap-1">
-              <Tag color={"blue"}>{IDRFormat(angssumdan)}</Tag>
               <Tag color={"blue"}>{IDRFormat(angs)}</Tag>
+              <Tag color={"blue"}>{IDRFormat(angssumdan)}</Tag>
             </div>
             <Tag color={"blue"} style={{ marginLeft: 2 }}>
               Ke {find ? find.counter : 0} |{" "}
               {IDRFormat(find ? find.remaining : 0)}
+            </Tag>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Pokok & margin",
+      dataIndex: "pm",
+      key: "pm",
+      render(value, record, index) {
+        const find = record.Angsuran.find((f) =>
+          moment(f.date_pay).isSame(pageProps.backdate || new Date(), "month"),
+        );
+        return (
+          <div className="flex flex-col gap-1">
+            <Tag color={"blue"} style={{ textAlign: "right" }}>
+              {IDRFormat(find ? find.principal : 0)}
+            </Tag>
+            <Tag color={"blue"} style={{ textAlign: "right" }}>
+              {IDRFormat(find ? find.margin : 0)}
             </Tag>
           </div>
         );
@@ -231,7 +274,7 @@ export default function Page() {
                 <Tag color={find.date_paid ? "green" : "red"} variant="solid">
                   {find.date_paid ? "PAID" : "UNPAID"}
                 </Tag>
-                <div className="italic text-xs opacity-70">
+                <div className="text-xs opacity-80">
                   <div>
                     <CalendarOutlined />{" "}
                     {moment(find.date_pay).format("DD/MM/YYYY")}
@@ -304,7 +347,7 @@ export default function Page() {
     await fetch("/api/tagihan", {
       method: "POST",
       body: JSON.stringify(
-        pageProps.data.flatMap((d) =>
+        selecteds.flatMap((d) =>
           d.Angsuran.find((f) =>
             moment(f.date_pay).isSame(
               pageProps.backdate || new Date(),
@@ -420,14 +463,35 @@ export default function Page() {
             }
           />
         </div>
-        <Input.Search
-          size="small"
-          style={{ width: 170 }}
-          placeholder="Cari nama..."
-          onChange={(e) =>
-            setPageProps({ ...pageProps, search: e.target.value })
-          }
-        />
+        <div className="flex gap-2 items-center">
+          <Button
+            icon={<PrinterOutlined />}
+            size="small"
+            type="primary"
+            onClick={() =>
+              ExportToExcel(
+                [
+                  {
+                    sheetname: "alldata",
+                    data: MappingToTagihan(pageProps.data, pageProps.backdate),
+                  },
+                ],
+                "monitoring",
+              )
+            }
+          >
+            Excel
+          </Button>
+          <Input.Search
+            size="small"
+            style={{ width: 170 }}
+            placeholder="Cari nama..."
+            onChange={(e) =>
+              setPageProps({ ...pageProps, search: e.target.value })
+            }
+            width={170}
+          />
+        </div>
       </div>
       <Table
         columns={columns}
@@ -437,6 +501,7 @@ export default function Page() {
         rowKey={"id"}
         bordered
         scroll={{ x: "max-content", y: "60vh" }}
+        rowSelection={rowSelection}
         pagination={{
           current: pageProps.page,
           pageSize: pageProps.limit,
@@ -471,10 +536,40 @@ export default function Page() {
                 curr.tenor,
                 curr.c_margin_sumdan,
                 curr.margin_type,
-                curr.rounded,
+                curr.rounded_sumdan,
               ).angsuran,
             0,
           );
+          const pokok = pageData
+            .flatMap((d) =>
+              d.Angsuran.find((a) =>
+                moment(a.date_pay).isSame(
+                  pageProps.backdate || new Date(),
+                  "month",
+                ),
+              ),
+            )
+            .reduce((acc, curr) => acc + (curr ? curr.principal : 0), 0);
+          const margin = pageData
+            .flatMap((d) =>
+              d.Angsuran.find((a) =>
+                moment(a.date_pay).isSame(
+                  pageProps.backdate || new Date(),
+                  "month",
+                ),
+              ),
+            )
+            .reduce((acc, curr) => acc + (curr ? curr.margin : 0), 0);
+          const os = pageData
+            .flatMap((d) =>
+              d.Angsuran.find((a) =>
+                moment(a.date_pay).isSame(
+                  pageProps.backdate || new Date(),
+                  "month",
+                ),
+              ),
+            )
+            .reduce((acc, curr) => acc + (curr ? curr.remaining : 0), 0);
           return (
             <Table.Summary.Row className="text-xs bg-blue-400">
               <Table.Summary.Cell index={0} colSpan={2} className="text-center">
@@ -492,7 +587,16 @@ export default function Page() {
                 className="text-center"
               ></Table.Summary.Cell>
               <Table.Summary.Cell index={5} className="text-center font-bold">
-                {IDRFormat(angsSumdan)} | {IDRFormat(angs)}
+                <div>
+                  {IDRFormat(angs)} - {IDRFormat(angsSumdan)}
+                </div>
+                <div className="border-t border-gray-500">
+                  {IDRFormat(angs - angsSumdan)}
+                </div>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={5} className="font-bold text-right">
+                <div>{IDRFormat(pokok)}</div>
+                <div>{IDRFormat(margin)}</div>
               </Table.Summary.Cell>
             </Table.Summary.Row>
           );
@@ -551,9 +655,7 @@ export default function Page() {
         onOk={handleProses}
         loading={loading}
       >
-        <p className="m-4">
-          Konfirmasi proses tagihan untuk data yg ditampilkan?
-        </p>
+        <p className="m-4">Konfirmasi proses tagihan untuk data yg dipilih?</p>
       </Modal>
     </Card>
   );
@@ -679,15 +781,9 @@ const CreatePelunasan = ({
 }) => {
   const [data, setData] = useState<IPelunasan>({
     id: "",
-    amount: rootrecord.Angsuran.filter((a) => a.date_paid !== null).sort(
-      (a, b) => b.counter - a.counter,
-    )[0].remaining,
+    amount: 0,
     amount_sumdan: 0,
-    penalty:
-      rootrecord.Angsuran.filter((a) => a.date_paid !== null).sort(
-        (a, b) => b.counter - a.counter,
-      )[0].remaining *
-      (5 / 100),
+    penalty: 0,
     type: "JATUHTEMPO",
     desc: "Permohonan pelunasan karna sudah jatuh tempo lunas",
     desc_sumdan: "",
@@ -733,7 +829,7 @@ const CreatePelunasan = ({
 
   return (
     <Modal
-      style={{ top: 30 }}
+      style={{ top: 10 }}
       title={"Permohonan Pelunasan " + rootrecord.id}
       open={open}
       onCancel={() => setOpen(false)}
@@ -765,6 +861,15 @@ const CreatePelunasan = ({
               required: true,
               disabled: true,
               value: data.Dapem?.no_contract,
+            }}
+          />
+          <FormInput
+            data={{
+              label: "Pembiayaan",
+              type: "text",
+              required: true,
+              disabled: true,
+              value: `${IDRFormat(data.Dapem.plafond || 0)} / ${data.Dapem.tenor || 0} Bulan`,
             }}
           />
           <FormInput
@@ -805,6 +910,14 @@ const CreatePelunasan = ({
           />
           <FormInput
             data={{
+              label: "Total",
+              type: "text",
+              disabled: true,
+              value: IDRFormat(data.penalty + data.amount),
+            }}
+          />
+          <FormInput
+            data={{
               label: "Keterangan",
               type: "textarea",
               required: true,
@@ -821,6 +934,7 @@ const CreatePelunasan = ({
               onChange: (e: string) => setData({ ...data, file_sub: e }),
             }}
           />
+
           {rootrecord.dropping_status === "PAID_OFF" ||
             (rootrecord.Pelunasan &&
               rootrecord.Pelunasan.status_paid !== "REJECTED" && (
@@ -832,7 +946,49 @@ const CreatePelunasan = ({
               ))}
         </div>
         <div className="flex-1">
-          <p className="my-2 font-bold text-lg">Table Angsuran</p>
+          <div className="flex flex-col gap-1 mb-1">
+            <FormInput
+              data={{
+                label: "Sisa Pokok",
+                type: "text",
+                disabled: true,
+                value: IDRFormat(GetSisaPokokMargin(rootrecord).principal),
+              }}
+            />
+            <FormInput
+              data={{
+                label: "Tunggakan",
+                type: "text",
+                disabled: true,
+                value: (() => {
+                  const val = GetSisaPokokMargin(rootrecord);
+                  return `(${val.prevcount}) P: ${IDRFormat(val.prevvalueprincipal)} | All: ${IDRFormat(val.prevvalueall)}`;
+                })(),
+              }}
+            />
+            <FormInput
+              data={{
+                label: "Penalty (5%)",
+                type: "text",
+                disabled: true,
+                value: IDRFormat(
+                  GetSisaPokokMargin(rootrecord).principal * (5 / 100),
+                ),
+              }}
+            />
+            <FormInput
+              data={{
+                label: "Est Total",
+                type: "text",
+                disabled: true,
+                value: (() => {
+                  const val = GetSisaPokokMargin(rootrecord);
+                  const penalty = val.principal * (5 / 100);
+                  return IDRFormat(val.principal + val.prevvalueall + penalty);
+                })(),
+              }}
+            />
+          </div>
           <Table
             columns={columnsangsuran}
             dataSource={rootrecord.Angsuran}
@@ -840,9 +996,8 @@ const CreatePelunasan = ({
             loading={loading}
             rowKey={"id"}
             bordered
-            scroll={{ x: "max-content", y: "50vh" }}
+            scroll={{ y: "30vh" }}
             pagination={{ pageSize: 12 }}
-            className="w-full"
           />
         </div>
       </div>
@@ -857,11 +1012,12 @@ const CekTagihan = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
-  const [msg, setMsg] = useState<string[]>([]);
+  const [msg, setMsg] = useState<{ name: string; value: string[] }[]>([]);
+  const [periode, setPeriode] = useState("");
 
   const props: UploadProps = {
     name: "file",
-    action: "/api/tagihan/cek",
+    action: `/api/tagihan/cek?periode=${periode}`,
     accept: ".xlsx,.xls",
     maxCount: 1,
 
@@ -874,14 +1030,32 @@ const CekTagihan = ({
         const res = info.file.response;
 
         if (res.status === 200) {
-          setMsg(res.msg || ["Internal server Error"]);
+          setMsg(res.data);
         } else {
-          setMsg(res.msg || ["Internal server Error"]);
+          setMsg([
+            {
+              name: "ERROR",
+              value: [
+                "Internal Server Error",
+                "Mohon cek file format tagihan terlebih dahulu!",
+                "Pastikan formatnya benar!",
+              ],
+            },
+          ]);
         }
       }
 
       if (info.file.status === "error") {
-        setMsg(["Upload gagal"]);
+        setMsg([
+          {
+            name: "ERROR",
+            value: [
+              "Internal Server Error",
+              "Mohon cek file format tagihan terlebih dahulu!",
+              "Pastikan formatnya benar!",
+            ],
+          },
+        ]);
       }
     },
   };
@@ -896,21 +1070,51 @@ const CekTagihan = ({
       style={{ top: 20 }}
     >
       <div className="min-h-32">
-        <div className="flex justify-between gap-5">
-          <span>Upload File Excel Tagihan</span>
-          <Upload {...props}>
-            <Button type="primary" icon={<CloudUploadOutlined />}>
+        <div className="my-1 flex gap-5 items-center">
+          <p className="w-52">Download Format</p>
+          <a href="/format_upload_tagihan.xlsx" download>
+            <Button type="primary" size="small" icon={<DownloadOutlined />}>
+              Download
+            </Button>
+          </a>
+        </div>
+        <div className="my-1 flex gap-5 items-center">
+          <p className="w-52">Periode Tagihan</p>
+          <DatePicker
+            picker="month"
+            onChange={(val, datestr) => setPeriode(datestr || "")}
+            size="small"
+          />
+        </div>
+        <div className="my-1 flex items-center gap-5">
+          <span className="w-52">Upload File</span>
+          <Upload {...props} disabled={!periode}>
+            <Button
+              type="primary"
+              icon={<CloudUploadOutlined />}
+              size="small"
+              disabled={!periode}
+            >
               Browse
             </Button>
           </Upload>
         </div>
         {msg.length > 0 && (
-          <div className="mt-4">
-            <Divider />
+          <div className="mt-4 text-xs">
+            <Divider style={{ marginTop: 5, marginBottom: 5 }} />
             <p className="font-bold mb-2">Hasil Cek Tagihan:</p>
-            <ul className="list-disc list-inside">
+            <ul className="list-decimal list-inside">
               {msg.map((m, i) => (
-                <li key={i}>{m}</li>
+                <li key={i} className="flex gap-2">
+                  <p className="w-52">{m.name}</p>
+                  <p className="w-5">:</p>
+                  <div className="flex-1">
+                    <ul className="list-disc list-inside">
+                      {m.value.length !== 0 &&
+                        m.value.map((mc, ind) => <li key={ind}>{mc}</li>)}
+                    </ul>
+                  </div>
+                </li>
               ))}
             </ul>
           </div>
@@ -926,11 +1130,13 @@ const columnsangsuran: TableProps<Angsuran>["columns"] = [
     dataIndex: "counter",
     key: "counter",
     width: 70,
+    className: "text-xs",
   },
   {
     title: "Jadwal Bayar",
     dataIndex: "date_pay",
     key: "datepay",
+    className: "text-xs",
     render(value, record, index) {
       return <>{moment(value).format("DD/MM/YYYY")}</>;
     },
@@ -939,6 +1145,7 @@ const columnsangsuran: TableProps<Angsuran>["columns"] = [
     title: "Pokok",
     dataIndex: "principal",
     key: "principal",
+    className: "text-xs",
     render(value, record, index) {
       return <>{IDRFormat(value)}</>;
     },
@@ -947,6 +1154,7 @@ const columnsangsuran: TableProps<Angsuran>["columns"] = [
     title: "Margin",
     dataIndex: "margin",
     key: "margin",
+    className: "text-xs",
     render(value, record, index) {
       return <>{IDRFormat(value)}</>;
     },
@@ -955,6 +1163,7 @@ const columnsangsuran: TableProps<Angsuran>["columns"] = [
     title: "Tanggal Bayar",
     dataIndex: "date_paid",
     key: "datepaid",
+    className: "text-xs",
     render(value, record, index) {
       return <>{value && moment(value).format("DD/MM/YYYY")}</>;
     },
@@ -963,6 +1172,7 @@ const columnsangsuran: TableProps<Angsuran>["columns"] = [
     title: "Sisa Pokok",
     dataIndex: "remaining",
     key: "remaining",
+    className: "text-xs",
     render(value, record, index) {
       return <>{IDRFormat(value)}</>;
     },

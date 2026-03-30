@@ -55,15 +55,22 @@ export const ViewFiles = ({
     children: (
       <div style={{ width: "100%", height: "76vh" }}>
         {d.url ? (
-          <iframe
-            width={"100%"}
-            height={"100%"}
-            src={
-              d.name.toLocaleLowerCase().includes("video")
-                ? d.url
-                : `/api/upload?url=${encodeURIComponent(d.url)}`
-            }
-          />
+          <>
+            {d.url.toLowerCase().endsWith(".pdf") ? (
+              <iframe src={d.url} width="100%" height="100%" />
+            ) : (
+              <video
+                src={d.url}
+                controls
+                playsInline
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                }}
+              />
+            )}
+          </>
         ) : (
           <div className="flex justify-center items-center h-full">
             <span className="text-gray-500 italic">
@@ -103,15 +110,22 @@ export const TabsFiles = ({
     children: (
       <div style={{ width: "100%", height: "73vh" }}>
         {d.url ? (
-          <iframe
-            width={"100%"}
-            height={"100%"}
-            src={
-              d.name.toLocaleLowerCase().includes("video")
-                ? d.url
-                : `/api/upload?url=${encodeURIComponent(d.url)}`
-            }
-          />
+          <>
+            {d.url.toLowerCase().endsWith(".pdf") ? (
+              <iframe src={d.url} width="100%" height="100%" />
+            ) : (
+              <video
+                src={d.url}
+                controls
+                playsInline
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                }}
+              />
+            )}
+          </>
         ) : (
           <div className="flex justify-center items-center h-full">
             <span className="text-gray-500 italic">
@@ -199,7 +213,7 @@ export const DetailDapem = ({
     data.tenor,
     data.c_margin_sumdan,
     data.margin_type,
-    data.rounded,
+    data.rounded_sumdan,
   ).angsuran;
 
   return (
@@ -581,12 +595,12 @@ export const DetailDapem = ({
               />
               <FormInput
                 data={{
-                  label: "Alamat",
+                  label: "Nomor Telepon",
                   mode: "vertical",
-                  type: "textarea",
+                  type: "text",
                   class: "flex-1",
                   disabled: true,
-                  value: `${data.address}`,
+                  value: data.aw_phone,
                 }}
               />
               <FormInput
@@ -597,6 +611,16 @@ export const DetailDapem = ({
                   class: "flex-1",
                   disabled: true,
                   value: data.aw_relate,
+                }}
+              />
+              <FormInput
+                data={{
+                  label: "Alamat",
+                  mode: "vertical",
+                  type: "textarea",
+                  class: "flex-1",
+                  disabled: true,
+                  value: `${data.aw_address}`,
                 }}
               />
             </div>
@@ -624,22 +648,22 @@ export const DetailDapem = ({
               />
               <FormInput
                 data={{
-                  label: "Alamat",
-                  mode: "vertical",
-                  type: "textarea",
-                  class: "flex-1",
-                  disabled: true,
-                  value: data.f_address,
-                }}
-              />
-              <FormInput
-                data={{
                   label: "Hubungan",
                   mode: "vertical",
                   type: "text",
                   class: "flex-1",
                   disabled: true,
                   value: data.f_relate,
+                }}
+              />
+              <FormInput
+                data={{
+                  label: "Alamat",
+                  mode: "vertical",
+                  type: "textarea",
+                  class: "flex-1",
+                  disabled: true,
+                  value: data.f_address,
                 }}
               />
             </div>
@@ -697,6 +721,16 @@ export const DetailDapem = ({
                 class: "flex-1",
                 disabled: true,
                 value: moment(data.Debitur.tmt_skep).format("DD-MM-YYYY"),
+              }}
+            />
+            <FormInput
+              data={{
+                label: "Penerbit SKEP",
+                mode: "vertical",
+                type: "text",
+                class: "flex-1",
+                disabled: true,
+                value: data.Debitur.publisher_skep,
               }}
             />
             <FormInput
@@ -881,7 +915,7 @@ export const DetailDapem = ({
                 <div className="w-[40%]"></div>
                 <div className="w-[5%]">:</div>
                 <div className="flex-1 justify-end text-xs">
-                  Mitra {data.c_margin_sumdan}% | Selisih {data.c_margin}%
+                  Mitra: {data.c_margin_sumdan}% |: Selisih {data.c_margin}%
                 </div>
               </div>
               <div className="my-1 flex">
@@ -969,10 +1003,33 @@ export const DetailDapem = ({
                 </div>
               </div>
               <div className="my-1 flex border-b border-dashed">
+                <div className="w-[40%]">Provisi</div>
+                <div className="w-[5%]">:</div>
+                <div className="flex-1 justify-end text-right">
+                  {IDRFormat(data.c_provisi)}
+                </div>
+              </div>
+              <div className="my-1 flex border-b border-dashed">
+                <div className="w-[40%]">Data Informasi</div>
+                <div className="w-[5%]">:</div>
+                <div className="flex-1 justify-end text-right">
+                  {IDRFormat(data.c_infomation)}
+                </div>
+              </div>
+              <div className="my-1 flex border-b border-dashed">
                 <div className="w-[40%]">Mutasi</div>
                 <div className="w-[5%]">:</div>
                 <div className="flex-1 justify-end text-right">
                   {IDRFormat(data.c_mutasi)}
+                </div>
+              </div>
+              <div className="my-1 flex border-b border-dashed">
+                <div className="w-[40%]">
+                  Blokir Angsuran ({data.c_blokir}x)
+                </div>
+                <div className="w-[5%]">:</div>
+                <div className="flex-1 justify-end text-right">
+                  {IDRFormat(angsRound * data.c_blokir)}
                 </div>
               </div>
               <div className="my-1 flex border-b border-dashed text-red-500 font-bold mt-2">
@@ -990,10 +1047,10 @@ export const DetailDapem = ({
                 </div>
               </div>
               <div className="my-1 flex border-b border-dashed">
-                <div className="w-[40%]">Blokir Angsuran {data.c_blokir}x</div>
+                <div className="w-[40%]">Bpp</div>
                 <div className="w-[5%]">:</div>
                 <div className="flex-1 justify-end text-right">
-                  {IDRFormat(data.c_blokir * angsRound)}
+                  {IDRFormat(data.c_bpp)}
                 </div>
               </div>
               <div className="my-1 flex border-b border-dashed">
@@ -1009,9 +1066,7 @@ export const DetailDapem = ({
                 <div className="flex-1 justify-end text-right">
                   {IDRFormat(
                     data.plafond -
-                      (GetBiaya(data) +
-                        data.c_takeover +
-                        data.c_blokir * angsRound),
+                      (GetBiaya(data) + data.c_takeover + data.c_bpp),
                   )}
                 </div>
               </div>
@@ -1074,6 +1129,7 @@ export const DetailDapem = ({
                 { name: "WAWANCARA", url: data.video_interview || "" },
                 { name: "ASURANSI", url: data.video_insurance || "" },
                 { name: "AKAD", url: data.file_contract || "" },
+                { name: "PROSES", url: data.file_proses || "" },
               ],
             }}
             allowprogres={allowprogres}

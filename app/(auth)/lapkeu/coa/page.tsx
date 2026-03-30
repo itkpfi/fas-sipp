@@ -81,7 +81,7 @@ export default function Page() {
         return (
           <div>
             <div>{(pageProps.page - 1) * pageProps.limit + index + 1}</div>
-            <div className="opacity-70 text-xs italic">{record.id}</div>
+            <div className="opacity-80 text-xs">{record.id}</div>
           </div>
         );
       },
@@ -237,6 +237,18 @@ export default function Page() {
         key={selected.selected ? "upsert" + selected.selected.id : "create"}
         lists={pageProps.data.filter((d) => !d.parentId)}
       />
+      {selected.selected && (
+        <DeleteData
+          open={selected.delete}
+          setOpen={(val: boolean) =>
+            setSelected({ ...selected, delete: val, selected: undefined })
+          }
+          record={selected.selected}
+          getData={getData}
+          hook={modal}
+          key={selected.selected ? "delete" + selected.selected.id : "delete"}
+        />
+      )}
     </Card>
   );
 }
@@ -325,7 +337,7 @@ const UpsertData = ({
           data={{
             label: "Parent Akun",
             value: data.parentId,
-            onChange: (e: string) => setData({ ...data, parentId: e }),
+            onChange: (e: any) => setData({ ...data, parentId: e ? e : null }),
             type: "select",
             options: lists.map((d) => ({
               label: `(${TypeAccount(d)}-${d.id}) ${d.name}`,
@@ -334,6 +346,57 @@ const UpsertData = ({
           }}
         />
       </div>
+    </Modal>
+  );
+};
+
+const DeleteData = ({
+  open,
+  setOpen,
+  record,
+  getData,
+  hook,
+}: {
+  open: boolean;
+  setOpen: Function;
+  record: CategoryOfAccount;
+  getData: Function;
+  hook: HookAPI;
+}) => {
+  const [loading, setLoading] = useState(false);
+  const handleDelete = async () => {
+    setLoading(true);
+    await fetch("/api/coa?id=" + record.id, { method: "DELETE" })
+      .then((res) => res.json())
+      .then(async (res) => {
+        const { msg, status } = res;
+        if (status === 200) {
+          await getData();
+          setOpen(false);
+        } else {
+          hook.error({ content: msg });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        hook.error({
+          content: `Internal Server Error!!. Hapus data COA ${record.id}) gagal`,
+        });
+      });
+    setLoading(false);
+  };
+
+  return (
+    <Modal
+      open={open}
+      onCancel={() => setOpen(false)}
+      title="Konfirmasi Hapus"
+      loading={loading}
+      onOk={handleDelete}
+    >
+      <p className="my-3">
+        Konfirmasi penghapusan COA {record.name} ({record.id})?
+      </p>
     </Modal>
   );
 };

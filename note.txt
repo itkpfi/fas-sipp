@@ -1,21 +1,3 @@
--> Cek Tagihan                        [x]
--> Laporan Keuangan                   [x]
--> Print Form                         [x]
--> Perubahan Akad Menambah Fee Banpot [x] 5% dari angsuran
--> Laporan Rugilaba versi Akunting dan Koperasi [v]
--> Cetak Pelunasan                    [v]
-
-
-ALUR INPUT JURNAL
-CONTOH 10.000.000
-
-Hutang Channelling    [CR] 10.000.000
-Piutang Challing      [DR] 200.000
-KAS (Giro BRI)        [DR] 9.800.000
-
-Piutang Channeling    [DR] 9.800.000
-ADM Koperasi          [CR] 300.000
-KAS                   [CR] 9.500.000
-
-HASIL Balance KAS 300.000
-Pendapatan        300.000
+- PK & SI sesuaikan sumdan KOPJAS FAS   [x]
+- Angsuran Sumdan by sumdan_rounded     [x]
+- Rp pada berkas generate

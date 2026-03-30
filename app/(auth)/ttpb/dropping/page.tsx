@@ -149,11 +149,11 @@ export default function Page() {
         return (
           <div>
             <div>
-              <span className="italic text-xs opacity-70">Plafond:</span>{" "}
+              <span className="text-xs opacity-80">Plafond:</span>{" "}
               <Tag color={"blue"}>{IDRFormat(total)}</Tag>
             </div>
             <div>
-              <span className="italic text-xs opacity-70">Angsuran:</span>{" "}
+              <span className="text-xs opacity-80">Angsuran:</span>{" "}
               <Tag color={"blue"}>{IDRFormat(angsuran)}</Tag>
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function Page() {
       key: "status",
       width: 180,
       render: (_, record, i) => (
-        <div className="">
+        <div className="flex gap-2">
           <Tag
             color={
               record.status === "MITRA"
@@ -179,7 +179,7 @@ export default function Page() {
           >
             {record.status}
           </Tag>
-          <span className="text-xs italic opacity-70">
+          <span className="text-xs opacity-80">
             {record.process_at
               ? moment(record.process_at).format("DD-MM-YYYY HH:mm")
               : ""}
@@ -663,7 +663,7 @@ const TableDapem = ({ data }: { data: IDapem[] }) => {
         return (
           <div>
             <div>{record.Debitur.fullname}</div>
-            <div className="opacity-70">@{record.nopen}</div>
+            <div className="opacity-80 text-xs">@{record.nopen}</div>
           </div>
         );
       },
@@ -676,7 +676,9 @@ const TableDapem = ({ data }: { data: IDapem[] }) => {
         return (
           <div>
             <div>{record.ProdukPembiayaan.name}</div>
-            <div className="opacity-70">{record.JenisPembiayaan.name}</div>
+            <div className="opacity-80 text-xs">
+              {record.JenisPembiayaan.name}
+            </div>
           </div>
         );
       },
@@ -700,7 +702,7 @@ const TableDapem = ({ data }: { data: IDapem[] }) => {
       dataIndex: "tgl",
       render(value, record, index) {
         return (
-          <div className="text-xs italic opacity-70">
+          <div className="text-xs italic opacity-80">
             <div>Akad {moment(record.date_contract).format("DD/MM/YYYY")}</div>
             <div>
               Realisai{" "}

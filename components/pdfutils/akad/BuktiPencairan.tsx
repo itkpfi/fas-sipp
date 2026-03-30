@@ -20,75 +20,118 @@ export const BuktiPencairan = (record: IDapem, isFor: string) => {
     record.c_gov +
     record.c_account +
     record.c_stamp +
-    record.c_mutasi;
+    record.c_infomation +
+    blokir +
+    record.c_mutasi +
+    record.c_provisi;
 
   return `
   ${Header("BUKTI PENCAIRAN PEMBIAYAAN", isFor, record.no_contract, process.env.NEXT_PUBLIC_APP_LOGO, record.ProdukPembiayaan.Sumdan.logo)}
   
   <div class="border-b mt-8">
     <div class="flex gap-2">
-      <p class="w-52">Nama Penerima</p>
+      <p class="w-44">Nama Penerima</p>
       <p class="w-4">:</p>
       <p class="flex-1">${record.Debitur.fullname}</p>
     </div>
     <div class="flex gap-2">
-      <p class="w-52">Nomor NIK</p>
+      <p class="w-44">Nomor NIK</p>
       <p class="w-4">:</p>
       <p class="flex-1">${record.Debitur.nik}</p>
     </div>
     <div class="flex gap-2">
-      <p class="w-52">Tempat/Tanggal Lahir</p>
+      <p class="w-44">Tempat/Tanggal Lahir</p>
       <p class="w-4">:</p>
       <p class="flex-1">${record.Debitur.birthplace}, ${moment(record.Debitur.birthdate).format("DD-MM-YYYY")}</p>
     </div>
     <div class="flex gap-2">
-      <p class="w-52">Pekerjaan</p>
+      <p class="w-44">Pekerjaan</p>
       <p class="w-4">:</p>
       <p class="flex-1">${record.job}</p>
     </div>
     <div class="flex gap-2">
-      <p class="w-52">No Telepon</p>
+      <p class="w-44">No Telepon</p>
       <p class="w-4">:</p>
       <p class="flex-1">${record.Debitur.phone}</p>
     </div>
     <div class="flex gap-2">
-      <p class="w-52">NIP / NRP / NOPEN</p>
+      <p class="w-44">NIP / NRP / NOPEN</p>
       <p class="w-4">:</p>
       <p class="flex-1">${record.Debitur.nopen}</p>
     </div>
     <div class="flex gap-2">
-      <p class="w-52">Alamat</p>
+      <p class="w-44">Alamat</p>
       <p class="w-4">:</p>
       <p class="flex-1">${record.Debitur.address}, KELURAHAN ${record.Debitur.ward} KECAMATAN ${record.Debitur.district}, ${record.Debitur.city} ${record.Debitur.province} ${record.Debitur.pos_code}</p>
     </div>
   </div>
   <div class="mt-5 mb-5">
     ${ListNonStyle([
-      { key: "Plafond Pembiayaan", value: IDRFormat(record.plafond) },
+      {
+        key: "Plafond Pembiayaan",
+        value: IDRFormat(record.plafond),
+        currency: true,
+      },
       { key: "Jangka Waktu/Tenor", value: `${record.tenor} Bulan` },
       {
         key: "Bunga",
         value: `${(record.c_margin + record.c_margin_sumdan).toFixed(2)}% /Tahun`,
       },
-      { key: "Angsuran", value: IDRFormat(angsuran) },
+      { key: "Angsuran", value: IDRFormat(angsuran), currency: true },
     ])}
   </div>
 
   <div>
-    <p>RINCIAN PEMBIAYAAN</p>
+    <p class="font-bold">Rincian Pembiayaan</p>
     <div class="flex gap-10 items-end">
       <div class="flex-1">
         ${ListNonStyle([
-          { key: "Biaya Administrasi", value: IDRFormat(admin) },
-          { key: "Biaya Asuransi", value: IDRFormat(asuransi) },
-          { key: "Biaya Tatalaksana", value: IDRFormat(record.c_gov) },
-          { key: "Biaya Buka Rekening", value: IDRFormat(record.c_account) },
-          { key: "Biaya Materai", value: IDRFormat(record.c_stamp) },
-          { key: "Biaya Mutasi", value: IDRFormat(record.c_mutasi) },
           {
-            key: "TOTAL BIAYA",
+            key: "Biaya Administrasi",
+            value: IDRFormat(admin),
+            currency: true,
+          },
+          { key: "Biaya Asuransi", value: IDRFormat(asuransi), currency: true },
+          {
+            key: "Biaya Tatalaksana",
+            value: IDRFormat(record.c_gov),
+            currency: true,
+          },
+          {
+            key: "Biaya Buka Rekening",
+            value: IDRFormat(record.c_account),
+            currency: true,
+          },
+          {
+            key: "Biaya Materai",
+            value: IDRFormat(record.c_stamp),
+            currency: true,
+          },
+          {
+            key: "Biaya Provisi",
+            value: IDRFormat(record.c_provisi),
+            currency: true,
+          },
+          {
+            key: "Biaya Data Informasi",
+            value: IDRFormat(record.c_infomation),
+            currency: true,
+          },
+          {
+            key: "Biaya Mutasi",
+            value: IDRFormat(record.c_mutasi),
+            currency: true,
+          },
+          {
+            key: `Blokir Angsuran (${record.c_blokir}x)`,
+            value: IDRFormat(blokir),
+            currency: true,
+          },
+          {
+            key: "Total Biaya",
             value: IDRFormat(biaya),
-            classStyle: "font-bold text-red-500 border-t border-dashed",
+            classStyle: "font-bold border-t border-dashed",
+            currency: true,
           },
         ])}
       </div>
@@ -98,18 +141,25 @@ export const BuktiPencairan = (record: IDapem, isFor: string) => {
           key: "Terima Kotor",
           value: IDRFormat(record.plafond - biaya),
           classStyle: "font-bold",
+          currency: true,
         },
         {
-          key: `Blokir Angsuran ${record.c_blokir}x`,
-          value: IDRFormat(blokir),
+          key: `Bpp`,
+          value: IDRFormat(record.c_bpp),
+          currency: true,
         },
-        { key: "Nominal Takeover", value: IDRFormat(record.c_takeover) },
         {
-          key: "TERIMA BERSIH",
+          key: "Nominal Takeover",
+          value: IDRFormat(record.c_takeover),
+          currency: true,
+        },
+        {
+          key: "Terima Bersih",
           value: IDRFormat(
-            record.plafond - (biaya + blokir + record.c_takeover),
+            record.plafond - (biaya + record.c_takeover + record.c_bpp),
           ),
-          classStyle: "font-bold text-green-500 border-t border-dashed",
+          classStyle: "font-bold border-t border-dashed",
+          currency: true,
         },
       ])}
       </div>

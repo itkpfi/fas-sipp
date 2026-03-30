@@ -107,7 +107,7 @@ export default function Page() {
         return (
           <div>
             <div>{(pageProps.page - 1) * pageProps.limit + index + 1}</div>
-            <div className="opacity-70 text-xs italic">{record.id}</div>
+            <div className="opacity-80 text-xs">{record.id}</div>
           </div>
         );
       },
@@ -169,6 +169,9 @@ export default function Page() {
                 type="primary"
                 danger
                 size="small"
+                onClick={() =>
+                  setAction({ ...action, delete: true, selected: record })
+                }
               ></Button>
             )}
           </div>
@@ -262,6 +265,16 @@ export default function Page() {
         akuns={akuns}
         hook={modal}
       />
+      {action.selected && (
+        <DeleteData
+          open={action.delete}
+          setOpen={(val: boolean) => setAction({ ...action, delete: val })}
+          getData={getData}
+          record={action.selected}
+          key={action.selected ? "delete" + action.selected.id : "del"}
+          hook={modal}
+        />
+      )}
     </Card>
   );
 }
@@ -474,7 +487,27 @@ const UpsertData = ({
                   )}
                 </div>
               </div>
-              <div className="w-56"></div>
+              <div className="w-56">
+                {(() => {
+                  const debit = data.JournalDetail.reduce(
+                    (acc, curr) => acc + curr.debit,
+                    0,
+                  );
+                  const credit = data.JournalDetail.reduce(
+                    (acc, curr) => acc + curr.credit,
+                    0,
+                  );
+                  return (
+                    <>
+                      {debit !== credit && (
+                        <span className="text-red-600">
+                          Selisih {IDRFormat(debit - credit)}
+                        </span>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
               <div className="w-56"></div>
             </div>
             <Button
@@ -565,6 +598,57 @@ const ListJournalDetail = ({ records }: { records: IJournalEntry }) => {
         bordered
       />
     </div>
+  );
+};
+
+const DeleteData = ({
+  open,
+  setOpen,
+  record,
+  getData,
+  hook,
+}: {
+  open: boolean;
+  setOpen: Function;
+  record: IJournalEntry;
+  getData: Function;
+  hook: HookAPI;
+}) => {
+  const [loading, setLoading] = useState(false);
+  const handleDelete = async () => {
+    setLoading(true);
+    await fetch("/api/journal?id=" + record.id, { method: "DELETE" })
+      .then((res) => res.json())
+      .then(async (res) => {
+        const { msg, status } = res;
+        if (status === 200) {
+          await getData();
+          setOpen(false);
+        } else {
+          hook.error({ content: msg });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        hook.error({
+          content: `Internal Server Error!!. Hapus data COA ${record.id}) gagal`,
+        });
+      });
+    setLoading(false);
+  };
+
+  return (
+    <Modal
+      open={open}
+      onCancel={() => setOpen(false)}
+      title="Konfirmasi Hapus"
+      loading={loading}
+      onOk={handleDelete}
+    >
+      <p className="my-3">
+        Konfirmasi penghapusan Transaksi ini *{record.id}*?
+      </p>
+    </Modal>
   );
 };
 

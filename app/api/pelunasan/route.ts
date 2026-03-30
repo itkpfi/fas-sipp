@@ -58,7 +58,13 @@ export const GET = async (req: NextRequest) => {
           lte: moment(backdate.split(",")[1]).toDate(),
         },
       }),
-      ...(user.sumdanId && { sumdanId: user.sumdanId }),
+      ...(user.sumdanId && {
+        Dapem: {
+          ProdukPembiayaan: {
+            sumdanId: user.sumdanId,
+          },
+        },
+      }),
     },
     skip: skip,
     take: parseInt(limit),
@@ -128,7 +134,13 @@ export const GET = async (req: NextRequest) => {
           lte: moment(backdate.split(",")[1]).toDate(),
         },
       }),
-      ...(user.sumdanId && { sumdanId: user.sumdanId }),
+      ...(user.sumdanId && {
+        Dapem: {
+          ProdukPembiayaan: {
+            sumdanId: user.sumdanId,
+          },
+        },
+      }),
     },
   });
 
