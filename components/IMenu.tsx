@@ -24,6 +24,7 @@ import {
   SnippetsOutlined,
   TeamOutlined,
   TransactionOutlined,
+  WalletOutlined,
 } from "@ant-design/icons";
 
 export interface IMenu {
@@ -176,6 +177,26 @@ export const listMenuUI: IMenuType[] = [
     key: "/pelunasan",
     icon: <MoneyCollectOutlined />,
     needaccess: true,
+  },
+  {
+    label: "Pinjaman Karyawan",
+    key: "/pinkar",
+    icon: <WalletOutlined />,
+    needaccess: true,
+    children: [
+      {
+        label: "Simulasi Pinkar",
+        key: "/pinkar/simulasi",
+        icon: <CalculatorOutlined />,
+        needaccess: true,
+      },
+      {
+        label: "Pemberkasan Pinkar",
+        key: "/pinkar/pemberkasan",
+        icon: <FolderOpenOutlined />,
+        needaccess: true,
+      },
+    ],
   },
   {
     label: "Laporan Keuangan",
@@ -338,6 +359,14 @@ export const listMenuServer: { key: string; needaccess: boolean }[] = [
   },
   {
     key: "/pelunasan",
+    needaccess: true,
+  },
+  {
+    key: "/pinkar/simulasi",
+    needaccess: true,
+  },
+  {
+    key: "/pinkar/pemberkasan",
     needaccess: true,
   },
   {

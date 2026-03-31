@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `angsuran` ADD COLUMN `fee_banpot` INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN `inst_sumdan` INTEGER NOT NULL DEFAULT 0;

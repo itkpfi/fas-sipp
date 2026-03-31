@@ -1,0 +1,136 @@
+.sidebar {
+  background: linear-gradient(180deg, #f0f5f3 0%, #f8fafb 100%) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+.sidebar :global(.ant-layout-sider-children) {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Menu base */
+.sidebarMenu {
+  background: transparent !important;
+  border-inline-end: none !important;
+  padding: 4px 6px !important;
+  font-size: 13px !important;
+}
+
+/* Menu items */
+.sidebarMenu :global(.ant-menu-item) {
+  border-radius: 8px !important;
+  margin: 2px 0 !important;
+  height: 38px !important;
+  line-height: 38px !important;
+  transition: all 0.25s ease !important;
+  color: #4a5568 !important;
+}
+
+.sidebarMenu :global(.ant-menu-item):hover {
+  background: rgba(26, 127, 90, 0.06) !important;
+  color: #1a7f5a !important;
+}
+
+/* Active menu item */
+.sidebarMenu :global(.ant-menu-item-selected) {
+  background: rgba(26, 127, 90, 0.1) !important;
+  color: #1a7f5a !important;
+  font-weight: 600 !important;
+  position: relative !important;
+}
+
+.sidebarMenu :global(.ant-menu-item-selected)::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3.5px;
+  height: 55%;
+  background: linear-gradient(180deg, #1a7f5a, #2d9b6e);
+  border-radius: 0 4px 4px 0;
+}
+
+/* Submenu title */
+.sidebarMenu :global(.ant-menu-submenu-title) {
+  border-radius: 8px !important;
+  margin: 2px 0 !important;
+  height: 38px !important;
+  line-height: 38px !important;
+  color: #4a5568 !important;
+  transition: all 0.25s ease !important;
+}
+
+.sidebarMenu :global(.ant-menu-submenu-title):hover {
+  background: rgba(26, 127, 90, 0.06) !important;
+  color: #1a7f5a !important;
+}
+
+/* Active/open submenu title */
+.sidebarMenu :global(.ant-menu-submenu-selected) > :global(.ant-menu-submenu-title) {
+  color: #1a7f5a !important;
+  font-weight: 600 !important;
+}
+
+/* Submenu children */
+.sidebarMenu :global(.ant-menu-sub.ant-menu-inline) {
+  background: transparent !important;
+}
+
+.sidebarMenu :global(.ant-menu-sub) :global(.ant-menu-item) {
+  font-size: 12.5px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+}
+
+/* Menu icons */
+.sidebarMenu :global(.ant-menu-item) :global(.anticon),
+.sidebarMenu :global(.ant-menu-submenu-title) :global(.anticon) {
+  font-size: 15px !important;
+  min-width: 18px;
+  transition: transform 0.2s ease;
+}
+
+.sidebarMenu :global(.ant-menu-item):hover :global(.anticon),
+.sidebarMenu :global(.ant-menu-submenu-title):hover :global(.anticon) {
+  transform: scale(1.1);
+}
+
+/* Submenu expand arrow */
+.sidebarMenu :global(.ant-menu-submenu-arrow) {
+  color: #a0aec0 !important;
+  transition: color 0.2s ease !important;
+}
+
+.sidebarMenu :global(.ant-menu-submenu-selected) > :global(.ant-menu-submenu-title) > :global(.ant-menu-submenu-arrow),
+.sidebarMenu :global(.ant-menu-submenu-title):hover > :global(.ant-menu-submenu-arrow) {
+  color: #1a7f5a !important;
+}
+
+/* Custom scrollbar */
+.sidebarMenu::-webkit-scrollbar {
+  width: 3px;
+}
+
+.sidebarMenu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebarMenu::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.sidebarMenu::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Collapsed mode */
+.sidebarMenuCollapsed :global(.ant-menu-item) {
+  text-align: center;
+  border-radius: 8px !important;
+}
+
+.sidebarMenuCollapsed :global(.ant-menu-item) :global(.anticon) {
+  font-size: 18px !important;
+}

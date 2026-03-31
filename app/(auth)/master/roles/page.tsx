@@ -313,6 +313,24 @@ export function UpsertRole({
     setLoading(false);
   };
 
+  const allAccessOptions = ["read", "write", "update", "delete", "proses"];
+
+  const isAllGlobalChecked = menus.every(
+    (m) => allAccessOptions.every((a) => m.access.includes(a))
+  );
+  const isSomeGlobalChecked = !isAllGlobalChecked && menus.some(
+    (m) => m.access.length > 0
+  );
+
+  const handleToggleAll = (checked: boolean) => {
+    setMenus((prev: IPermission[]) =>
+      prev.map((p) => ({
+        ...p,
+        access: checked ? [...allAccessOptions] : [],
+      }))
+    );
+  };
+
   const columns: TableProps<IPermission>["columns"] = [
     {
       title: "Menu",
@@ -333,7 +351,19 @@ export function UpsertRole({
       },
     },
     {
-      title: "Access",
+      title: (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <span>Access</span>
+          <Checkbox
+            checked={isAllGlobalChecked}
+            indeterminate={isSomeGlobalChecked}
+            onChange={(e) => handleToggleAll(e.target.checked)}
+            style={{ marginLeft: 4 }}
+          >
+            <span style={{ fontSize: 11 }}>Semua</span>
+          </Checkbox>
+        </div>
+      ),
       dataIndex: "access",
       key: "access",
       width: 200,
@@ -347,24 +377,49 @@ export function UpsertRole({
         };
       },
       render(value, record, index) {
+        const isAllChecked = allAccessOptions.every((a) =>
+          record.access.includes(a)
+        );
+        const isSomeChecked =
+          !isAllChecked && record.access.length > 0;
+
         return (
-          <>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <div>
+              <Checkbox
+                checked={isAllChecked}
+                indeterminate={isSomeChecked}
+                onChange={(e) => {
+                  const newAccess = e.target.checked
+                    ? [...allAccessOptions]
+                    : [];
+                  setMenus((prev: IPermission[]) =>
+                    prev.map((p) =>
+                      p.path === record.path
+                        ? { ...p, access: newAccess }
+                        : p
+                    )
+                  );
+                }}
+                style={{ fontWeight: 600, fontSize: 11 }}
+              >
+                Pilih Semua
+              </Checkbox>
+            </div>
             <Checkbox.Group
-              options={["read", "write", "update", "delete", "proses"]}
+              options={allAccessOptions}
               value={record.access}
               onChange={(e) => {
-                setMenus((prev: IPermission[]) => {
-                  const filter = prev.map((p) => {
-                    if (p.path === record.path) {
-                      p.access = e;
-                    }
-                    return p;
-                  });
-                  return filter;
-                });
+                setMenus((prev: IPermission[]) =>
+                  prev.map((p) =>
+                    p.path === record.path
+                      ? { ...p, access: e }
+                      : p
+                  )
+                );
               }}
             />
-          </>
+          </div>
         );
       },
     },

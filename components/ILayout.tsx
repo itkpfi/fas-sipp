@@ -95,37 +95,109 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
         theme="light"
       >
         <div
-          className="flex gap-3 bg-linear-to-br from-green-500 to-gray-500 rounded p-2"
           style={{
-            margin: 3,
-            color: "rgba(255, 255, 255, 0.85)",
+            margin: 6,
+            padding: 14,
+            borderRadius: 12,
+            background: "linear-gradient(135deg, #1a7f5a 0%, #2d9b6e 40%, #3a7bd5 100%)",
+            color: "#fff",
+            boxShadow: "0 4px 15px rgba(26, 127, 90, 0.35)",
+            position: "relative",
+            overflow: "hidden",
             ...(collapsed ? { display: "none" } : { display: "flex" }),
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 8,
           }}
         >
-          <img
-            src="https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg"
-            alt="profile_picture"
-            className="w-18 h-18 rounded-full border-2 border-white overflow-hidden"
-          />
-          <div className="flex-1">
-            <div style={{ lineHeight: 1 }}>
-              <div className="font-bold">{user?.fullname}</div>
-              <div className="opacity-60 text-xs">
-                <div>@{user?.username}</div>
-                <div>
-                  @{user?.position} | {user?.cabang}
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    size="small"
-                    type="primary"
-                    icon={<DoubleLeftOutlined />}
-                    onClick={() => setCollapsed(true)}
-                  ></Button>
-                </div>
-              </div>
+          {/* Decorative circles */}
+          <div style={{
+            position: "absolute",
+            top: -20,
+            right: -20,
+            width: 80,
+            height: 80,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.08)",
+          }} />
+          <div style={{
+            position: "absolute",
+            bottom: -15,
+            left: -15,
+            width: 60,
+            height: 60,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.06)",
+          }} />
+
+          {/* Avatar */}
+          <div style={{
+            width: 64,
+            height: 64,
+            borderRadius: "50%",
+            padding: 3,
+            background: "linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.3))",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
+          }}>
+            <img
+              src="https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg"
+              alt="profile_picture"
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: "50%",
+                objectFit: "cover",
+                background: "#e8f5e9",
+              }}
+            />
+          </div>
+
+          {/* User Info */}
+          <div style={{ textAlign: "center", lineHeight: 1.3, zIndex: 1 }}>
+            <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2, letterSpacing: 0.3 }}>
+              {user?.fullname}
+            </div>
+            <div style={{ opacity: 0.75, fontSize: 11 }}>
+              @{user?.username}
+            </div>
+            <div style={{
+              marginTop: 6,
+              display: "inline-block",
+              background: "rgba(255,255,255,0.18)",
+              backdropFilter: "blur(4px)",
+              borderRadius: 20,
+              padding: "2px 10px",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.5,
+              border: "1px solid rgba(255,255,255,0.2)",
+            }}>
+              {user?.position} &middot; {user?.cabang}
             </div>
           </div>
+
+          {/* Collapse Button */}
+          <Button
+            size="small"
+            type="primary"
+            ghost
+            icon={<DoubleLeftOutlined />}
+            onClick={() => setCollapsed(true)}
+            style={{
+              position: "absolute",
+              bottom: 6,
+              right: 6,
+              borderColor: "rgba(255,255,255,0.4)",
+              color: "rgba(255,255,255,0.8)",
+              borderRadius: 6,
+              fontSize: 10,
+              width: 24,
+              height: 24,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          />
         </div>
         {collapsed && window && window.innerWidth > 600 && (
           <div className="flex justify-center">
