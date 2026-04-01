@@ -99,7 +99,8 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
             margin: 6,
             padding: 14,
             borderRadius: 12,
-            background: "linear-gradient(135deg, #1a7f5a 0%, #2d9b6e 40%, #3a7bd5 100%)",
+            background:
+              "linear-gradient(135deg, #1a7f5a 0%, #2d9b6e 40%, #3a7bd5 100%)",
             color: "#fff",
             boxShadow: "0 4px 15px rgba(26, 127, 90, 0.35)",
             position: "relative",
@@ -111,34 +112,41 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
           }}
         >
           {/* Decorative circles */}
-          <div style={{
-            position: "absolute",
-            top: -20,
-            right: -20,
-            width: 80,
-            height: 80,
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.08)",
-          }} />
-          <div style={{
-            position: "absolute",
-            bottom: -15,
-            left: -15,
-            width: 60,
-            height: 60,
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.06)",
-          }} />
+          <div
+            style={{
+              position: "absolute",
+              top: -20,
+              right: -20,
+              width: 80,
+              height: 80,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.08)",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              bottom: -15,
+              left: -15,
+              width: 60,
+              height: 60,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.06)",
+            }}
+          />
 
           {/* Avatar */}
-          <div style={{
-            width: 64,
-            height: 64,
-            borderRadius: "50%",
-            padding: 3,
-            background: "linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.3))",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
-          }}>
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: "50%",
+              padding: 3,
+              background:
+                "linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.3))",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
+            }}
+          >
             <img
               src="https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg"
               alt="profile_picture"
@@ -154,24 +162,31 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
 
           {/* User Info */}
           <div style={{ textAlign: "center", lineHeight: 1.3, zIndex: 1 }}>
-            <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2, letterSpacing: 0.3 }}>
+            <div
+              style={{
+                fontWeight: 700,
+                fontSize: 14,
+                marginBottom: 2,
+                letterSpacing: 0.3,
+              }}
+            >
               {user?.fullname}
             </div>
-            <div style={{ opacity: 0.75, fontSize: 11 }}>
-              @{user?.username}
-            </div>
-            <div style={{
-              marginTop: 6,
-              display: "inline-block",
-              background: "rgba(255,255,255,0.18)",
-              backdropFilter: "blur(4px)",
-              borderRadius: 20,
-              padding: "2px 10px",
-              fontSize: 10,
-              fontWeight: 500,
-              letterSpacing: 0.5,
-              border: "1px solid rgba(255,255,255,0.2)",
-            }}>
+            <div style={{ opacity: 0.75, fontSize: 11 }}>@{user?.username}</div>
+            <div
+              style={{
+                marginTop: 6,
+                display: "inline-block",
+                background: "rgba(255,255,255,0.18)",
+                backdropFilter: "blur(4px)",
+                borderRadius: 20,
+                padding: "2px 10px",
+                fontSize: 10,
+                fontWeight: 500,
+                letterSpacing: 0.5,
+                border: "1px solid rgba(255,255,255,0.2)",
+              }}
+            >
               {user?.position} &middot; {user?.cabang}
             </div>
           </div>
@@ -221,7 +236,7 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
                   ? 80
                   : 0
                 : 250,
-              height: collapsed ? "90vh" : "82vh",
+              height: collapsed ? "90vh" : "72vh",
               overflow: "auto",
             }}
             items={MenuPermission(
