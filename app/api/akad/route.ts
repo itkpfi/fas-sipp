@@ -152,6 +152,8 @@ function GenerateFlat(dapem: Dapem): Angsuran[] {
       margin: angsuran - pokok,
       remaining: sisa,
       dapemId: dapem.id,
+      inst_sumdan: 0,
+      fee_banpot: 0,
     });
   }
   return angsurans;
