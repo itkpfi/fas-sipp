@@ -55,6 +55,8 @@ export const POST = async (req: NextRequest) => {
       principal: 0,
       margin: 0,
       remaining: find.plafond,
+      inst_sumdan: 0,
+      fee_banpot: 0,
     });
     return NextResponse.json(
       { msg: "Berhasil memperbarui data akad!", status: 200, data: result },
@@ -112,6 +114,8 @@ function GenerateAnuitas(dapem: Dapem): Angsuran[] {
       margin: bungaBulan,
       remaining: sisa,
       dapemId: dapem.id,
+      inst_sumdan: 0,
+      fee_banpot: 0,
     });
   }
   return angsurans;
