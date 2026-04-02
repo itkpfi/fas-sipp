@@ -10,7 +10,7 @@ const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME!;
 const sharedKeyCredential = new StorageSharedKeyCredential(account, accountKey);
 const blobServiceClient = new BlobServiceClient(
   `https://${account}.blob.core.windows.net`,
-  sharedKeyCredential
+  sharedKeyCredential,
 );
 
 export const getContainerClient = () =>

@@ -7,11 +7,23 @@ import {
   CalculatorOutlined,
   HistoryOutlined,
   PrinterOutlined,
+  SaveOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Divider, Image, Input, Modal, Table, TableProps } from "antd";
+import {
+  Button,
+  Card,
+  Divider,
+  Image,
+  Input,
+  Modal,
+  Table,
+  TableProps,
+  message,
+} from "antd";
 import moment from "moment";
 import { useRef, useState, useMemo } from "react";
 import { toPng } from "html-to-image";
+import { useRouter } from "next/navigation";
 
 interface IPinkarSimulasi {
   nip: string;
@@ -59,12 +71,15 @@ export default function Page() {
       };
     }
 
+    // Helper untuk pembulatan ke 1000 terdekat
+    const roundToThousand = (num: number) => Math.ceil(num / 1000) * 1000;
+
     const marginPerBulan = (plafond * (marginRate / 100)) / 12;
     const pokokPerBulan = plafond / tenor;
-    const angsuranPerBulan = Math.ceil(pokokPerBulan + marginPerBulan);
-    const biayaAdmin = Math.ceil((plafond * adminRate) / 100);
+    const angsuranPerBulan = roundToThousand(pokokPerBulan + marginPerBulan);
+    const biayaAdmin = roundToThousand((plafond * adminRate) / 100);
     const terimaBersih = plafond - biayaAdmin;
-    const totalMargin = Math.ceil(marginPerBulan * tenor);
+    const totalMargin = roundToThousand(marginPerBulan * tenor);
     const totalBayar = angsuranPerBulan * tenor;
 
     // Jadwal angsuran
@@ -74,8 +89,8 @@ export default function Page() {
 
     for (let i = 1; i <= tenor; i++) {
       const tgl = startDate.clone().add(i - 1, "month");
-      const pokok = i === tenor ? sisaPokok : Math.ceil(pokokPerBulan);
-      const margin = Math.ceil(marginPerBulan);
+      const pokok = i === tenor ? sisaPokok : roundToThousand(pokokPerBulan);
+      const margin = roundToThousand(marginPerBulan);
       const angs = pokok + margin;
       sisaPokok = Math.max(0, sisaPokok - pokok);
 
@@ -234,11 +249,7 @@ export default function Page() {
         </div>
 
         <div className="mt-5 flex justify-between">
-          <Button
-            danger
-            icon={<HistoryOutlined />}
-            onClick={handleReset}
-          >
+          <Button danger icon={<HistoryOutlined />} onClick={handleReset}>
             Reset
           </Button>
           <Button
@@ -348,6 +359,8 @@ const ModalCetakPinkar = ({
   setOpen: Function;
 }) => {
   const printRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const handleDownloadImage = async () => {
     if (printRef.current === null) return;
@@ -364,6 +377,52 @@ const ModalCetakPinkar = ({
       link.click();
     } catch (err) {
       console.error("Gagal mendownload gambar", err);
+    }
+  };
+
+  const handleSavePinjaman = async () => {
+    if (!data.nip || !data.fullname || data.plafond <= 0) {
+      message.error(
+        "Data tidak lengkap. Silakan isi semua field yang diperlukan",
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/pinjaman", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nip: data.nip,
+          fullname: data.fullname,
+          plafond: data.plafond,
+          tenor: data.tenor,
+          marginRate: data.marginRate,
+          adminRate: data.adminRate,
+          biayaAdmin: calc.biayaAdmin,
+          terimaBersih: calc.terimaBersih,
+          totalMargin: calc.totalMargin,
+          totalBayar: calc.totalBayar,
+          angsuranPerBulan: calc.angsuranPerBulan,
+          scheduleJson: calc.jadwal,
+        }),
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        message.success("Data pinjaman berhasil disimpan!");
+        setOpen(false);
+        router.push("/pinkar/data-pinjaman");
+      } else {
+        message.error(result.message || "Gagal menyimpan data pinjaman");
+      }
+    } catch (error) {
+      console.error("Error saving pinjaman:", error);
+      message.error("Terjadi kesalahan saat menyimpan data");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -387,9 +446,7 @@ const ModalCetakPinkar = ({
             preview={false}
           />
           <div>
-            <p className="font-bold text-lg">
-              SIMULASI PINJAMAN KARYAWAN
-            </p>
+            <p className="font-bold text-lg">SIMULASI PINJAMAN KARYAWAN</p>
             <p className="text-xs text-gray-500">
               {process.env.NEXT_PUBLIC_APP_FULLNAME}
             </p>
@@ -439,7 +496,9 @@ const ModalCetakPinkar = ({
             </div>
             <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
               <p>Angsuran / Bulan</p>
-              <p className="font-semibold">{IDRFormat(calc.angsuranPerBulan)}</p>
+              <p className="font-semibold">
+                {IDRFormat(calc.angsuranPerBulan)}
+              </p>
             </div>
             <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
               <p>Biaya Admin</p>
@@ -519,14 +578,23 @@ const ModalCetakPinkar = ({
         </div>
       </div>
 
-      <div className="flex justify-end mt-2">
+      <div className="flex justify-end gap-2 mt-2">
         <Button
-          type="primary"
+          type="default"
           icon={<PrinterOutlined />}
           onClick={handleDownloadImage}
           size="small"
         >
           Download Gambar
+        </Button>
+        <Button
+          type="primary"
+          icon={<SaveOutlined />}
+          onClick={handleSavePinjaman}
+          loading={loading}
+          size="small"
+        >
+          Simpan Data Pinjaman
         </Button>
       </div>
     </Modal>

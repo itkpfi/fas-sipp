@@ -165,6 +165,14 @@ export const listMenuUI: IMenuType[] = [
     key: "/tagihan",
     icon: <MoneyCollectOutlined />,
     needaccess: true,
+    children: [
+      {
+        label: "Data Tagihan",
+        key: "/tagihan/data-tagihan",
+        icon: <DatabaseOutlined />,
+        needaccess: true,
+      },
+    ],
   },
   {
     label: "Data Debitur",
@@ -194,6 +202,18 @@ export const listMenuUI: IMenuType[] = [
         label: "Pemberkasan Pinkar",
         key: "/pinkar/pemberkasan",
         icon: <FolderOpenOutlined />,
+        needaccess: true,
+      },
+      {
+        label: "Data Pinjaman",
+        key: "/pinkar/data-pinjaman",
+        icon: <DatabaseOutlined />,
+        needaccess: true,
+      },
+      {
+        label: "Data Tagihan",
+        key: "/pinkar/data-tagihan",
+        icon: <MoneyCollectOutlined />,
         needaccess: true,
       },
     ],
@@ -354,6 +374,10 @@ export const listMenuServer: { key: string; needaccess: boolean }[] = [
     needaccess: true,
   },
   {
+    key: "/tagihan/data-tagihan",
+    needaccess: true,
+  },
+  {
     key: "/debitur",
     needaccess: true,
   },
@@ -367,6 +391,14 @@ export const listMenuServer: { key: string; needaccess: boolean }[] = [
   },
   {
     key: "/pinkar/pemberkasan",
+    needaccess: true,
+  },
+  {
+    key: "/pinkar/data-pinjaman",
+    needaccess: true,
+  },
+  {
+    key: "/pinkar/data-tagihan",
     needaccess: true,
   },
   {

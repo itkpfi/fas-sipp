@@ -418,6 +418,46 @@ model Angsuran {
   dapemId     String
 }
 
+// PINJAMAN KARYAWAN
+model Pinjaman {
+  id               String @id @default(uuid())
+  nip              String
+  fullname         String
+  plafond          Int
+  tenor            Int
+  marginRate       Float
+  adminRate        Float
+  biayaAdmin       Int
+  terimaBersih     Int
+  totalMargin      Int
+  totalBayar       Int
+  angsuranPerBulan Int
+
+  scheduleJson String @db.LongText // JSON array of jadwal angsuran
+
+  status         Boolean          @default(true)
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @default(now())
+  AngsuranPinkar AngsuranPinkar[]
+}
+
+model AngsuranPinkar {
+  id        String    @id @default(uuid())
+  counter   Int // nomor urut angsuran (1, 2, 3, ...)
+  principal Int // pokok
+  margin    Int // bunga/margin
+  date_pay  DateTime // tanggal jatuh tempo
+  date_paid DateTime? // tanggal pembayaran (null jika belum bayar)
+  remaining Int // sisa pokok
+  status    String    @default("PENDING") // PENDING, PAID, OVERDUE
+
+  Pinjaman   Pinjaman @relation(fields: [pinjamanId], references: [id], onDelete: Cascade)
+  pinjamanId String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+}
+
 // AKUNTING
 enum AccountType {
   ASSET
