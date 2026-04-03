@@ -4,30 +4,21 @@ import { FormInput } from "@/components";
 import { IDRFormat, IDRToNumber } from "@/components/utils/PembiayaanUtil";
 import { useAccess } from "@/libs/Permission";
 import {
-  CalculatorOutlined,
   HistoryOutlined,
   PrinterOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
-import {
-  Button,
-  Card,
-  Divider,
-  Image,
-  Input,
-  Modal,
-  Table,
-  TableProps,
-  message,
-} from "antd";
+import { Button, Card, Divider, Image, Modal, Table, TableProps, message } from "antd";
 import moment from "moment";
-import { useRef, useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { useRouter } from "next/navigation";
 
 interface IPinkarSimulasi {
+  memberId?: string;
   nip: string;
   fullname: string;
+  phone: string;
   plafond: number;
   tenor: number;
   marginRate: number; // % per tahun
@@ -43,9 +34,17 @@ interface IAngsuranRow {
   sisaPokok: number;
 }
 
+interface IUserOption {
+  id: string;
+  nip: string | null;
+  fullname: string;
+  phone: string | null;
+}
+
 const defaultData: IPinkarSimulasi = {
   nip: "",
   fullname: "",
+  phone: "",
   plafond: 0,
   tenor: 6,
   marginRate: 18,
@@ -54,8 +53,68 @@ const defaultData: IPinkarSimulasi = {
 
 export default function Page() {
   const [data, setData] = useState<IPinkarSimulasi>(defaultData);
+  const [members, setMembers] = useState<IUserOption[]>([]);
+  const [membersLoading, setMembersLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const { hasAccess } = useAccess("/pinkar/simulasi");
+  useAccess("/pinkar/simulasi");
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      setMembersLoading(true);
+      try {
+        const res = await fetch("/api/user?limit=1000");
+        const result = await res.json();
+        if (result.status === 200 && Array.isArray(result.data)) {
+          setMembers(result.data);
+        } else {
+          message.error("Data anggota tidak berhasil dimuat");
+        }
+      } catch (error) {
+        console.error("Error fetching members:", error);
+        message.error("Terjadi kesalahan saat memuat data anggota");
+      } finally {
+        setMembersLoading(false);
+      }
+    };
+
+    fetchMembers();
+  }, []);
+
+  const memberOptions = useMemo(
+    () =>
+      members.map((member) => ({
+        label: `${member.nip || "-"} - ${member.fullname}`,
+        value: member.id,
+      })),
+    [members],
+  );
+
+  const handleSelectMember = (memberId?: string) => {
+    if (!memberId) {
+      setData((prev) => ({
+        ...prev,
+        memberId: undefined,
+        nip: "",
+        fullname: "",
+        phone: "",
+      }));
+      return;
+    }
+
+    const selectedMember = members.find((member) => member.id === memberId);
+
+    if (!selectedMember) {
+      return;
+    }
+
+    setData((prev) => ({
+      ...prev,
+      memberId,
+      nip: selectedMember.nip || "",
+      fullname: selectedMember.fullname,
+      phone: selectedMember.phone || "",
+    }));
+  };
 
   // Kalkulasi
   const calc = useMemo(() => {
@@ -185,11 +244,13 @@ export default function Page() {
           <FormInput
             data={{
               label: "NIP/No Anggota",
-              type: "text",
+              type: "select",
               mode: "vertical",
               class: "flex-1",
-              value: data.nip,
-              onChange: (e: string) => setData({ ...data, nip: e }),
+              value: data.memberId,
+              options: memberOptions,
+              disabled: membersLoading,
+              onChange: (e?: string) => handleSelectMember(e),
             }}
           />
           <FormInput
@@ -199,7 +260,17 @@ export default function Page() {
               mode: "vertical",
               class: "flex-1",
               value: data.fullname,
-              onChange: (e: string) => setData({ ...data, fullname: e }),
+              disabled: true,
+            }}
+          />
+          <FormInput
+            data={{
+              label: "No Hp",
+              type: "text",
+              mode: "vertical",
+              class: "flex-1",
+              value: data.phone,
+              onChange: (e: string) => setData({ ...data, phone: e }),
             }}
           />
           <FormInput
@@ -356,7 +427,7 @@ const ModalCetakPinkar = ({
     jadwal: IAngsuranRow[];
   };
   open: boolean;
-  setOpen: Function;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const printRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -381,7 +452,7 @@ const ModalCetakPinkar = ({
   };
 
   const handleSavePinjaman = async () => {
-    if (!data.nip || !data.fullname || data.plafond <= 0) {
+    if (!data.nip || !data.fullname || !data.phone.trim() || data.plafond <= 0) {
       message.error(
         "Data tidak lengkap. Silakan isi semua field yang diperlukan",
       );
@@ -396,6 +467,7 @@ const ModalCetakPinkar = ({
         body: JSON.stringify({
           nip: data.nip,
           fullname: data.fullname,
+          phone: data.phone.trim(),
           plafond: data.plafond,
           tenor: data.tenor,
           marginRate: data.marginRate,
@@ -414,7 +486,7 @@ const ModalCetakPinkar = ({
       if (result.success) {
         message.success("Data pinjaman berhasil disimpan!");
         setOpen(false);
-        router.push("/pinkar/data-pinjaman");
+        router.replace("/pinkar/data-pinjaman");
       } else {
         message.error(result.message || "Gagal menyimpan data pinjaman");
       }
@@ -444,6 +516,7 @@ const ModalCetakPinkar = ({
             src={process.env.NEXT_PUBLIC_APP_LOGO}
             width={50}
             preview={false}
+            alt="Logo aplikasi"
           />
           <div>
             <p className="font-bold text-lg">SIMULASI PINJAMAN KARYAWAN</p>
@@ -466,6 +539,10 @@ const ModalCetakPinkar = ({
             <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
               <p>Nama Lengkap</p>
               <p className="font-semibold">{data.fullname || "-"}</p>
+            </div>
+            <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
+              <p>No Hp</p>
+              <p className="font-semibold">{data.phone || "-"}</p>
             </div>
             <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
               <p>Tanggal Simulasi</p>

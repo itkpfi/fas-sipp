@@ -8,12 +8,12 @@ import {
   MenuOutlined,
 } from "@ant-design/icons";
 import { Badge, Button, Drawer, Dropdown, Layout, Menu, Modal } from "antd";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useUser } from "./UserContext";
 import { listMenuUI, MenuPermission } from "./IMenu";
 import { useAccess } from "@/libs/Permission";
-import Link from "next/link";
 
 const { Header, Content, Sider } = Layout;
 
@@ -21,7 +21,9 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [openMenuKeys, setOpenMenuKeys] = useState<string[]>([]);
   const router = useRouter();
+  const pathname = usePathname();
   const user = useUser();
   const { crossAccess } = useAccess("/");
   const [notif, setNotif] = useState({
@@ -81,6 +83,51 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
       });
     setLoading(false);
   };
+
+  const menuItems = useMemo(() => {
+    if (!user) return [];
+
+    return MenuPermission(
+      listMenuUI,
+      JSON.parse(user.Role.permission || "[]").map((p: { path: string }) => p.path),
+    );
+  }, [user]);
+
+  const selectedMenuKey = useMemo(() => {
+    const keys: string[] = [];
+
+    const collectKeys = (items: { key: string; children?: unknown[] }[]) => {
+      items.forEach((item) => {
+        keys.push(item.key);
+        if (Array.isArray(item.children) && item.children.length > 0) {
+          collectKeys(
+            item.children.filter(
+              (child): child is { key: string; children?: unknown[] } =>
+                typeof child === "object" && child !== null && "key" in child,
+            ),
+          );
+        }
+      });
+    };
+
+    collectKeys(menuItems);
+
+    return (
+      keys
+        .filter((key) => pathname === key || pathname.startsWith(`${key}/`))
+        .sort((a, b) => b.length - a.length)[0] || pathname
+    );
+  }, [menuItems, pathname]);
+
+  const defaultOpenMenuKeys = useMemo(() => {
+    const segments = selectedMenuKey.split("/").filter(Boolean);
+
+    return segments.slice(0, -1).map((_, index) => `/${segments.slice(0, index + 1).join("/")}`);
+  }, [selectedMenuKey]);
+
+  useEffect(() => {
+    setOpenMenuKeys(defaultOpenMenuKeys);
+  }, [defaultOpenMenuKeys]);
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -239,10 +286,10 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
               height: collapsed ? "90vh" : "72vh",
               overflow: "auto",
             }}
-            items={MenuPermission(
-              listMenuUI,
-              JSON.parse(user.Role.permission || "").map((p: any) => p.path),
-            )}
+            items={menuItems}
+            selectedKeys={[selectedMenuKey]}
+            openKeys={openMenuKeys}
+            onOpenChange={(keys) => setOpenMenuKeys(keys)}
             onClick={(e) => router.push(e.key)}
           />
         )}
@@ -261,7 +308,7 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
           }}
         >
           <div className="flex items-center gap-2 ml-2">
-            <img width={30} src={process.env.NEXT_PUBLIC_APP_LOGO || ""} />
+            <img width={30} src={process.env.NEXT_PUBLIC_APP_LOGO || ""} alt="Logo aplikasi" />
             <p className=" font-bold text-xl">
               {process.env.NEXT_PUBLIC_APP_SHORTNAME}
             </p>
@@ -412,10 +459,10 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
           {user && (
             <Menu
               mode="inline"
-              items={MenuPermission(
-                listMenuUI,
-                JSON.parse(user.Role.permission || "").map((p: any) => p.path),
-              )}
+              items={menuItems}
+              selectedKeys={[selectedMenuKey]}
+              openKeys={openMenuKeys}
+              onOpenChange={(keys) => setOpenMenuKeys(keys)}
               onClick={(e) => router.push(e.key)}
             />
           )}

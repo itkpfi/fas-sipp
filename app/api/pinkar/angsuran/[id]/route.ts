@@ -4,10 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 // PUT update AngsuranPinkar (tandai sudah bayar)
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const body = await req.json();
     const { date_paid, status } = body;
 
@@ -36,10 +36,10 @@ export async function PUT(
 // DELETE AngsuranPinkar (undo pembayaran)
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
 
     const angsuran = await prisma.angsuranPinkar.update({
       where: { id },

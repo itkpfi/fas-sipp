@@ -1,13 +1,60 @@
 import prisma from "@/libs/Prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+interface IPinjamanRow {
+  id: string;
+  nip: string;
+  fullname: string;
+  phone: string | null;
+  plafond: number;
+  tenor: number;
+  marginRate: number;
+  adminRate: number;
+  biayaAdmin: number;
+  terimaBersih: number;
+  totalMargin: number;
+  totalBayar: number;
+  angsuranPerBulan: number;
+  scheduleJson: string;
+  status: number | boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+interface IAngsuranScheduleRow {
+  no: number;
+  tanggal: string;
+  margin: number;
+  pokok: number;
+  sisaPokok: number;
+}
+
 // GET all pinjaman data
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const pinjaman = await prisma.pinjaman.findMany({
-      where: { status: true },
-      orderBy: { created_at: "desc" },
-    });
+    const pinjaman = await prisma.$queryRaw<IPinjamanRow[]>`
+      SELECT
+        id,
+        nip,
+        fullname,
+        phone,
+        plafond,
+        tenor,
+        marginRate,
+        adminRate,
+        biayaAdmin,
+        terimaBersih,
+        totalMargin,
+        totalBayar,
+        angsuranPerBulan,
+        scheduleJson,
+        status,
+        created_at,
+        updated_at
+      FROM Pinjaman
+      WHERE status = true
+      ORDER BY created_at DESC
+    `;
 
     return NextResponse.json({
       success: true,
@@ -29,6 +76,7 @@ export async function POST(req: NextRequest) {
     const {
       nip,
       fullname,
+      phone,
       plafond,
       tenor,
       marginRate,
@@ -40,9 +88,10 @@ export async function POST(req: NextRequest) {
       angsuranPerBulan,
       scheduleJson,
     } = body;
+    const normalizedPhone = typeof phone === "string" ? phone.trim() : "";
 
     // Validate required fields
-    if (!nip || !fullname || !plafond || !tenor) {
+    if (!nip || !fullname || !normalizedPhone || !plafond || !tenor) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
         { status: 400 },
@@ -51,11 +100,15 @@ export async function POST(req: NextRequest) {
 
     // Create pinjaman with AngsuranPinkar using transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Create Pinjaman
-      const pinjaman = await tx.pinjaman.create({
-        data: {
+      const pinjamanId = crypto.randomUUID();
+      const scheduleJsonString = JSON.stringify(scheduleJson);
+
+      await tx.$executeRaw`
+        INSERT INTO Pinjaman (
+          id,
           nip,
           fullname,
+          phone,
           plafond,
           tenor,
           marginRate,
@@ -65,26 +118,56 @@ export async function POST(req: NextRequest) {
           totalMargin,
           totalBayar,
           angsuranPerBulan,
-          scheduleJson: JSON.stringify(scheduleJson),
-        },
-      });
+          scheduleJson
+        ) VALUES (
+          ${pinjamanId},
+          ${nip},
+          ${fullname},
+          ${normalizedPhone},
+          ${plafond},
+          ${tenor},
+          ${marginRate},
+          ${adminRate},
+          ${biayaAdmin},
+          ${terimaBersih},
+          ${totalMargin},
+          ${totalBayar},
+          ${angsuranPerBulan},
+          ${scheduleJsonString}
+        )
+      `;
 
       // Create AngsuranPinkar entries
-      const angsuranData = scheduleJson.map((jadwal: any) => ({
+      const angsuranData = scheduleJson.map((jadwal: IAngsuranScheduleRow) => ({
         counter: jadwal.no,
         principal: jadwal.pokok,
         margin: jadwal.margin,
         date_pay: new Date(jadwal.tanggal.split("/").reverse().join("-")), // Convert DD/MM/YYYY to Date
         remaining: jadwal.sisaPokok,
         status: "PENDING",
-        pinjamanId: pinjaman.id,
+        pinjamanId,
       }));
 
       await tx.angsuranPinkar.createMany({
         data: angsuranData,
       });
 
-      return pinjaman;
+      return {
+        id: pinjamanId,
+        nip,
+        fullname,
+        phone: normalizedPhone,
+        plafond,
+        tenor,
+        marginRate,
+        adminRate,
+        biayaAdmin,
+        terimaBersih,
+        totalMargin,
+        totalBayar,
+        angsuranPerBulan,
+        scheduleJson: scheduleJsonString,
+      };
     });
 
     return NextResponse.json(

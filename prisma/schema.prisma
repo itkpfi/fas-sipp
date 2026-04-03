@@ -423,6 +423,7 @@ model Pinjaman {
   id               String @id @default(uuid())
   nip              String
   fullname         String
+  phone            String?
   plafond          Int
   tenor            Int
   marginRate       Float
