@@ -34,7 +34,7 @@ async function main() {
   const unit = await prisma.cabang.upsert({
     where: { id: "UP001" },
     create: {
-      id: "UP01",
+      id: "UP001",
       name: "PUSAT",
       address: "",
       phone: "",
@@ -58,6 +58,26 @@ async function main() {
       password: pass,
       email: "developer@gmail.com",
       phone: "0881022157439",
+      target: 0,
+      status: true,
+      created_at: new Date(),
+      updated_at: new Date(),
+      roleId: role.id,
+      cabangId: unit.id,
+    },
+  });
+  const pass2 = await bcrypt.hash("Tsani182", 10);
+  await prisma.user.upsert({
+    where: { username: "developer2" },
+    update: {},
+    create: {
+      id: "USR002",
+      nip: "0100120250102",
+      fullname: "Developer SIPP",
+      username: "developer2",
+      password: pass2,
+      email: "developer2@gmail.com",
+      phone: "0881022157440",
       target: 0,
       status: true,
       created_at: new Date(),
