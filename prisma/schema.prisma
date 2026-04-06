@@ -133,6 +133,7 @@ model User {
   password    String
   email       String?
   phone       String?
+  address     String?   @db.Text
   target      Int       @default(0)
   position    String?
   pkwt_status String?
@@ -433,6 +434,8 @@ model Pinjaman {
   totalMargin      Int
   totalBayar       Int
   angsuranPerBulan Int
+  berkasFileUrl    String? @db.LongText
+  akadFileUrl      String? @db.LongText
 
   scheduleJson String @db.LongText // JSON array of jadwal angsuran
 

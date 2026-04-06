@@ -783,6 +783,7 @@ const defaultUser: User = {
   username: "",
   email: null,
   phone: null,
+  address: null,
   password: "",
   cabangId: "",
   roleId: "",

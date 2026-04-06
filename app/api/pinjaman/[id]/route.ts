@@ -16,6 +16,8 @@ interface IPinjamanDetailRow {
   totalMargin: number;
   totalBayar: number;
   angsuranPerBulan: number;
+  berkasFileUrl: string | null;
+  akadFileUrl: string | null;
   scheduleJson: string;
   status: number | boolean;
   created_at: Date;
@@ -134,6 +136,8 @@ export async function GET(
         totalMargin,
         totalBayar,
         angsuranPerBulan,
+        berkasFileUrl,
+        akadFileUrl,
         scheduleJson,
         status,
         created_at,
@@ -188,7 +192,35 @@ export async function PUT(
       tenor,
       marginRate,
       adminRate,
+      berkasFileUrl,
+      akadFileUrl,
     } = body;
+
+    const hasDocumentOnlyPayload =
+      (typeof berkasFileUrl === "string" || berkasFileUrl === null) ||
+      (typeof akadFileUrl === "string" || akadFileUrl === null);
+
+    if (hasDocumentOnlyPayload && !nip && !fullname && !plafond && !tenor) {
+      const updatePayload: { berkasFileUrl?: string | null; akadFileUrl?: string | null } = {};
+
+      if (typeof berkasFileUrl === "string" || berkasFileUrl === null) {
+        updatePayload.berkasFileUrl = berkasFileUrl;
+      }
+
+      if (typeof akadFileUrl === "string" || akadFileUrl === null) {
+        updatePayload.akadFileUrl = akadFileUrl;
+      }
+
+      await prisma.pinjaman.update({
+        where: { id },
+        data: updatePayload,
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Dokumen pinjaman berhasil diperbarui",
+      });
+    }
 
     const normalizedPhone = typeof phone === "string" ? phone.trim() : "";
 

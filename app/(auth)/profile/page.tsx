@@ -6,7 +6,7 @@ import { IDRFormat } from "@/components/utils/PembiayaanUtil";
 import { SettingOutlined, UserOutlined } from "@ant-design/icons";
 import { App, Button, Card, Typography } from "antd";
 import moment from "moment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 const { Title } = Typography;
 export default function Page() {
   const user = useUser();
@@ -18,6 +18,12 @@ export default function Page() {
     confirmPassword: "",
   });
   const { modal } = App.useApp();
+
+  useEffect(() => {
+    if (user) {
+      setData(user);
+    }
+  }, [user]);
 
   const handleProfile = async () => {
     if (!data.fullname || !data.username) {
@@ -160,6 +166,14 @@ export default function Page() {
                 type: "text",
                 value: data?.phone,
                 onChange: (val: string) => setData({ ...data, phone: val }),
+              }}
+            />
+            <FormInput
+              data={{
+                label: "Alamat / Lokasi",
+                type: "textarea",
+                value: data?.address,
+                onChange: (val: string) => setData({ ...data, address: val }),
               }}
             />
             {user && !user.sumdanId && (

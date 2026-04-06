@@ -21,6 +21,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
             password: "",
             email: res.data.email,
             phone: res.data.phone,
+            address: res.data.address,
             target: res.data.target,
             status: res.data.status,
             created_at: res.data.created_at,

@@ -15,6 +15,8 @@ interface IPinjamanRow {
   totalMargin: number;
   totalBayar: number;
   angsuranPerBulan: number;
+  berkasFileUrl: string | null;
+  akadFileUrl: string | null;
   scheduleJson: string;
   status: number | boolean;
   created_at: Date;
@@ -47,6 +49,8 @@ export async function GET() {
         totalMargin,
         totalBayar,
         angsuranPerBulan,
+        berkasFileUrl,
+        akadFileUrl,
         scheduleJson,
         status,
         created_at,
