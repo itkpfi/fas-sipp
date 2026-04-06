@@ -199,12 +199,6 @@ export const listMenuUI: IMenuType[] = [
         needaccess: true,
       },
       {
-        label: "Pemberkasan Pinkar",
-        key: "/pinkar/pemberkasan",
-        icon: <FolderOpenOutlined />,
-        needaccess: true,
-      },
-      {
         label: "Data Pinjaman",
         key: "/pinkar/data-pinjaman",
         icon: <DatabaseOutlined />,
@@ -387,10 +381,6 @@ export const listMenuServer: { key: string; needaccess: boolean }[] = [
   },
   {
     key: "/pinkar/simulasi",
-    needaccess: true,
-  },
-  {
-    key: "/pinkar/pemberkasan",
     needaccess: true,
   },
   {

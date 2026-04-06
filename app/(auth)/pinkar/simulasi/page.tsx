@@ -18,7 +18,6 @@ interface IPinkarSimulasi {
   memberId?: string;
   nip: string;
   fullname: string;
-  phone: string;
   plafond: number;
   tenor: number;
   marginRate: number; // % per tahun
@@ -44,7 +43,6 @@ interface IUserOption {
 const defaultData: IPinkarSimulasi = {
   nip: "",
   fullname: "",
-  phone: "",
   plafond: 0,
   tenor: 6,
   marginRate: 18,
@@ -96,7 +94,6 @@ export default function Page() {
         memberId: undefined,
         nip: "",
         fullname: "",
-        phone: "",
       }));
       return;
     }
@@ -112,7 +109,6 @@ export default function Page() {
       memberId,
       nip: selectedMember.nip || "",
       fullname: selectedMember.fullname,
-      phone: selectedMember.phone || "",
     }));
   };
 
@@ -261,16 +257,6 @@ export default function Page() {
               class: "flex-1",
               value: data.fullname,
               disabled: true,
-            }}
-          />
-          <FormInput
-            data={{
-              label: "No Hp",
-              type: "text",
-              mode: "vertical",
-              class: "flex-1",
-              value: data.phone,
-              onChange: (e: string) => setData({ ...data, phone: e }),
             }}
           />
           <FormInput
@@ -452,7 +438,7 @@ const ModalCetakPinkar = ({
   };
 
   const handleSavePinjaman = async () => {
-    if (!data.nip || !data.fullname || !data.phone.trim() || data.plafond <= 0) {
+    if (!data.nip || !data.fullname || data.plafond <= 0) {
       message.error(
         "Data tidak lengkap. Silakan isi semua field yang diperlukan",
       );
@@ -467,7 +453,6 @@ const ModalCetakPinkar = ({
         body: JSON.stringify({
           nip: data.nip,
           fullname: data.fullname,
-          phone: data.phone.trim(),
           plafond: data.plafond,
           tenor: data.tenor,
           marginRate: data.marginRate,
@@ -539,10 +524,6 @@ const ModalCetakPinkar = ({
             <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
               <p>Nama Lengkap</p>
               <p className="font-semibold">{data.fullname || "-"}</p>
-            </div>
-            <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
-              <p>No Hp</p>
-              <p className="font-semibold">{data.phone || "-"}</p>
             </div>
             <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
               <p>Tanggal Simulasi</p>

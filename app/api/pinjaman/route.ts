@@ -88,10 +88,11 @@ export async function POST(req: NextRequest) {
       angsuranPerBulan,
       scheduleJson,
     } = body;
-    const normalizedPhone = typeof phone === "string" ? phone.trim() : "";
+    const normalizedPhone =
+      typeof phone === "string" && phone.trim().length > 0 ? phone.trim() : null;
 
     // Validate required fields
-    if (!nip || !fullname || !normalizedPhone || !plafond || !tenor) {
+    if (!nip || !fullname || !plafond || !tenor) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
         { status: 400 },
