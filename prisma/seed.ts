@@ -18,7 +18,14 @@ async function main() {
       created_at: new Date(),
       updated_at: new Date(),
     },
-    update: {},
+    update: {
+      permission: JSON.stringify([
+        {
+          path: "/master/roles",
+          access: ["read", "write", "update", "delete"],
+        },
+      ]),
+    },
   });
   const area = await prisma.area.upsert({
     where: { id: "KW01" },

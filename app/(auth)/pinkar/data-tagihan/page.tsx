@@ -4,10 +4,8 @@ import { IDRFormat } from "@/components/utils/PembiayaanUtil";
 import { useAccess } from "@/libs/Permission";
 import {
   EyeOutlined,
-  CalendarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
-  EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
 import {
@@ -19,13 +17,9 @@ import {
   TableProps,
   Tag,
   message,
-  Collapse,
   Statistic,
   Row,
   Col,
-  DatePicker,
-  Form,
-  Popconfirm,
 } from "antd";
 import moment from "moment";
 import { useEffect, useState } from "react";
