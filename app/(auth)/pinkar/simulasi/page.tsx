@@ -574,6 +574,17 @@ const ModalCetakPinkar = ({
               <p>Total Bayar</p>
               <p>{IDRFormat(calc.totalBayar)}</p>
             </div>
+            <div className="mt-3 flex justify-end">
+              <Button
+                type="primary"
+                icon={<SaveOutlined />}
+                onClick={handleSavePinjaman}
+                loading={loading}
+                size="small"
+              >
+                Simpan Data Pinjaman
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -644,15 +655,6 @@ const ModalCetakPinkar = ({
           size="small"
         >
           Download Gambar
-        </Button>
-        <Button
-          type="primary"
-          icon={<SaveOutlined />}
-          onClick={handleSavePinjaman}
-          loading={loading}
-          size="small"
-        >
-          Simpan Data Pinjaman
         </Button>
       </div>
     </Modal>

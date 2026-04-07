@@ -1,7 +1,7 @@
 "use client";
 
 import { FormInput } from "@/components";
-import { printContractpinkar } from "@/components/pdfutils/akad/PKPinkar";
+import { NumberToWordsID } from "@/components/pdfutils/utils";
 import { IDRFormat, IDRToNumber } from "@/components/utils/PembiayaanUtil";
 import { IUser } from "@/libs/IInterfaces";
 import {
@@ -24,7 +24,6 @@ import {
   TableProps,
   message,
 } from "antd";
-import { toPng } from "html-to-image";
 import moment from "moment";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -166,6 +165,20 @@ const parsePinkarStartDate = (scheduleJson: string) => {
     return getDefaultPinkarStartDate();
   }
 };
+
+const getRomanMonth = (date: moment.Moment) => {
+  const romans = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+  return romans[date.month()] || "-";
+};
+
+const formatContractDate = (value: string | Date) => moment(value).format("DD-MM-YYYY");
+
+const getContractNumber = (record: IPinjamanData) => {
+  const created = moment(record.created_at);
+  return `001/FAS/${getRomanMonth(created)}/${created.format("YYYY")}`;
+};
+
+const wrapTerbilangRupiah = (amount: number) => `${NumberToWordsID(Math.round(amount))} Rupiah`;
 
 const calculatePinkarLoan = (form: IEditablePinjaman): IPinkarCalc => {
   const { plafond, tenor, marginRate, adminRate } = form;
@@ -1214,6 +1227,19 @@ const ModalDokumenPinjaman = ({
   const templateRef = useRef<HTMLDivElement>(null);
   const [schedule, setSchedule] = useState<IAngsuranRow[]>([]);
 
+  const userInfo = data.User || null;
+  const memberName = userInfo?.fullname || data.fullname || "-";
+  const memberNip = userInfo?.nip || data.nip || "-";
+  const memberPhone = userInfo?.phone || data.phone || "-";
+  const memberPosition = userInfo?.position || "Karyawan";
+  const contractAddress = memberAddress || userInfo?.address || "-";
+  const contractDate = moment(data.created_at);
+  const contractNumber = getContractNumber(data);
+  const firstDueDate = schedule[0]?.tanggal || formatContractDate(data.created_at);
+  const lastDueDate =
+    schedule[schedule.length - 1]?.tanggal ||
+    contractDate.clone().add(data.tenor, "month").format("DD-MM-YYYY");
+
   useEffect(() => {
     try {
       const parsed = JSON.parse(data.scheduleJson) as IAngsuranRow[];
@@ -1226,18 +1252,30 @@ const ModalDokumenPinjaman = ({
   const handleDownloadTemplate = async () => {
     if (templateRef.current === null) return;
     try {
-      const dataUrl = await toPng(templateRef.current, {
-        cacheBust: true,
-        pixelRatio: 2,
-      });
+      const html2pdf = (await import("html2pdf.js")).default;
+      const filename = `Template-Berkas-${memberNip || memberName || "Berkas"}.pdf`;
 
-      const link = document.createElement("a");
-      link.download = `Template-Berkas-${data.User?.nip || data.User?.fullname || "Berkas"}.png`;
-      link.href = dataUrl;
-      link.click();
+      await html2pdf()
+        .set({
+          margin: [12, 12, 12, 12],
+          filename,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+          },
+          jsPDF: {
+            unit: "mm",
+            format: "a4",
+            orientation: "portrait",
+          },
+        })
+        .from(templateRef.current)
+        .save();
     } catch (error) {
-      console.error("Gagal download template berkas:", error);
-      message.error("Gagal mengunduh template berkas");
+      console.error("Gagal download template berkas PDF:", error);
+      message.error("Gagal mengunduh template PDF");
     }
   };
 
@@ -1289,7 +1327,7 @@ const ModalDokumenPinjaman = ({
               data={{
                 label: "Alamat / Lokasi",
                 type: "textarea",
-                value: data.User?.address || "-",
+                value: contractAddress,
                 disabled: true,
               }}
             />
@@ -1350,10 +1388,9 @@ const ModalDokumenPinjaman = ({
             {type === "berkas" && (
               <Button
                 icon={<DownloadOutlined />}
-                // onClick={handleDownloadTemplate}
-                onClick={() => printContractpinkar(data)}
+                onClick={handleDownloadTemplate}
               >
-                Download Template Berkas
+                Download Template PDF
               </Button>
             )}
           </div>
@@ -1366,120 +1403,166 @@ const ModalDokumenPinjaman = ({
           ) : (
             <div
               ref={templateRef}
-              className="border rounded p-6 bg-white text-gray-700"
+              className="border rounded p-6 bg-white text-gray-700 overflow-y-auto"
               style={{ minHeight: 560 }}
             >
-              <div className="flex items-center gap-3 mb-3">
-                <Image
-                  src={process.env.NEXT_PUBLIC_APP_LOGO}
-                  width={56}
-                  preview={false}
-                  alt="Logo"
-                />
-                <div>
-                  <p className="font-bold text-lg">
-                    BERKAS PENGAJUAN PINJAMAN KARYAWAN
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {process.env.NEXT_PUBLIC_APP_FULLNAME || "Aplikasi"}
-                  </p>
+              <div className="mx-auto max-w-[780px] text-[15px] leading-8 text-black font-serif">
+                <div className="mb-5 flex items-start justify-between">
+                  <Image
+                    src={process.env.NEXT_PUBLIC_APP_LOGO}
+                    width={72}
+                    preview={false}
+                    alt="Logo kiri"
+                  />
+                  <div className="px-3 text-center">
+                    <p className="text-[18px] font-bold uppercase tracking-wide">
+                      Perjanjian Kredit Pinjaman Anggota
+                    </p>
+                    <p className="text-[16px] font-bold underline">
+                      Nomor: {contractNumber}
+                    </p>
+                  </div>
+                  <Image
+                    src={process.env.NEXT_PUBLIC_APP_LOGO}
+                    width={72}
+                    preview={false}
+                    alt="Logo kanan"
+                  />
                 </div>
-              </div>
-              <Divider style={{ margin: "8px 0 12px" }} />
 
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                <p>
-                  NIP : <b>{data.User?.nip || "-"}</b>
+                <p className="mb-5 text-justify">
+                  Pada hari ini, <b>{contractDate.format("dddd DD-MM-YYYY")}</b> (
+                  {moment.locale("id") && NumberToWordsID(contractDate.date())} {contractDate.format("MMMM YYYY")}),
+                  telah dibuat dan ditandatangani perjanjian ini oleh dan antara:
                 </p>
-                <p>
-                  Tanggal Pengajuan :{" "}
-                  <b>{moment(data.created_at).format("DD-MM-YYYY")}</b>
-                </p>
-                <p>
-                  Nama Karyawan : <b>{data.User?.fullname || "-"}</b>
-                </p>
-                <p>
-                  No Telepon : <b>{data.User?.phone || "-"}</b>
-                </p>
-                <p className="col-span-2">
-                  Alamat / Lokasi : <b>{data.User?.address || "-"}</b>
-                </p>
-              </div>
 
-              <div className="mt-4">
-                <div className="bg-orange-500 text-white font-bold text-center rounded px-3 py-2 mb-2">
-                  RINCIAN PINJAMAN
+                <div className="space-y-3 text-justify">
+                  <div>
+                    <p className="font-bold uppercase">Pihak Pertama</p>
+                    <p>
+                      <b>Koperasi Jasa Fadillah Aqila Sejahtra</b>, beralamat di
+                      Perum Pondok Permai Lestari Blok G-4 No.9 – Bandung, dalam
+                      hal ini diwakili oleh <b>Eva Fajar Nurhasanah</b> selaku Ketua
+                      Koperasi. Selanjutnya dalam perjanjian ini disebut <b>PIHAK PERTAMA</b>.
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="font-bold uppercase">Pihak Kedua</p>
+                    <p>
+                      <b>{memberName.toUpperCase()}</b>, beralamat di {contractAddress},
+                      dengan nomor identitas/NIP <b>{memberNip}</b> dan bernomor telepon <b>{memberPhone}</b>
+                      {memberPosition ? (
+                        <>
+                          {" "}menjabat sebagai <b>{memberPosition}</b>
+                        </>
+                      ) : null}.
+                      Selanjutnya dalam perjanjian ini disebut <b>PIHAK KEDUA</b>.
+                    </p>
+                  </div>
                 </div>
-                <table className="w-full text-sm border-collapse">
-                  <tbody>
-                    <tr>
-                      <td className="border px-2 py-1">Plafond</td>
-                      <td className="border px-2 py-1">
-                        {IDRFormat(data.plafond)}
-                      </td>
-                      <td className="border px-2 py-1">Tenor</td>
-                      <td className="border px-2 py-1">{data.tenor} Bulan</td>
-                    </tr>
-                    <tr>
-                      <td className="border px-2 py-1">Angsuran/Bulan</td>
-                      <td className="border px-2 py-1">
-                        {IDRFormat(data.angsuranPerBulan)}
-                      </td>
-                      <td className="border px-2 py-1">Total Bayar</td>
-                      <td className="border px-2 py-1">
-                        {IDRFormat(data.totalBayar)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border px-2 py-1">Biaya Admin</td>
-                      <td className="border px-2 py-1">
-                        {IDRFormat(data.biayaAdmin)}
-                      </td>
-                      <td className="border px-2 py-1">Terima Bersih</td>
-                      <td className="border px-2 py-1">
-                        {IDRFormat(data.terimaBersih)}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
 
-              <div className="mt-4">
-                <div className="bg-gray-700 text-white font-bold text-center rounded px-3 py-2 mb-2">
-                  JADWAL ANGSURAN (6 BULAN AWAL)
+                <div className="mt-6 space-y-5 text-justify">
+                  <section>
+                    <p className="text-center font-bold uppercase">Pasal 1</p>
+                    <p className="text-center font-bold uppercase">Pemberian dan Jumlah Kredit</p>
+                    <ol className="mt-2 list-decimal space-y-2 pl-6">
+                      <li>
+                        <b>PIHAK PERTAMA</b> dengan ini setuju memberikan pinjaman/kredit kepada <b>PIHAK KEDUA</b>
+                        dan <b>PIHAK KEDUA</b> setuju menerima pinjaman dari <b>PIHAK PERTAMA</b> sebesar
+                        <b> {IDRFormat(data.plafond)}</b> ({wrapTerbilangRupiah(data.plafond)}).
+                      </li>
+                      <li>
+                        Biaya-biaya: <b>PIHAK KEDUA</b> dikenakan biaya admin sebesar <b>{data.adminRate}%</b>
+                        dari jumlah pinjaman.
+                      </li>
+                      <li>
+                        Setiap bulannya <b>PIHAK KEDUA</b> wajib menyetorkan Simpanan Sukarela sebesar
+                        <b> Rp. 5.000</b> (Lima Ribu Rupiah).
+                      </li>
+                      <li>Tujuan penggunaan pinjaman ini adalah untuk <b>Konsumtif</b>.</li>
+                    </ol>
+                  </section>
+
+                  <section>
+                    <p className="text-center font-bold uppercase">Pasal 2</p>
+                    <p className="text-center font-bold uppercase">Jangka Waktu dan Bunga/Jasa</p>
+                    <ol className="mt-2 list-decimal space-y-2 pl-6">
+                      <li>
+                        Jangka Waktu Pinjaman: Pinjaman ini diberikan untuk jangka waktu <b>{data.tenor} bulan</b>
+                        ({NumberToWordsID(data.tenor)} bulan), terhitung mulai tanggal <b>{firstDueDate}</b>
+                        sampai dengan tanggal <b>{lastDueDate}</b>.
+                      </li>
+                      <li>
+                        Bunga/Jasa Pinjaman: Atas pinjaman ini, <b>PIHAK KEDUA</b> dikenakan bunga/jasa
+                        pinjaman sebesar <b>{data.marginRate}%</b> ({NumberToWordsID(data.marginRate)} persen)
+                        per tahun yang dihitung dari saldo pinjaman.
+                      </li>
+                    </ol>
+                  </section>
+
+                  <section>
+                    <p className="text-center font-bold uppercase">Pasal 3</p>
+                    <p className="text-center font-bold uppercase">Mekanisme Pembayaran Angsuran</p>
+                    <ol className="mt-2 list-decimal space-y-2 pl-6">
+                      <li>
+                        <b>PIHAK KEDUA</b> wajib membayar kembali pokok pinjaman dan bunga/jasa secara
+                        angsuran setiap bulan.
+                      </li>
+                      <li>
+                        Jumlah Angsuran Per Bulan sebesar <b>{IDRFormat(data.angsuranPerBulan)}</b>
+                        ({wrapTerbilangRupiah(data.angsuranPerBulan)}).
+                      </li>
+                      <li>
+                        Tanggal Pembayaran: Angsuran wajib dibayarkan selambat-lambatnya pada tanggal
+                        <b> {schedule[0]?.tanggal?.slice(0, 2) || contractDate.format("DD")}</b> setiap bulannya.
+                      </li>
+                      <li>
+                        Cara Pembayaran: Pembayaran angsuran dapat dilakukan melalui pemotongan gaji
+                        ataupun transfer kepada <b>PIHAK PERTAMA</b>.
+                      </li>
+                    </ol>
+                  </section>
+
+                  <section>
+                    <p className="text-center font-bold uppercase">Pasal 4</p>
+                    <p className="text-center font-bold uppercase">Peristiwa Cidera Janji</p>
+                    <p className="mt-2"><b>PIHAK KEDUA</b> dinyatakan cidera janji apabila:</p>
+                    <ol className="mt-2 list-decimal space-y-2 pl-6">
+                      <li>Tidak membayar angsuran selama 3 bulan berturut-turut.</li>
+                      <li>Menggunakan pinjaman tidak sesuai dengan tujuan yang disepakati.</li>
+                      <li>Memberikan keterangan palsu/tidak benar terkait data diri atau jaminan.</li>
+                      <li>
+                        Dalam kondisi cidera janji, <b>PIHAK PERTAMA</b> berhak seketika menagih seluruh sisa
+                        pokok pinjaman dan bunga/jasa yang belum dibayar sekaligus tanpa diperlukan teguran terlebih dahulu.
+                      </li>
+                    </ol>
+                  </section>
+
+                  <section>
+                    <p className="text-center font-bold uppercase">Pasal 5</p>
+                    <p className="text-center font-bold uppercase">Penyelesaian Perselisihan</p>
+                    <p className="mt-2">
+                      Apabila terjadi perselisihan dalam pelaksanaan perjanjian ini, para pihak sepakat
+                      untuk menyelesaikannya secara musyawarah untuk mufakat. Jika musyawarah tidak mencapai
+                      mufakat, maka para pihak sepakat untuk menyelesaikannya melalui Pengadilan Negeri.
+                    </p>
+                  </section>
                 </div>
-                <table className="w-full text-sm border-collapse">
-                  <thead>
-                    <tr>
-                      <th className="border px-2 py-1">No</th>
-                      <th className="border px-2 py-1">Tanggal</th>
-                      <th className="border px-2 py-1 text-right">Pokok</th>
-                      <th className="border px-2 py-1 text-right">Margin</th>
-                      <th className="border px-2 py-1 text-right">Angsuran</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {schedule.map((row) => (
-                      <tr key={row.no}>
-                        <td className="border px-2 py-1 text-center">
-                          {row.no}
-                        </td>
-                        <td className="border px-2 py-1 text-center">
-                          {row.tanggal}
-                        </td>
-                        <td className="border px-2 py-1 text-right">
-                          {IDRFormat(row.pokok)}
-                        </td>
-                        <td className="border px-2 py-1 text-right">
-                          {IDRFormat(row.margin)}
-                        </td>
-                        <td className="border px-2 py-1 text-right">
-                          {IDRFormat(row.angsuran)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+
+                <div className="mt-16 grid grid-cols-2 gap-10 text-center font-bold uppercase">
+                  <div>
+                    <p>Pihak Kedua</p>
+                    <p>Penerima Pinjaman</p>
+                    <div className="mt-16 text-left text-[13px] normal-case font-normal">Materai 10.000</div>
+                    <div className="mt-16 border-t border-black pt-2">{memberName.toUpperCase()}</div>
+                  </div>
+                  <div>
+                    <p>Pihak Pertama</p>
+                    <p>Pemberi Pinjaman</p>
+                    <div className="mt-32 border-t border-black pt-2">EVA FAJAR NURHASANAH</div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
