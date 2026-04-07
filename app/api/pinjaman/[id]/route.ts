@@ -2,28 +2,6 @@ import prisma from "@/libs/Prisma";
 import { NextRequest, NextResponse } from "next/server";
 import moment from "moment";
 
-interface IPinjamanDetailRow {
-  id: string;
-  nip: string;
-  fullname: string;
-  phone: string | null;
-  plafond: number;
-  tenor: number;
-  marginRate: number;
-  adminRate: number;
-  biayaAdmin: number;
-  terimaBersih: number;
-  totalMargin: number;
-  totalBayar: number;
-  angsuranPerBulan: number;
-  berkasFileUrl: string | null;
-  akadFileUrl: string | null;
-  scheduleJson: string;
-  status: number | boolean;
-  created_at: Date;
-  updated_at: Date;
-}
-
 interface IAngsuranScheduleRow {
   no: number;
   angsuran?: number;
@@ -35,7 +13,8 @@ interface IAngsuranScheduleRow {
 
 const roundToThousand = (num: number) => Math.ceil(num / 1000) * 1000;
 
-const getDefaultPinkarStartDate = () => moment().add(1, "month").startOf("month");
+const getDefaultPinkarStartDate = () =>
+  moment().add(1, "month").startOf("month");
 
 const parsePinkarStartDate = (scheduleJson: string) => {
   try {
@@ -117,38 +96,31 @@ export async function GET(
     if (!id) {
       return NextResponse.json(
         { success: false, message: "ID tidak ditemukan" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const pinjaman = await prisma.$queryRaw<IPinjamanDetailRow[]>`
-      SELECT
+    const pinjaman = await prisma.pinjaman.findFirst({
+      where: {
         id,
-        nip,
-        fullname,
-        phone,
-        plafond,
-        tenor,
-        marginRate,
-        adminRate,
-        biayaAdmin,
-        terimaBersih,
-        totalMargin,
-        totalBayar,
-        angsuranPerBulan,
-        berkasFileUrl,
-        akadFileUrl,
-        scheduleJson,
-        status,
-        created_at,
-        updated_at
-      FROM Pinjaman
-      WHERE id = ${id}
-        AND status = true
-      LIMIT 1
-    `;
+        status: true,
+      },
+      include: {
+        User: {
+          select: {
+            id: true,
+            nip: true,
+            fullname: true,
+            phone: true,
+            email: true,
+            address: true,
+            position: true,
+          },
+        },
+      },
+    });
 
-    if (!pinjaman[0]) {
+    if (!pinjaman) {
       return NextResponse.json(
         { success: false, message: "Data pinjaman tidak ditemukan" },
         { status: 404 },
@@ -157,7 +129,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: pinjaman[0],
+      data: pinjaman,
     });
   } catch (error) {
     console.error("Error fetching pinjaman detail:", error);
@@ -197,11 +169,16 @@ export async function PUT(
     } = body;
 
     const hasDocumentOnlyPayload =
-      (typeof berkasFileUrl === "string" || berkasFileUrl === null) ||
-      (typeof akadFileUrl === "string" || akadFileUrl === null);
+      typeof berkasFileUrl === "string" ||
+      berkasFileUrl === null ||
+      typeof akadFileUrl === "string" ||
+      akadFileUrl === null;
 
     if (hasDocumentOnlyPayload && !nip && !fullname && !plafond && !tenor) {
-      const updatePayload: { berkasFileUrl?: string | null; akadFileUrl?: string | null } = {};
+      const updatePayload: {
+        berkasFileUrl?: string | null;
+        akadFileUrl?: string | null;
+      } = {};
 
       if (typeof berkasFileUrl === "string" || berkasFileUrl === null) {
         updatePayload.berkasFileUrl = berkasFileUrl;
@@ -231,17 +208,14 @@ export async function PUT(
       );
     }
 
-    const existingPinjaman = await prisma.$queryRaw<
-      { id: string; scheduleJson: string }[]
-    >`
-      SELECT id, scheduleJson
-      FROM Pinjaman
-      WHERE id = ${id}
-        AND status = true
-      LIMIT 1
-    `;
+    const existingPinjaman = await prisma.pinjaman.findFirst({
+      where: {
+        id,
+        status: true,
+      },
+    });
 
-    if (!existingPinjaman[0]) {
+    if (!existingPinjaman) {
       return NextResponse.json(
         { success: false, message: "Data pinjaman tidak ditemukan" },
         { status: 404 },
@@ -268,7 +242,9 @@ export async function PUT(
       );
     }
 
-    const anchoredStartDate = parsePinkarStartDate(existingPinjaman[0].scheduleJson);
+    const anchoredStartDate = parsePinkarStartDate(
+      existingPinjaman.scheduleJson,
+    );
     const calculatedPinjaman = buildPinkarSchedule({
       plafond,
       tenor,
@@ -279,25 +255,24 @@ export async function PUT(
     const scheduleJsonString = JSON.stringify(calculatedPinjaman.jadwal);
 
     await prisma.$transaction(async (tx) => {
-      await tx.$executeRaw`
-        UPDATE Pinjaman
-        SET
-          nip = ${nip},
-          fullname = ${fullname},
-          phone = ${normalizedPhone},
-          plafond = ${plafond},
-          tenor = ${tenor},
-          marginRate = ${marginRate},
-          adminRate = ${adminRate},
-          biayaAdmin = ${calculatedPinjaman.biayaAdmin},
-          terimaBersih = ${calculatedPinjaman.terimaBersih},
-          totalMargin = ${calculatedPinjaman.totalMargin},
-          totalBayar = ${calculatedPinjaman.totalBayar},
-          angsuranPerBulan = ${calculatedPinjaman.angsuranPerBulan},
-          scheduleJson = ${scheduleJsonString},
-          updated_at = ${new Date()}
-        WHERE id = ${id}
-      `;
+      await tx.pinjaman.update({
+        where: { id },
+        data: {
+          nip: nip || undefined,
+          fullname: fullname || undefined,
+          phone: normalizedPhone || undefined,
+          plafond,
+          tenor,
+          marginRate,
+          adminRate,
+          biayaAdmin: calculatedPinjaman.biayaAdmin,
+          terimaBersih: calculatedPinjaman.terimaBersih,
+          totalMargin: calculatedPinjaman.totalMargin,
+          totalBayar: calculatedPinjaman.totalBayar,
+          angsuranPerBulan: calculatedPinjaman.angsuranPerBulan,
+          scheduleJson: scheduleJsonString,
+        },
+      });
 
       await tx.angsuranPinkar.deleteMany({
         where: { pinjamanId: id },
@@ -340,7 +315,7 @@ export async function DELETE(
     if (!id) {
       return NextResponse.json(
         { success: false, message: "ID tidak ditemukan" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 

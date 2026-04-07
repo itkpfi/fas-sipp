@@ -7,6 +7,17 @@ export async function GET(req: NextRequest) {
     const pinjamanList = await prisma.pinjaman.findMany({
       where: { status: true },
       include: {
+        User: {
+          select: {
+            id: true,
+            nip: true,
+            fullname: true,
+            phone: true,
+            email: true,
+            address: true,
+            position: true,
+          },
+        },
         AngsuranPinkar: {
           orderBy: { counter: "asc" },
         },
@@ -17,8 +28,9 @@ export async function GET(req: NextRequest) {
     // Transform to tagihan format
     const tagihan = pinjamanList.map((pinjaman) => ({
       id: pinjaman.id,
-      nip: pinjaman.nip,
-      fullname: pinjaman.fullname,
+      nip: pinjaman.User?.nip || pinjaman.nip,
+      fullname: pinjaman.User?.fullname || pinjaman.fullname,
+      phone: pinjaman.User?.phone || pinjaman.phone,
       plafond: pinjaman.plafond,
       tenor: pinjaman.tenor,
       totalAngsuran: pinjaman.AngsuranPinkar.length,
@@ -28,6 +40,7 @@ export async function GET(req: NextRequest) {
         .length,
       angsuranList: pinjaman.AngsuranPinkar,
       createdAt: pinjaman.created_at,
+      User: pinjaman.User,
     }));
 
     return NextResponse.json({

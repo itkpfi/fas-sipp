@@ -1,7 +1,9 @@
 "use client";
 
 import { FormInput } from "@/components";
+import { printContractpinkar } from "@/components/pdfutils/akad/PKPinkar";
 import { IDRFormat, IDRToNumber } from "@/components/utils/PembiayaanUtil";
+import { IUser } from "@/libs/IInterfaces";
 import {
   DownloadOutlined,
   DeleteOutlined,
@@ -28,9 +30,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 interface IPinjamanData {
   id: string;
-  nip: string;
-  fullname: string;
-  phone: string | null;
+  userId: string | null;
+  User: IUser | null;
+  nip?: string | null; // Deprecated: use User.nip
+  fullname?: string | null; // Deprecated: use User.fullname
+  phone?: string | null; // Deprecated: use User.phone
   plafond: number;
   tenor: number;
   marginRate: number;
@@ -65,15 +69,56 @@ interface IUserOption {
   address: string | null;
 }
 
-const normalizeText = (value?: string | null) => (value || "").trim().toLowerCase();
+const normalizeText = (value?: string | null) =>
+  (value || "").trim().toLowerCase();
 
-const findMemberByPinjaman = (record: IPinjamanData, members: IUserOption[]) => {
+// Get user info from pinjaman - prefer User relation, fallback to deprecated fields
+const getUserFromPinjaman = (record: IPinjamanData): IUserOption | null => {
+  if (record.User) {
+    return {
+      id: record.User.id || "",
+      nip: record.User.nip || null,
+      fullname: record.User.fullname,
+      phone: record.User.phone || null,
+      address: record.User.address || null,
+    };
+  }
+  if (record.nip || record.fullname) {
+    return {
+      id: "",
+      nip: record.nip || null,
+      fullname: record.fullname || "",
+      phone: record.phone || null,
+      address: null,
+    };
+  }
+  return null;
+};
+
+const findMemberByPinjaman = (
+  record: IPinjamanData,
+  members: IUserOption[],
+) => {
+  // Prefer User relation if available
+  if (record.User) {
+    return {
+      id: record.User.id,
+      nip: record.User.nip || null,
+      fullname: record.User.fullname,
+      phone: record.User.phone || null,
+      address: record.User.address || null,
+    };
+  }
+
+  // Fallback to search by nip or fullname for backward compatibility
   const normalizedNip = normalizeText(record.nip);
   const normalizedName = normalizeText(record.fullname);
 
   return (
     members.find((member) => normalizeText(member.nip) === normalizedNip) ||
-    members.find((member) => normalizeText(member.fullname) === normalizedName) ||
+    members.find(
+      (member) => normalizeText(member.fullname) === normalizedName,
+    ) ||
     null
   );
 };
@@ -101,7 +146,8 @@ interface IPinkarCalc {
 
 const roundToThousand = (num: number) => Math.ceil(num / 1000) * 1000;
 
-const getDefaultPinkarStartDate = () => moment().add(1, "month").startOf("month");
+const getDefaultPinkarStartDate = () =>
+  moment().add(1, "month").startOf("month");
 
 const parsePinkarStartDate = (scheduleJson: string) => {
   try {
@@ -148,7 +194,9 @@ const calculatePinkarLoan = (form: IEditablePinjaman): IPinkarCalc => {
   const startDate = form.startDate
     ? moment(form.startDate, "YYYY-MM-DD", true)
     : getDefaultPinkarStartDate();
-  const firstDueDate = startDate.isValid() ? startDate : getDefaultPinkarStartDate();
+  const firstDueDate = startDate.isValid()
+    ? startDate
+    : getDefaultPinkarStartDate();
 
   for (let i = 1; i <= tenor; i++) {
     const tgl = firstDueDate.clone().add(i - 1, "month");
@@ -181,13 +229,22 @@ const buildEditablePinjaman = (
   data: IPinjamanData,
   members: IUserOption[],
 ): IEditablePinjaman => {
-  const matchedMember = members.find((member) => member.nip === data.nip);
+  // Prefer User relation
+  const userInfo = data.User || {
+    id: "",
+    nip: data.nip || null,
+    fullname: data.fullname || "",
+    phone: data.phone || null,
+    email: null,
+    address: null,
+    position: null,
+  };
 
   return {
-    memberId: matchedMember?.id,
-    nip: data.nip,
-    fullname: data.fullname,
-    phone: data.phone || "",
+    memberId: userInfo.id,
+    nip: userInfo.nip || "",
+    fullname: userInfo.fullname || "",
+    phone: userInfo.phone || "",
     plafond: data.plafond,
     tenor: data.tenor,
     marginRate: data.marginRate,
@@ -201,8 +258,12 @@ export default function Page() {
   const [members, setMembers] = useState<IUserOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [membersLoading, setMembersLoading] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<IPinjamanData | null>(null);
-  const [editingRecord, setEditingRecord] = useState<IPinjamanData | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<IPinjamanData | null>(
+    null,
+  );
+  const [editingRecord, setEditingRecord] = useState<IPinjamanData | null>(
+    null,
+  );
   const [detailOpen, setDetailOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [docOpen, setDocOpen] = useState(false);
@@ -283,31 +344,48 @@ export default function Page() {
   };
 
   const handleOpenDoc = (record: IPinjamanData, type: "berkas" | "akad") => {
-    const matchedMember = findMemberByPinjaman(record, members);
     setDocType(type);
-    setDocRecord(record);
-    setDocUrl(type === "berkas" ? record.berkasFileUrl || undefined : record.akadFileUrl || undefined);
-    setDocMemberAddress(matchedMember?.address || "");
+    setDocUrl(
+      type === "berkas"
+        ? record.berkasFileUrl || undefined
+        : record.akadFileUrl || undefined,
+    );
     setDocOpen(true);
 
-    const syncAddress = async () => {
+    // Fetch fresh detail with full User relation
+    const fetchDetail = async () => {
       try {
-        const query = encodeURIComponent(record.nip || record.fullname || "");
-        const res = await fetch(`/api/user?search=${query}&limit=50`);
-        const json = await res.json();
-        const list: IUserOption[] = Array.isArray(json.data) ? json.data : [];
+        const res = await fetch(`/api/pinjaman/${record.id}`);
+        const result = await res.json();
 
-        const latestMatch =
-          findMemberByPinjaman(record, list) ||
-          findMemberByPinjaman(record, members);
+        if (result.success && result.data) {
+          const freshData = result.data;
+          console.log("Fresh pinjaman data:", freshData);
+          setDocRecord(freshData);
 
-        setDocMemberAddress(latestMatch?.address || "");
+          // Set address from fresh User data
+          const addressFromUser = freshData.User?.address;
+          if (addressFromUser) {
+            setDocMemberAddress(addressFromUser);
+            console.log("Address set to:", addressFromUser);
+          } else {
+            setDocMemberAddress("");
+            console.log("Address is empty");
+          }
+        }
       } catch (error) {
-        console.error("Error syncing member address:", error);
+        console.error("Error fetching pinjaman detail:", error);
+        // Fallback to original record
+        setDocRecord(record);
+        const matchedMember = findMemberByPinjaman(record, members);
+        const fallbackAddress =
+          record.User?.address || matchedMember?.address || "";
+        setDocMemberAddress(fallbackAddress);
+        console.log("Fallback address:", fallbackAddress);
       }
     };
 
-    syncAddress();
+    fetchDetail();
   };
 
   const handleSaveDoc = async () => {
@@ -357,19 +435,15 @@ export default function Page() {
     },
     {
       title: "NIP",
-      dataIndex: "nip",
+      dataIndex: ["User", "nip"],
       width: 120,
+      render: (value: string | null) => value || "-",
     },
     {
       title: "Nama Lengkap",
-      dataIndex: "fullname",
+      dataIndex: ["User", "fullname"],
       width: 180,
-    },
-    {
-      title: "No Hp",
-      dataIndex: "phone",
-      width: 140,
-      render: (value: string | null) => value || "-",
+      render: (value: string) => value || "-",
     },
     {
       title: "Plafond",
@@ -405,7 +479,11 @@ export default function Page() {
       width: 90,
       align: "center",
       render: (value: string | null) =>
-        value ? <Tag color="green">Tersedia</Tag> : <Tag color="default">Kosong</Tag>,
+        value ? (
+          <Tag color="green">Tersedia</Tag>
+        ) : (
+          <Tag color="default">Kosong</Tag>
+        ),
     },
     {
       title: "Akad",
@@ -413,7 +491,11 @@ export default function Page() {
       width: 90,
       align: "center",
       render: (value: string | null) =>
-        value ? <Tag color="green">Tersedia</Tag> : <Tag color="default">Kosong</Tag>,
+        value ? (
+          <Tag color="green">Tersedia</Tag>
+        ) : (
+          <Tag color="default">Kosong</Tag>
+        ),
     },
     {
       title: "Aksi",
@@ -567,7 +649,7 @@ const ModalDetailPinjaman = ({
       });
 
       const link = document.createElement("a");
-      link.download = `PinjamanKaryawan-${data.fullname || "Karyawan"}.png`;
+      link.download = `PinjamanKaryawan-${data.User?.fullname || data.fullname || "Karyawan"}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
@@ -610,15 +692,11 @@ const ModalDetailPinjaman = ({
             </div>
             <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
               <p>NIP/No Anggota</p>
-              <p className="font-semibold">{data.nip || "-"}</p>
+              <p className="font-semibold">{data.User?.nip || "-"}</p>
             </div>
             <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
               <p>Nama Lengkap</p>
-              <p className="font-semibold">{data.fullname || "-"}</p>
-            </div>
-            <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
-              <p>No Hp</p>
-              <p className="font-semibold">{data.phone || "-"}</p>
+              <p className="font-semibold">{data.User?.fullname || "-"}</p>
             </div>
             <div className="border-b py-1 flex gap-4 justify-between border-gray-200">
               <p>Tanggal Pinjaman</p>
@@ -648,7 +726,9 @@ const ModalDetailPinjaman = ({
                     type="link"
                     size="small"
                     className="!p-0"
-                    onClick={() => window.open(data.berkasFileUrl || "", "_blank")}
+                    onClick={() =>
+                      window.open(data.berkasFileUrl || "", "_blank")
+                    }
                   >
                     Lihat File
                   </Button>
@@ -665,7 +745,9 @@ const ModalDetailPinjaman = ({
                     type="link"
                     size="small"
                     className="!p-0"
-                    onClick={() => window.open(data.akadFileUrl || "", "_blank")}
+                    onClick={() =>
+                      window.open(data.akadFileUrl || "", "_blank")
+                    }
                   >
                     Lihat File
                   </Button>
@@ -682,7 +764,9 @@ const ModalDetailPinjaman = ({
             </div>
             <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
               <p>Angsuran / Bulan</p>
-              <p className="font-semibold">{IDRFormat(data.angsuranPerBulan)}</p>
+              <p className="font-semibold">
+                {IDRFormat(data.angsuranPerBulan)}
+              </p>
             </div>
             <div className="border-b py-1 flex gap-4 justify-between border-gray-200 border-dashed">
               <p>Biaya Admin</p>
@@ -722,11 +806,21 @@ const ModalDetailPinjaman = ({
               {schedule.map((row) => (
                 <tr key={row.no}>
                   <td className="border px-2 py-1 text-center">{row.no}</td>
-                  <td className="border px-2 py-1 text-center">{row.tanggal}</td>
-                  <td className="border px-2 py-1 text-right">{IDRFormat(row.angsuran)}</td>
-                  <td className="border px-2 py-1 text-right">{IDRFormat(row.margin)}</td>
-                  <td className="border px-2 py-1 text-right">{IDRFormat(row.pokok)}</td>
-                  <td className="border px-2 py-1 text-right">{IDRFormat(row.sisaPokok)}</td>
+                  <td className="border px-2 py-1 text-center">
+                    {row.tanggal}
+                  </td>
+                  <td className="border px-2 py-1 text-right">
+                    {IDRFormat(row.angsuran)}
+                  </td>
+                  <td className="border px-2 py-1 text-right">
+                    {IDRFormat(row.margin)}
+                  </td>
+                  <td className="border px-2 py-1 text-right">
+                    {IDRFormat(row.pokok)}
+                  </td>
+                  <td className="border px-2 py-1 text-right">
+                    {IDRFormat(row.sisaPokok)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -735,9 +829,15 @@ const ModalDetailPinjaman = ({
                 <td className="border px-2 py-1 text-center" colSpan={2}>
                   TOTAL
                 </td>
-                <td className="border px-2 py-1 text-right">{IDRFormat(data.totalBayar)}</td>
-                <td className="border px-2 py-1 text-right">{IDRFormat(data.totalMargin)}</td>
-                <td className="border px-2 py-1 text-right">{IDRFormat(data.plafond)}</td>
+                <td className="border px-2 py-1 text-right">
+                  {IDRFormat(data.totalBayar)}
+                </td>
+                <td className="border px-2 py-1 text-right">
+                  {IDRFormat(data.totalMargin)}
+                </td>
+                <td className="border px-2 py-1 text-right">
+                  {IDRFormat(data.plafond)}
+                </td>
                 <td className="border px-2 py-1 text-right">0</td>
               </tr>
             </tfoot>
@@ -777,7 +877,9 @@ const ModalUpdatePinjaman = ({
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onSuccess: () => Promise<void>;
 }) => {
-  const [form, setForm] = useState<IEditablePinjaman>(buildEditablePinjaman(data, members));
+  const [form, setForm] = useState<IEditablePinjaman>(
+    buildEditablePinjaman(data, members),
+  );
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -971,20 +1073,6 @@ const ModalUpdatePinjaman = ({
             />
             <FormInput
               data={{
-                label: "No Hp",
-                type: "text",
-                mode: "vertical",
-                class: "flex-1",
-                value: form.phone,
-                onChange: (value: string) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    phone: value,
-                  })),
-              }}
-            />
-            <FormInput
-              data={{
                 label: "Plafond",
                 type: "text",
                 mode: "vertical",
@@ -1144,7 +1232,7 @@ const ModalDokumenPinjaman = ({
       });
 
       const link = document.createElement("a");
-      link.download = `Template-Berkas-${data.nip || data.fullname}.png`;
+      link.download = `Template-Berkas-${data.User?.nip || data.User?.fullname || "Berkas"}.png`;
       link.href = dataUrl;
       link.click();
     } catch (error) {
@@ -1155,7 +1243,9 @@ const ModalDokumenPinjaman = ({
 
   return (
     <Modal
-      title={type === "berkas" ? "Kelola Dokumen BERKAS" : "Kelola Dokumen AKAD"}
+      title={
+        type === "berkas" ? "Kelola Dokumen BERKAS" : "Kelola Dokumen AKAD"
+      }
       open={open}
       onCancel={onClose}
       onOk={onSave}
@@ -1171,18 +1261,35 @@ const ModalDokumenPinjaman = ({
             DATA PENGAJUAN KARYAWAN
           </div>
           <div className="flex flex-col gap-2">
-            <FormInput data={{ label: "NIP", type: "text", value: data.nip, disabled: true }} />
             <FormInput
-              data={{ label: "Nama Karyawan", type: "text", value: data.fullname, disabled: true }}
+              data={{
+                label: "NIP",
+                type: "text",
+                value: data.User?.nip || "-",
+                disabled: true,
+              }}
             />
             <FormInput
-              data={{ label: "No Telepon", type: "text", value: data.phone || "-", disabled: true }}
+              data={{
+                label: "Nama Karyawan",
+                type: "text",
+                value: data.User?.fullname || "-",
+                disabled: true,
+              }}
+            />
+            <FormInput
+              data={{
+                label: "No Telepon",
+                type: "text",
+                value: data.User?.phone || "-",
+                disabled: true,
+              }}
             />
             <FormInput
               data={{
                 label: "Alamat / Lokasi",
                 type: "textarea",
-                value: memberAddress || "Alamat belum diisi di profil karyawan",
+                value: data.User?.address || "-",
                 disabled: true,
               }}
             />
@@ -1213,16 +1320,22 @@ const ModalDokumenPinjaman = ({
             <Divider style={{ margin: "8px 0" }} />
             <FormInput
               data={{
-                label: type === "berkas" ? "Upload File Berkas" : "Upload File Akad",
+                label:
+                  type === "berkas" ? "Upload File Berkas" : "Upload File Akad",
                 type: "upload",
                 mode: "vertical",
                 value: fileUrl,
-                accept: "image/png,image/jpg,image/jpeg,image/webp,application/pdf",
+                accept:
+                  "image/png,image/jpg,image/jpeg,image/webp,application/pdf",
                 onChange: (val: string) => setFileUrl(val),
               }}
             />
             {fileUrl && (
-              <Button type="link" className="!px-0" onClick={() => window.open(fileUrl, "_blank")}>
+              <Button
+                type="link"
+                className="!px-0"
+                onClick={() => window.open(fileUrl, "_blank")}
+              >
                 Lihat / Download File Tersimpan
               </Button>
             )}
@@ -1231,9 +1344,15 @@ const ModalDokumenPinjaman = ({
 
         <div className="w-full lg:w-[64%] border rounded p-3 bg-white">
           <div className="flex items-center justify-between mb-2">
-            <p className="font-semibold text-gray-700 text-sm">Preview Template Dokumen</p>
+            <p className="font-semibold text-gray-700 text-sm">
+              Preview Template Dokumen
+            </p>
             {type === "berkas" && (
-              <Button icon={<DownloadOutlined />} onClick={handleDownloadTemplate}>
+              <Button
+                icon={<DownloadOutlined />}
+                // onClick={handleDownloadTemplate}
+                onClick={() => printContractpinkar(data)}
+              >
                 Download Template Berkas
               </Button>
             )}
@@ -1241,7 +1360,8 @@ const ModalDokumenPinjaman = ({
 
           {type === "akad" ? (
             <div className="h-[560px] flex items-center justify-center text-gray-500 border rounded bg-gray-50">
-              Upload file AKAD, lalu gunakan tombol &quot;Lihat / Download File Tersimpan&quot; di panel kiri.
+              Upload file AKAD, lalu gunakan tombol &quot;Lihat / Download File
+              Tersimpan&quot; di panel kiri.
             </div>
           ) : (
             <div
@@ -1257,7 +1377,9 @@ const ModalDokumenPinjaman = ({
                   alt="Logo"
                 />
                 <div>
-                  <p className="font-bold text-lg">BERKAS PENGAJUAN PINJAMAN KARYAWAN</p>
+                  <p className="font-bold text-lg">
+                    BERKAS PENGAJUAN PINJAMAN KARYAWAN
+                  </p>
                   <p className="text-xs text-gray-500">
                     {process.env.NEXT_PUBLIC_APP_FULLNAME || "Aplikasi"}
                   </p>
@@ -1267,19 +1389,20 @@ const ModalDokumenPinjaman = ({
 
               <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
                 <p>
-                  NIP : <b>{data.nip}</b>
+                  NIP : <b>{data.User?.nip || "-"}</b>
                 </p>
                 <p>
-                  Tanggal Pengajuan : <b>{moment(data.created_at).format("DD-MM-YYYY")}</b>
+                  Tanggal Pengajuan :{" "}
+                  <b>{moment(data.created_at).format("DD-MM-YYYY")}</b>
                 </p>
                 <p>
-                  Nama Karyawan : <b>{data.fullname}</b>
+                  Nama Karyawan : <b>{data.User?.fullname || "-"}</b>
                 </p>
                 <p>
-                  No Telepon : <b>{data.phone || "-"}</b>
+                  No Telepon : <b>{data.User?.phone || "-"}</b>
                 </p>
                 <p className="col-span-2">
-                  Alamat / Lokasi : <b>{memberAddress || "-"}</b>
+                  Alamat / Lokasi : <b>{data.User?.address || "-"}</b>
                 </p>
               </div>
 
@@ -1291,21 +1414,31 @@ const ModalDokumenPinjaman = ({
                   <tbody>
                     <tr>
                       <td className="border px-2 py-1">Plafond</td>
-                      <td className="border px-2 py-1">{IDRFormat(data.plafond)}</td>
+                      <td className="border px-2 py-1">
+                        {IDRFormat(data.plafond)}
+                      </td>
                       <td className="border px-2 py-1">Tenor</td>
                       <td className="border px-2 py-1">{data.tenor} Bulan</td>
                     </tr>
                     <tr>
                       <td className="border px-2 py-1">Angsuran/Bulan</td>
-                      <td className="border px-2 py-1">{IDRFormat(data.angsuranPerBulan)}</td>
+                      <td className="border px-2 py-1">
+                        {IDRFormat(data.angsuranPerBulan)}
+                      </td>
                       <td className="border px-2 py-1">Total Bayar</td>
-                      <td className="border px-2 py-1">{IDRFormat(data.totalBayar)}</td>
+                      <td className="border px-2 py-1">
+                        {IDRFormat(data.totalBayar)}
+                      </td>
                     </tr>
                     <tr>
                       <td className="border px-2 py-1">Biaya Admin</td>
-                      <td className="border px-2 py-1">{IDRFormat(data.biayaAdmin)}</td>
+                      <td className="border px-2 py-1">
+                        {IDRFormat(data.biayaAdmin)}
+                      </td>
                       <td className="border px-2 py-1">Terima Bersih</td>
-                      <td className="border px-2 py-1">{IDRFormat(data.terimaBersih)}</td>
+                      <td className="border px-2 py-1">
+                        {IDRFormat(data.terimaBersih)}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -1328,11 +1461,21 @@ const ModalDokumenPinjaman = ({
                   <tbody>
                     {schedule.map((row) => (
                       <tr key={row.no}>
-                        <td className="border px-2 py-1 text-center">{row.no}</td>
-                        <td className="border px-2 py-1 text-center">{row.tanggal}</td>
-                        <td className="border px-2 py-1 text-right">{IDRFormat(row.pokok)}</td>
-                        <td className="border px-2 py-1 text-right">{IDRFormat(row.margin)}</td>
-                        <td className="border px-2 py-1 text-right">{IDRFormat(row.angsuran)}</td>
+                        <td className="border px-2 py-1 text-center">
+                          {row.no}
+                        </td>
+                        <td className="border px-2 py-1 text-center">
+                          {row.tanggal}
+                        </td>
+                        <td className="border px-2 py-1 text-right">
+                          {IDRFormat(row.pokok)}
+                        </td>
+                        <td className="border px-2 py-1 text-right">
+                          {IDRFormat(row.margin)}
+                        </td>
+                        <td className="border px-2 py-1 text-right">
+                          {IDRFormat(row.angsuran)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

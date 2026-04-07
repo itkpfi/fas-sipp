@@ -157,6 +157,7 @@ model User {
   CreateDDapem  Dapem[]         @relation("CreateDapemRelation")
   AODapem       Dapem[]         @relation("AODapemRelation")
   JournalDetail JournalDetail[]
+  Pinjaman      Pinjaman[]
 }
 
 model ProdukPembiayaan {
@@ -421,10 +422,10 @@ model Angsuran {
 
 // PINJAMAN KARYAWAN
 model Pinjaman {
-  id               String @id @default(uuid())
-  nip              String
-  fullname         String
-  phone            String?
+  id               String  @id @default(uuid())
+  nip              String? // Deprecated: use User.nip via userId relation
+  fullname         String? // Deprecated: use User.fullname via userId relation
+  phone            String? // Deprecated: use User.phone via userId relation
   plafond          Int
   tenor            Int
   marginRate       Float
@@ -439,9 +440,13 @@ model Pinjaman {
 
   scheduleJson String @db.LongText // JSON array of jadwal angsuran
 
-  status         Boolean          @default(true)
-  created_at     DateTime         @default(now())
-  updated_at     DateTime         @default(now())
+  status     Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  User   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
+
   AngsuranPinkar AngsuranPinkar[]
 }
 

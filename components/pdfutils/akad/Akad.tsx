@@ -10,6 +10,8 @@ import { Pemotongan } from "./Pemotongan";
 import { Kesanggupan } from "./Kesanggupan";
 import { PenyerahanJaminan } from "./PenyerahanJaminan";
 import { FormCeklist1 } from "./FormCeklist1";
+import { PKDHMJB } from "./pkutils/PKHMJB";
+import { PKDassa } from "./pkutils/PKDassa";
 
 moment.locale("id");
 
@@ -76,7 +78,8 @@ const generateContractHtml = (record: IDapem) => {
       </div>
 
       <div class="page text-justify" style="font-size: 12px;">
-        ${PerjanjianKredit(record)}
+        ${record.ProdukPembiayaan.Sumdan.code === "BPR HMJB" ? PKDHMJB(record) : record.ProdukPembiayaan.Sumdan.code === "BPR DASSA" ? PKDassa(record) : ""}
+        ${["BPR HMJB", "BPR DASSA"].includes(record.ProdukPembiayaan.Sumdan.code) ? PerjanjianKredit(record) : ""}
       </div>
 
       <div class="page text-justify" style="font-size: 11px;">

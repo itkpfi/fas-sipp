@@ -1,28 +1,6 @@
 import prisma from "@/libs/Prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-interface IPinjamanRow {
-  id: string;
-  nip: string;
-  fullname: string;
-  phone: string | null;
-  plafond: number;
-  tenor: number;
-  marginRate: number;
-  adminRate: number;
-  biayaAdmin: number;
-  terimaBersih: number;
-  totalMargin: number;
-  totalBayar: number;
-  angsuranPerBulan: number;
-  berkasFileUrl: string | null;
-  akadFileUrl: string | null;
-  scheduleJson: string;
-  status: number | boolean;
-  created_at: Date;
-  updated_at: Date;
-}
-
 interface IAngsuranScheduleRow {
   no: number;
   tanggal: string;
@@ -31,34 +9,26 @@ interface IAngsuranScheduleRow {
   sisaPokok: number;
 }
 
-// GET all pinjaman data
+// GET all pinjaman data with User relation
 export async function GET() {
   try {
-    const pinjaman = await prisma.$queryRaw<IPinjamanRow[]>`
-      SELECT
-        id,
-        nip,
-        fullname,
-        phone,
-        plafond,
-        tenor,
-        marginRate,
-        adminRate,
-        biayaAdmin,
-        terimaBersih,
-        totalMargin,
-        totalBayar,
-        angsuranPerBulan,
-        berkasFileUrl,
-        akadFileUrl,
-        scheduleJson,
-        status,
-        created_at,
-        updated_at
-      FROM Pinjaman
-      WHERE status = true
-      ORDER BY created_at DESC
-    `;
+    const pinjaman = await prisma.pinjaman.findMany({
+      where: { status: true },
+      include: {
+        User: {
+          select: {
+            id: true,
+            nip: true,
+            fullname: true,
+            phone: true,
+            email: true,
+            address: true,
+            position: true,
+          },
+        },
+      },
+      orderBy: { created_at: "desc" },
+    });
 
     return NextResponse.json({
       success: true,
@@ -78,6 +48,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
+      userId,
       nip,
       fullname,
       phone,
@@ -92,28 +63,50 @@ export async function POST(req: NextRequest) {
       angsuranPerBulan,
       scheduleJson,
     } = body;
-    const normalizedPhone =
-      typeof phone === "string" && phone.trim().length > 0 ? phone.trim() : null;
 
     // Validate required fields
-    if (!nip || !fullname || !plafond || !tenor) {
+    if (!userId && !nip) {
       return NextResponse.json(
-        { success: false, message: "Missing required fields" },
+        { success: false, message: "userId or nip harus disediakan" },
         { status: 400 },
+      );
+    }
+
+    if (!plafond || !tenor) {
+      return NextResponse.json(
+        { success: false, message: "plafond dan tenor harus disediakan" },
+        { status: 400 },
+      );
+    }
+
+    // Find user by userId or nip
+    let userRecord = null;
+    if (userId) {
+      userRecord = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+    } else if (nip) {
+      userRecord = await prisma.user.findFirst({
+        where: { nip },
+      });
+    }
+
+    if (!userRecord) {
+      return NextResponse.json(
+        { success: false, message: "User tidak ditemukan" },
+        { status: 404 },
       );
     }
 
     // Create pinjaman with AngsuranPinkar using transaction
     const result = await prisma.$transaction(async (tx) => {
-      const pinjamanId = crypto.randomUUID();
       const scheduleJsonString = JSON.stringify(scheduleJson);
 
-      await tx.$executeRaw`
-        INSERT INTO Pinjaman (
-          id,
-          nip,
-          fullname,
-          phone,
+      const pinjaman = await tx.pinjaman.create({
+        data: {
+          nip: nip || userRecord.nip || undefined, // Keep nip for backward compatibility
+          fullname: fullname || userRecord.fullname,
+          phone: phone || userRecord.phone || undefined,
           plafond,
           tenor,
           marginRate,
@@ -123,24 +116,10 @@ export async function POST(req: NextRequest) {
           totalMargin,
           totalBayar,
           angsuranPerBulan,
-          scheduleJson
-        ) VALUES (
-          ${pinjamanId},
-          ${nip},
-          ${fullname},
-          ${normalizedPhone},
-          ${plafond},
-          ${tenor},
-          ${marginRate},
-          ${adminRate},
-          ${biayaAdmin},
-          ${terimaBersih},
-          ${totalMargin},
-          ${totalBayar},
-          ${angsuranPerBulan},
-          ${scheduleJsonString}
-        )
-      `;
+          scheduleJson: scheduleJsonString,
+          userId: userRecord.id,
+        },
+      });
 
       // Create AngsuranPinkar entries
       const angsuranData = scheduleJson.map((jadwal: IAngsuranScheduleRow) => ({
@@ -150,29 +129,14 @@ export async function POST(req: NextRequest) {
         date_pay: new Date(jadwal.tanggal.split("/").reverse().join("-")), // Convert DD/MM/YYYY to Date
         remaining: jadwal.sisaPokok,
         status: "PENDING",
-        pinjamanId,
+        pinjamanId: pinjaman.id,
       }));
 
       await tx.angsuranPinkar.createMany({
         data: angsuranData,
       });
 
-      return {
-        id: pinjamanId,
-        nip,
-        fullname,
-        phone: normalizedPhone,
-        plafond,
-        tenor,
-        marginRate,
-        adminRate,
-        biayaAdmin,
-        terimaBersih,
-        totalMargin,
-        totalBayar,
-        angsuranPerBulan,
-        scheduleJson: scheduleJsonString,
-      };
+      return pinjaman;
     });
 
     return NextResponse.json(
