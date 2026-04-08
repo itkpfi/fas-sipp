@@ -3,6 +3,9 @@ declare module "html2pdf.js" {
     scale?: number;
     useCORS?: boolean;
     logging?: boolean;
+    backgroundColor?: string;
+    windowWidth?: number;
+    windowHeight?: number;
   }
 
   interface JsPdfOptions {

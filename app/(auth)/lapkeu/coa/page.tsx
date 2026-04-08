@@ -22,11 +22,12 @@ import {
   Input,
   Modal,
   Select,
+  Tag,
   Table,
   TableProps,
 } from "antd";
 import { HookAPI } from "antd/es/modal/useModal";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function Page() {
   const [pageProps, setPageProps] = useState<IPageProps<ICategoryOfAccount>>({
@@ -72,6 +73,43 @@ export default function Page() {
     return () => clearTimeout(timeout);
   }, [pageProps.page, pageProps.limit, pageProps.search, pageProps.type]);
 
+  const orderedData = useMemo(() => {
+    const data = pageProps.data || [];
+    const childrenMap = new Map<string, ICategoryOfAccount[]>();
+
+    data.forEach((item) => {
+      if (!item.parentId) return;
+      const children = childrenMap.get(item.parentId) || [];
+      children.push(item);
+      childrenMap.set(item.parentId, children);
+    });
+
+    const roots = data
+      .filter((item) => !item.parentId)
+      .sort((a, b) => a.id.localeCompare(b.id));
+
+    const flattened: ICategoryOfAccount[] = [];
+    const seen = new Set<string>();
+
+    roots.forEach((root) => {
+      flattened.push(root);
+      seen.add(root.id);
+
+      (childrenMap.get(root.id) || [])
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .forEach((child) => {
+          flattened.push(child);
+          seen.add(child.id);
+        });
+    });
+
+    data.forEach((item) => {
+      if (!seen.has(item.id)) flattened.push(item);
+    });
+
+    return flattened;
+  }, [pageProps.data]);
+
   const columns: TableProps<ICategoryOfAccount>["columns"] = [
     {
       title: "ID",
@@ -87,31 +125,57 @@ export default function Page() {
       },
     },
     {
+      title: "Level",
+      key: "level",
+      width: 140,
+      render: (_, record) =>
+        record.parentId ? (
+          <div className="flex flex-col gap-1">
+            <Tag color="gold">Child</Tag>
+            <span className="text-xs text-gray-500">Parent: {record.Parent?.id}</span>
+          </div>
+        ) : (
+          <Tag color="blue">Parent</Tag>
+        ),
+    },
+    {
       title: "Account",
       dataIndex: "name",
       key: "name",
-      render(value, record, index) {
+      render(value, record) {
+        const isChild = Boolean(record.parentId);
         return (
-          <div>
-            <span className="opacity-70">
-              (
-              {record.type === "ASSET"
-                ? "D"
-                : record.type === "KEWAJIBAN"
-                  ? "K"
-                  : record.type === "PENDAPATAN"
+          <div className={isChild ? "ml-4 border-l-4 border-orange-300 pl-4" : ""}>
+            <div className="flex items-center gap-2 flex-wrap">
+              {isChild ? (
+                <Tag color="orange">Sub Akun</Tag>
+              ) : (
+                <Tag color="processing">Akun Utama</Tag>
+              )}
+              <span className="opacity-70 text-xs">
+                (
+                {record.type === "ASSET"
+                  ? "D"
+                  : record.type === "KEWAJIBAN"
                     ? "K"
-                    : record.type === "MODAL"
+                    : record.type === "PENDAPATAN"
                       ? "K"
-                      : record.type === "BEBAN"
-                        ? "D"
-                        : ""}
-              -{record.id})
-            </span>
-            {record.parentId && (
-              <span className="opacity-70">({record.Parent?.name})</span>
-            )}{" "}
-            {record.name}
+                      : record.type === "MODAL"
+                        ? "K"
+                        : record.type === "BEBAN"
+                          ? "D"
+                          : ""}
+                -{record.id})
+              </span>
+              {record.parentId && record.Parent?.name && (
+                <span className="text-xs text-gray-500">
+                  turunan dari <b>{record.Parent.name}</b>
+                </span>
+              )}
+            </div>
+            <div className={isChild ? "font-medium text-gray-700" : "font-semibold"}>
+              {record.name}
+            </div>
           </div>
         );
       },
@@ -205,11 +269,14 @@ export default function Page() {
 
       <Table
         columns={columns}
-        dataSource={pageProps.data}
+        dataSource={orderedData}
         size="small"
         loading={loading}
         rowKey={"id"}
         bordered
+        rowClassName={(record) =>
+          record.parentId ? "bg-orange-50/40" : "bg-blue-50/40"
+        }
         scroll={{ x: "max-content", y: "60vh" }}
         pagination={{
           current: pageProps.page,

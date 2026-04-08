@@ -1,6 +1,7 @@
 "use client";
 
 import { FormInput } from "@/components";
+import { downloadContractPdfPinkar } from "@/components/pdfutils/akad/PKPinkar";
 import { NumberToWordsID } from "@/components/pdfutils/utils";
 import { IDRFormat, IDRToNumber } from "@/components/utils/PembiayaanUtil";
 import { IUser } from "@/libs/IInterfaces";
@@ -1250,29 +1251,8 @@ const ModalDokumenPinjaman = ({
   }, [data.scheduleJson]);
 
   const handleDownloadTemplate = async () => {
-    if (templateRef.current === null) return;
     try {
-      const html2pdf = (await import("html2pdf.js")).default;
-      const filename = `Template-Berkas-${memberNip || memberName || "Berkas"}.pdf`;
-
-      await html2pdf()
-        .set({
-          margin: [12, 12, 12, 12],
-          filename,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-          },
-          jsPDF: {
-            unit: "mm",
-            format: "a4",
-            orientation: "portrait",
-          },
-        })
-        .from(templateRef.current)
-        .save();
+      await downloadContractPdfPinkar(data as never);
     } catch (error) {
       console.error("Gagal download template berkas PDF:", error);
       message.error("Gagal mengunduh template PDF");
