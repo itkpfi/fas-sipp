@@ -117,29 +117,72 @@ export default function Page() {
     })();
   }, []);
 
+  const totalBiaya = GetBiaya(data);
+  const terimaKotor = data.plafon - totalBiaya;
+  const terimaBersih = data.plafon - (totalBiaya + data.c_bpp + data.c_takeover);
+  const sisaGaji = data.salary - data.angsuran;
+  const dsr = data.salary > 0 ? (data.angsuran / data.salary) * 100 : 0;
+
   return (
-    <div className="flex flex-col sm:flex-row">
-      <Card
-        loading={loading}
-        style={{ flex: 1 }}
-        styles={{
-          title: { margin: 0, padding: 0 },
-          body: { margin: 12, padding: 0 },
-        }}
-      >
-        <FormInput
-          data={{
-            label: "Tanggal Simulasi",
-            type: "date",
-            mode: "vertical",
-            class: "flex-1",
-            disabled: !hasAccess("proses"),
-            value: moment(data.created_at).format("YYYY-MM-DD"),
-            onChange: (e: string) =>
-              setData({ ...data, created_at: new Date(e) }),
+    <div className="space-y-6 p-1 md:p-2">
+      <section className="app-page-hero space-y-5 p-6 md:p-7">
+        <div>
+          <h1 className="text-3xl font-bold tracking-[-0.03em] text-white md:text-4xl">
+            Simulasi Pembiayaan
+          </h1>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-[24px] border border-white/16 bg-white/12 p-4 backdrop-blur">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">Plafond</div>
+            <div className="mt-2 text-2xl font-bold text-white">{IDRFormat(data.plafon || 0)}</div>
+          </div>
+          <div className="rounded-[24px] border border-white/16 bg-white/12 p-4 backdrop-blur">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">Angsuran</div>
+            <div className="mt-2 text-2xl font-bold text-white">{IDRFormat(data.angsuran || 0)}</div>
+          </div>
+          <div className="rounded-[24px] border border-white/16 bg-white/12 p-4 backdrop-blur">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">Total biaya</div>
+            <div className="mt-2 text-2xl font-bold text-white">{IDRFormat(totalBiaya)}</div>
+          </div>
+          <div className="rounded-[24px] border border-white/16 bg-white/12 p-4 backdrop-blur">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">Terima bersih</div>
+            <div className="mt-2 text-2xl font-bold text-white">{IDRFormat(terimaBersih)}</div>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+        <Card
+          loading={loading}
+          className="app-card"
+          styles={{
+            body: { margin: 0, padding: 20 },
           }}
-        />
-        <div className="flex gap-2 flex-wrap">
+        >
+          <div className="space-y-5">
+            <div className="app-toolbar-panel p-4 md:p-5">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  Data pemohon
+                </p>
+                <h2 className="text-xl font-semibold text-slate-900">Informasi dasar simulasi</h2>
+              </div>
+            </div>
+
+            <FormInput
+              data={{
+                label: "Tanggal Simulasi",
+                type: "date",
+                mode: "vertical",
+                class: "flex-1",
+                disabled: !hasAccess("proses"),
+                value: moment(data.created_at).format("YYYY-MM-DD"),
+                onChange: (e: string) =>
+                  setData({ ...data, created_at: new Date(e) }),
+              }}
+            />
+
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           <FormInput
             data={{
               label: "Nomor Pensiun",
@@ -150,7 +193,7 @@ export default function Page() {
               onChange: (e: string) => setData({ ...data, nopen: e }),
               suffix: (
                 <Button
-                  size="small"
+                  size="middle"
                   type="primary"
                   icon={<SearchOutlined />}
                   loading={loading}
@@ -180,9 +223,11 @@ export default function Page() {
                 setData({ ...data, birthdate: new Date(e) }),
             }}
           />
-          <div className="w-full">
-            <p>Usia Pemohon</p>
-            <div className="flex gap-2">
+            </div>
+
+            <div className="rounded-[24px] border border-slate-200 bg-slate-50/85 p-4">
+              <p className="text-sm font-semibold text-slate-700">Usia Pemohon</p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-3">
               <Input
                 disabled
                 style={{ color: "black" }}
@@ -202,92 +247,100 @@ export default function Page() {
                 suffix={<span className="text-xs italic opacity-70">Hr</span>}
               />
             </div>
-          </div>
-          <FormInput
-            data={{
-              label: "Gaji Pensiun",
-              type: "text",
-              mode: "vertical",
-              class: "flex-1",
-              value: IDRFormat(data.salary || 0),
-              onChange: (e: string) =>
-                setData({ ...data, salary: IDRToNumber(e || "0") }),
-            }}
-          />
-          <FormInput
-            data={{
-              label: "Jenis Pembiayaan",
-              type: "select",
-              mode: "vertical",
-              class: "flex-1",
-              options: jenis.map((j) => ({ label: j.name, value: j.id })),
-              value: data.Jenis.id,
-              onChange: (e: string) => {
-                const find = jenis.find((f) => f.id === e);
-                if (find) {
-                  setData({
-                    ...data,
-                    Jenis: find,
-                    c_mutasi: find.c_mutasi,
-                    c_blokir: find.c_blokir,
-                  });
-                }
-              },
-            }}
-          />
-          <div className="w-full">
-            <p>Produk Pembiayaan</p>
-            <Select
-              className="w-full"
-              options={sumdanAv.map((j) => ({
-                label: j.name,
-                options: j.ProdukPembiayaan.map((p) => ({
-                  label: `${p.name}`,
-                  value: p.id,
-                })),
-              }))}
-              value={data.Produk.id}
-              onChange={(e: string) => {
-                const find = sumdan
-                  .flatMap((s) => s.ProdukPembiayaan)
-                  .find((f) => f.id === e);
-                if (find) {
-                  const findSumdan = sumdan.find((s) => s.id === find.sumdanId);
-                  if (findSumdan) {
-                    setData({
-                      ...data,
-                      Produk: find,
-                      Sumdan: findSumdan as Sumdan,
-                      margin: findSumdan.c_margin + find.c_margin,
-                      marginType: find.margin_type,
-                      c_adm: findSumdan.c_adm + find.c_adm,
-                      c_insurance: find.c_insurance,
-                      c_gov: findSumdan.c_gov,
-                      c_account: findSumdan.c_account,
-                      c_stamp: findSumdan.c_stamps,
-                      c_information: findSumdan.c_information,
-                      c_provisi: findSumdan.c_provisi,
-                    });
-                  }
-                }
-              }}
-            />
-          </div>
-          <FormInput
-            data={{
-              label: "Margin",
-              type: "number",
-              mode: "vertical",
-              class: "flex-1",
-              value: data.margin,
-              disabled: !hasAccess("proses"),
-              onChange: (e: string) => setData({ ...data, margin: Number(e) }),
-            }}
-          />
-          <div className="w-full bg-gray-800 text-gray-50 p-2 rounded">
-            Rekomendasi Pembiayaan
-          </div>
-          <div className="flex gap-2 ">
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <FormInput
+                data={{
+                  label: "Gaji Pensiun",
+                  type: "text",
+                  mode: "vertical",
+                  class: "flex-1",
+                  value: IDRFormat(data.salary || 0),
+                  onChange: (e: string) =>
+                    setData({ ...data, salary: IDRToNumber(e || "0") }),
+                }}
+              />
+              <FormInput
+                data={{
+                  label: "Jenis Pembiayaan",
+                  type: "select",
+                  mode: "vertical",
+                  class: "flex-1",
+                  options: jenis.map((j) => ({ label: j.name, value: j.id })),
+                  value: data.Jenis.id,
+                  onChange: (e: string) => {
+                    const find = jenis.find((f) => f.id === e);
+                    if (find) {
+                      setData({
+                        ...data,
+                        Jenis: find,
+                        c_mutasi: find.c_mutasi,
+                        c_blokir: find.c_blokir,
+                      });
+                    }
+                  },
+                }}
+              />
+              <FormInput
+                data={{
+                  label: "Margin",
+                  type: "number",
+                  mode: "vertical",
+                  class: "flex-1",
+                  value: data.margin,
+                  disabled: !hasAccess("proses"),
+                  onChange: (e: string) => setData({ ...data, margin: Number(e) }),
+                }}
+              />
+            </div>
+
+            <div className="space-y-3 rounded-[24px] border border-slate-200 bg-slate-50/72 p-4 md:p-5">
+              <div className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white">
+                Rekomendasi Pembiayaan
+              </div>
+
+              <div>
+                <p className="mb-2 text-sm font-semibold text-slate-700">Produk Pembiayaan</p>
+                <Select
+                  size="large"
+                  className="w-full"
+                  options={sumdanAv.map((j) => ({
+                    label: j.name,
+                    options: j.ProdukPembiayaan.map((p) => ({
+                      label: `${p.name}`,
+                      value: p.id,
+                    })),
+                  }))}
+                  value={data.Produk.id}
+                  onChange={(e: string) => {
+                    const find = sumdan
+                      .flatMap((s) => s.ProdukPembiayaan)
+                      .find((f) => f.id === e);
+                    if (find) {
+                      const findSumdan = sumdan.find((s) => s.id === find.sumdanId);
+                      if (findSumdan) {
+                        setData({
+                          ...data,
+                          Produk: find,
+                          Sumdan: findSumdan as Sumdan,
+                          margin: findSumdan.c_margin + find.c_margin,
+                          marginType: find.margin_type,
+                          c_adm: findSumdan.c_adm + find.c_adm,
+                          c_insurance: find.c_insurance,
+                          c_gov: findSumdan.c_gov,
+                          c_account: findSumdan.c_account,
+                          c_stamp: findSumdan.c_stamps,
+                          c_information: findSumdan.c_information,
+                          c_provisi: findSumdan.c_provisi,
+                        });
+                      }
+                    }
+                  }}
+                />
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
             <FormInput
               data={{
                 label: "Tenor",
@@ -308,8 +361,9 @@ export default function Page() {
                 value: data.max_tenor,
               }}
             />
-          </div>
-          <div className="flex gap-2">
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
             <FormInput
               data={{
                 label: "Plafond",
@@ -331,8 +385,9 @@ export default function Page() {
                 value: IDRFormat(data.max_plafond || 0),
               }}
             />
-          </div>
-          <div className="flex  gap-2">
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
             <FormInput
               data={{
                 label: "Angsuran",
@@ -355,25 +410,50 @@ export default function Page() {
                   setData({ ...data, salary: IDRToNumber(e || "0") }),
               }}
             />
+              </div>
+            </div>
+
+            <div className="flex justify-between gap-3 pt-2">
+              <Button danger icon={<HistoryOutlined />} onClick={() => setData(defaultData)}>
+                Reset
+              </Button>
+              <Button type="primary" icon={<PrinterOutlined />} onClick={() => setOpen(true)}>
+                Cetak
+              </Button>
+            </div>
           </div>
-        </div>
-      </Card>
-      <Card
-        loading={loading}
-        style={{ flex: 1 }}
-        styles={{
-          title: { margin: 0, padding: 0 },
-          body: { margin: 12, padding: 0 },
-        }}
-      >
-        <div className="w-full bg-red-500 text-gray-50 p-2 rounded mb-1">
-          Rincian Biaya
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
-          <div className="flex-1">Biaya Administrasi</div>
-          <div className="flex gap-2 flex-2">
+        </Card>
+
+        <Card
+          loading={loading}
+          className="app-card"
+          styles={{
+            body: { margin: 0, padding: 20 },
+          }}
+        >
+          <div className="space-y-5">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="app-stat-tile">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Sisa gaji</div>
+                <div className="mt-2 text-3xl font-bold text-slate-900">{IDRFormat(sisaGaji)}</div>
+              </div>
+              <div className="app-stat-tile">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Debt service ratio</div>
+                <div className="mt-2 text-3xl font-bold text-slate-900">{dsr.toFixed(2)}%</div>
+              </div>
+            </div>
+
+            <div className="space-y-3 rounded-[24px] border border-slate-200 bg-slate-50/70 p-4 md:p-5">
+              <div className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-600">
+                Rincian Biaya
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3">
+                  <div className="min-w-0 flex-1 text-sm font-medium text-slate-700">Biaya Administrasi</div>
+                  <div className="flex gap-2">
             <Input
-              size="small"
+              size="middle"
               style={{ width: 80 }}
               disabled={!hasAccess("proses")}
               suffix={<span className="text-xs italic opacity-70">%</span>}
@@ -384,18 +464,19 @@ export default function Page() {
               type={"number"}
             />
             <Input
-              size="small"
+              size="middle"
               disabled
               value={IDRFormat((data.plafon * data.c_adm) / 100)}
               style={{ textAlign: "right", color: "black" }}
             />
           </div>
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
-          <div className="flex-1">Biaya Asuransi</div>
-          <div className="flex gap-2 flex-2">
+                </div>
+
+                <div className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3">
+                  <div className="min-w-0 flex-1 text-sm font-medium text-slate-700">Biaya Asuransi</div>
+                  <div className="flex gap-2">
             <Input
-              size="small"
+              size="middle"
               style={{ width: 80 }}
               disabled={!hasAccess("proses")}
               suffix={<span className="text-xs italic opacity-70">%</span>}
@@ -409,18 +490,17 @@ export default function Page() {
               type={"number"}
             />
             <Input
-              size="small"
+              size="middle"
               disabled
               value={IDRFormat((data.plafon * data.c_insurance) / 100)}
               style={{ textAlign: "right", color: "black" }}
             />
           </div>
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
-          <div className="flex-1">Biaya Tatalaksana</div>
-          <div className="flex gap-2 flex-2">
+                </div>
+
+                <SimulasiRow label="Biaya Tatalaksana">
             <Input
-              size="small"
+              size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_gov)}
               style={{ textAlign: "right", color: "black" }}
@@ -428,13 +508,11 @@ export default function Page() {
                 setData({ ...data, c_gov: IDRToNumber(e.target.value || "0") })
               }
             />
-          </div>
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
-          <div className="flex-1">Biaya Buka Rekening</div>
-          <div className="flex gap-2 flex-2">
+                </SimulasiRow>
+
+                <SimulasiRow label="Biaya Buka Rekening">
             <Input
-              size="small"
+              size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_account)}
               style={{ textAlign: "right", color: "black" }}
@@ -445,13 +523,11 @@ export default function Page() {
                 })
               }
             />
-          </div>
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
-          <div className="flex-1">Biaya Provisi</div>
-          <div className="flex gap-2 flex-2">
+                </SimulasiRow>
+
+                <SimulasiRow label="Biaya Provisi">
             <Input
-              size="small"
+              size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_provisi)}
               style={{ textAlign: "right", color: "black" }}
@@ -462,13 +538,11 @@ export default function Page() {
                 })
               }
             />
-          </div>
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
-          <div className="flex-1">Biaya Data Informasi</div>
-          <div className="flex gap-2 flex-2">
+                </SimulasiRow>
+
+                <SimulasiRow label="Biaya Data Informasi">
             <Input
-              size="small"
+              size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_information)}
               style={{ textAlign: "right", color: "black" }}
@@ -479,13 +553,11 @@ export default function Page() {
                 })
               }
             />
-          </div>
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
-          <div className="flex-1">Biaya Materai</div>
-          <div className="flex gap-2 flex-2">
+                </SimulasiRow>
+
+                <SimulasiRow label="Biaya Materai">
             <Input
-              size="small"
+              size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_stamp)}
               style={{ textAlign: "right", color: "black" }}
@@ -496,13 +568,11 @@ export default function Page() {
                 })
               }
             />
-          </div>
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
-          <div className="flex-1">Biaya Mutasi</div>
-          <div className="flex gap-2 flex-2">
+                </SimulasiRow>
+
+                <SimulasiRow label="Biaya Mutasi">
             <Input
-              size="small"
+              size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_mutasi)}
               style={{ textAlign: "right", color: "black" }}
@@ -513,13 +583,13 @@ export default function Page() {
                 })
               }
             />
-          </div>
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
-          <div className="flex-1">Blokir Angsuran</div>
-          <div className="flex gap-2 flex-2">
+                </SimulasiRow>
+
+                <div className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3">
+                  <div className="min-w-0 flex-1 text-sm font-medium text-slate-700">Blokir Angsuran</div>
+                  <div className="flex gap-2">
             <Input
-              size="small"
+              size="middle"
               style={{ width: 80 }}
               suffix={<span className="text-xs italic opacity-70">%</span>}
               value={data.c_blokir}
@@ -532,31 +602,34 @@ export default function Page() {
               type={"number"}
             />
             <Input
-              size="small"
+              size="middle"
               disabled
               value={IDRFormat(data.c_blokir * data.angsuran)}
               style={{ textAlign: "right", color: "black" }}
             />
           </div>
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 font-bold text-red-500 border-t mt-2">
-          <div className="flex-1">Total Biaya</div>
-          <div className="text-right">{IDRFormat(GetBiaya(data))}</div>
-        </div>
-        <div className="w-full bg-blue-800 text-gray-50 p-2 rounded mb-1">
-          Rincian Pembiayaan
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 font-bold text-blue-500 border-b border-dashed">
-          <div className="flex-1">Terima Kotor</div>
-          <div className="text-right">
-            {IDRFormat(data.plafon - GetBiaya(data))}
-          </div>
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 border-b border-dashed">
-          <div className="flex-1">BPP</div>
-          <div className="flex gap-2 flex-2">
+                </div>
+
+                <div className="flex items-center justify-between rounded-2xl border border-rose-200 bg-rose-50/90 px-4 py-3 font-semibold text-rose-600">
+                  <div>Total Biaya</div>
+                  <div>{IDRFormat(totalBiaya)}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 rounded-[24px] border border-slate-200 bg-slate-50/70 p-4 md:p-5">
+              <div className="text-sm font-semibold uppercase tracking-[0.18em] text-sky-700">
+                Rincian Pembiayaan
+              </div>
+
+              <div className="flex items-center justify-between rounded-2xl border border-sky-200 bg-sky-50/90 px-4 py-3 font-semibold text-sky-700">
+                <div>Terima Kotor</div>
+                <div>{IDRFormat(terimaKotor)}</div>
+              </div>
+
+              <SimulasiRow label="BPP">
             <Input
-              size="small"
+              size="middle"
               value={IDRFormat(data.c_bpp || 0)}
               style={{ textAlign: "right", color: "black" }}
               onChange={(e) =>
@@ -566,13 +639,11 @@ export default function Page() {
                 })
               }
             />
-          </div>
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 text-red-500 border-b border-dashed">
-          <div className="flex-1">Nominal Takeover</div>
-          <div className="flex gap-2 flex-2">
+              </SimulasiRow>
+
+              <SimulasiRow label="Nominal Takeover">
             <Input
-              size="small"
+              size="middle"
               value={IDRFormat(data.c_takeover || 0)}
               style={{ textAlign: "right", color: "black" }}
               onChange={(e) =>
@@ -582,48 +653,48 @@ export default function Page() {
                 })
               }
             />
-          </div>
-        </div>
-        <div className="flex gap-2 justify-between items-center my-1 font-bold text-green-500 border-t mt-2">
-          <div className="flex-1">Terima Bersih</div>
-          <div className="text-right">
-            {IDRFormat(
-              data.plafon - (GetBiaya(data) + data.c_bpp + data.c_takeover),
-            )}
-          </div>
-        </div>
-        <Divider style={{ marginBottom: 5 }}>Informasi Tambahan</Divider>
-        <div className="italic">
-          <div className="flex justify-between border-b border-dashed">
-            <div>Sisa Gaji</div>
-            <div>{IDRFormat(data.salary - data.angsuran)}</div>
-          </div>
-          <div className="flex justify-between border-b border-dashed">
-            <div>Debt Service Ratio</div>
-            <div>
-              {((data.angsuran / data.salary) * 100).toFixed(2)} % /{" "}
-              {data.Sumdan.dsr} %
+              </SimulasiRow>
+
+              <div className="flex items-center justify-between rounded-2xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 font-semibold text-emerald-700">
+                <div>Terima Bersih</div>
+                <div>{IDRFormat(terimaBersih)}</div>
+              </div>
+            </div>
+
+            <div className="rounded-[24px] border border-slate-200 bg-slate-50/72 p-4 md:p-5">
+              <Divider style={{ marginTop: 0, marginBottom: 12 }}>Informasi Tambahan</Divider>
+              <div className="space-y-3 text-sm italic text-slate-700">
+                <div className="flex items-center justify-between rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3">
+                  <div>Sisa Gaji</div>
+                  <div className="font-semibold">{IDRFormat(sisaGaji)}</div>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3">
+                  <div>Debt Service Ratio</div>
+                  <div className="font-semibold">
+                    {dsr.toFixed(2)} % / {data.Sumdan.dsr} %
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="mt-5 flex justify-between">
-          <Button
-            danger
-            icon={<HistoryOutlined />}
-            onClick={() => setData(defaultData)}
-          >
-            Reset
-          </Button>
-          <Button
-            type="primary"
-            icon={<PrinterOutlined />}
-            onClick={() => setOpen(true)}
-          >
-            Cetak
-          </Button>
-        </div>
-      </Card>
+        </Card>
+      </div>
       <ModalDetailPembiayaan data={data} setOpen={setOpen} open={open} />
+    </div>
+  );
+}
+
+function SimulasiRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3">
+      <div className="min-w-0 flex-1 text-sm font-medium text-slate-700">{label}</div>
+      <div className="flex gap-2">{children}</div>
     </div>
   );
 }

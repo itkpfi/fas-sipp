@@ -251,16 +251,25 @@ export const ProsesPembiayaan = ({
   );
 };
 
-export const FilterData = ({ children }: { children: React.ReactNode }) => {
+export const FilterData = ({
+  children,
+  buttonClassName = "",
+  buttonSize = "small",
+}: {
+  children: React.ReactNode;
+  buttonClassName?: string;
+  buttonSize?: "small" | "middle" | "large";
+}) => {
   const [open, setOpen] = useState(false);
 
   return (
     <div>
       <Button
         icon={<FilterOutlined />}
-        size="small"
+        size={buttonSize}
         onClick={() => setOpen(true)}
         type="primary"
+        className={buttonClassName}
       >
         Filter
       </Button>

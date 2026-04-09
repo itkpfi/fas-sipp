@@ -1,7 +1,7 @@
 "use client";
 
 import { LoadingOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Input } from "antd";
+import { Button, Input } from "antd";
 import moment from "moment";
 import { useState } from "react";
 
@@ -11,6 +11,7 @@ export default function Home() {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  const appLogoSrc = process.env.NEXT_PUBLIC_APP_LOGO || "/logsvg.svg";
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -34,98 +35,99 @@ export default function Home() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-blue-500 to-purple-600">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-2xl">
-        {/* Logo Section */}
-        <div className="text-center">
-          <img
-            src={process.env.NEXT_PUBLIC_APP_LOGO ?? "/images/app_logo.png"}
-            alt={`${process.env.NEXT_PUBLIC_APP_FULLNAME ?? "KOPJAS"} Logo`}
-            className="mx-auto w-40"
-          />
-        </div>
+    <div className="min-h-screen px-4 py-5 md:px-8 md:py-8 lg:px-12">
+      <div className="app-auth-shell mx-auto grid min-h-[calc(100vh-2.5rem)] max-w-7xl xl:grid-cols-[1.15fr_0.85fr]">
+        <section className="relative flex items-center justify-center px-6 py-8 text-white md:px-10 md:py-10 xl:px-12 xl:py-12">
+          <div className="relative z-10 flex w-full max-w-2xl flex-col items-center justify-center rounded-[32px] border border-white/14 bg-white/10 px-8 py-12 text-center shadow-[0_24px_60px_rgba(2,6,23,0.2)] backdrop-blur md:px-12 md:py-16">
+            <img
+              src={appLogoSrc}
+              alt={`${process.env.NEXT_PUBLIC_APP_FULLNAME ?? "KOPJAS"} Logo`}
+              className="h-20 w-auto md:h-24"
+            />
+            <h1 className="mt-8 text-3xl font-bold tracking-[-0.03em] text-white md:text-5xl">
+              {process.env.NEXT_PUBLIC_APP_FULLNAME ?? "KOPJAS SJM"}
+            </h1>
+          </div>
+        </section>
 
-        {/* Login Form */}
-        <div className="space-y-6">
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Username
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <UserOutlined />
+        <section className="relative flex items-center justify-center bg-white/86 p-6 md:p-10 xl:p-12">
+          <div className="w-full max-w-md space-y-8">
+            <div className="space-y-4 text-center">
+              <div>
+                <h2 className="text-3xl font-bold tracking-[-0.03em] text-slate-950 md:text-[2.1rem]">
+                  Masuk
+                </h2>
               </div>
-              <input
-                type="text"
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Masukkan username"
-                required
-              />
             </div>
-          </div>
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Password
-            </label>
-            <div className="relative">
-              <Input.Password
-                prefix={<LockOutlined />}
+            <div className="app-card space-y-5 p-6 md:p-7">
+              <div>
+                <label htmlFor="username" className="mb-2 block text-sm font-semibold text-slate-700">
+                  Username
+                </label>
+                <Input
+                  id="username"
+                  size="large"
+                  prefix={<UserOutlined className="text-slate-400" />}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Masukkan username"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-700">
+                  Password
+                </label>
+                <Input.Password
+                  prefix={<LockOutlined className="text-slate-400" />}
+                  size="large"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Masukkan password"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <label htmlFor="rememberMe" className="flex cursor-pointer items-center gap-2 text-sm text-slate-600">
+                  <input
+                    type="checkbox"
+                    id="rememberMe"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  Ingat Saya
+                </label>
+              </div>
+
+              {err && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs italic text-red-600">
+                  {err}
+                </div>
+              )}
+
+              <Button
+                type="primary"
                 size="large"
-                // type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Masukkan password"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="rememberMe"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="rememberMe"
-                className="ml-2 block text-sm text-gray-700"
+                block
+                className="!h-[52px] !rounded-[18px] !bg-[linear-gradient(135deg,#0f513f_0%,#178a6d_50%,#2563eb_100%)] !shadow-[0_18px_36px_rgba(15,81,63,0.22)]"
+                onClick={() => handleSubmit()}
               >
-                Ingat Saya
-              </label>
+                {loading ? <LoadingOutlined /> : null} Masuk
+              </Button>
+            </div>
+
+            <div className="border-t border-slate-200 pt-5 text-center">
+              <p className="text-xs text-slate-500">
+                © {moment().format("YYYY")} {process.env.NEXT_PUBLIC_APP_FULLNAME ?? "SYREL"}. All rights reserved.
+              </p>
             </div>
           </div>
-          {err && <div className="italic text-red-500 text-xs">{err}</div>}
-          <button
-            className="w-full bg-linear-to-r from-blue-500 to-purple-600 text-white py-2 px-4 rounded-md hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 transform hover:scale-105 cursor-pointer"
-            onClick={() => handleSubmit()}
-          >
-            {loading ? <LoadingOutlined /> : ""} Masuk
-          </button>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-8 pt-6 border-t border-gray-200 text-center">
-          <p className="text-xs text-gray-500">
-            © {moment().format("YYYY")}{" "}
-            {process.env.NEXT_PUBLIC_APP_FULLNAME ?? "SYREL"}. All rights
-            reserved.
-          </p>
-        </div>
+        </section>
       </div>
     </div>
   );

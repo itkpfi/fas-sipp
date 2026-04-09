@@ -45,7 +45,6 @@ import { JenisPembiayaan, Sumdan } from "@prisma/client";
 import {
   App,
   Button,
-  Card,
   DatePicker,
   Input,
   Modal,
@@ -536,177 +535,200 @@ export default function Page() {
     },
   ];
 
+  const totalPlafond = pageProps.data.reduce((acc, item) => acc + item.plafond, 0);
+  const totalApproved = pageProps.data.filter((item) => item.dropping_status === "APPROVED").length;
+  const totalQueue = pageProps.data.filter((item) => ["DRAFT", "PENDING"].includes(item.dropping_status)).length;
+  const totalProcess = pageProps.data.filter((item) => item.dropping_status === "PROCCESS").length;
+  const totalFinal = pageProps.data.filter((item) => ["APPROVED", "PAID_OFF"].includes(item.dropping_status)).length;
+
   return (
-    <Card
-      title={
-        <div className="flex gap-2 font-bold text-xl">
-          <ReadOutlined /> Monitoring Pembiayaan
+    <div className="space-y-5">
+      <section className="app-page-hero grid gap-5 p-6 md:p-7 xl:grid-cols-[1.15fr_0.85fr]">
+        <div className="relative z-10 space-y-4">
+          <h1 className="text-3xl font-bold tracking-[-0.03em] text-white md:text-4xl">
+            Monitoring Pembiayaan
+          </h1>
         </div>
-      }
-      styles={{ body: { padding: 5 } }}
-    >
-      <div className="flex justify-between my-1 gap-2 overflow-auto">
-        <div className="flex gap-2">
-          {hasAccess("write") && (
-            <Link href={"/monitoring/upsert"}>
-              <Button size="small" icon={<PlusCircleOutlined />} type="primary">
-                Add New
-              </Button>
-            </Link>
-          )}
-          <FilterData
-            children={
-              <>
-                <div className="my-2">
-                  <p>Periode :</p>
-                  <RangePicker
-                    size="small"
-                    onChange={(date, dateStr) =>
-                      setPageProps({ ...pageProps, backdate: dateStr })
-                    }
-                    style={{ width: "100%" }}
-                  />
-                </div>
-                {user && !user.sumdanId && (
-                  <div className="my-2">
-                    <p>Mitra pembiayaan :</p>
+
+        <div className="relative z-10 grid gap-3 self-end sm:grid-cols-2">
+          <div className="rounded-[24px] border border-white/16 bg-white/12 p-4 backdrop-blur">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">Total plafon</div>
+            <div className="mt-2 text-2xl font-bold text-white">Rp. {IDRFormat(totalPlafond)}</div>
+          </div>
+          <div className="rounded-[24px] border border-white/16 bg-white/12 p-4 backdrop-blur">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">Hasil filter</div>
+            <div className="mt-2 text-2xl font-bold text-white">{pageProps.total || pageProps.data.length} data</div>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="app-stat-tile">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Antrian</div>
+            <div className="mt-2 text-3xl font-bold text-slate-900">{totalQueue}</div>
+          </div>
+          <div className="app-stat-tile">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Proses</div>
+            <div className="mt-2 text-3xl font-bold text-slate-900">{totalProcess}</div>
+          </div>
+          <div className="app-stat-tile">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Approved</div>
+            <div className="mt-2 text-3xl font-bold text-slate-900">{totalApproved}</div>
+          </div>
+          <div className="app-stat-tile">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Final</div>
+            <div className="mt-2 text-3xl font-bold text-slate-900">{totalFinal}</div>
+          </div>
+      </section>
+
+      <section className="app-toolbar-panel p-4 md:p-5">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-wrap gap-3">
+            {hasAccess("write") && (
+              <Link href={"/monitoring/upsert"}>
+                <Button icon={<PlusCircleOutlined />} type="primary" className="!rounded-2xl !px-5">
+                  Add New
+                </Button>
+              </Link>
+            )}
+            <FilterData
+              buttonSize="large"
+              buttonClassName="!rounded-2xl !px-5"
+              children={
+                <div className="space-y-3 p-1">
+                  <div>
+                    <p className="mb-2 text-sm font-semibold text-slate-700">Periode</p>
+                    <RangePicker
+                      size="middle"
+                      onChange={(date, dateStr) => setPageProps({ ...pageProps, backdate: dateStr })}
+                      style={{ width: "100%" }}
+                    />
+                  </div>
+                  {user && !user.sumdanId && (
+                    <div>
+                      <p className="mb-2 text-sm font-semibold text-slate-700">Mitra pembiayaan</p>
+                      <Select
+                        size="middle"
+                        placeholder="Pilih Mitra..."
+                        options={sumdans.map((s) => ({
+                          label: s.code,
+                          value: s.id,
+                        }))}
+                        onChange={(e) => setPageProps({ ...pageProps, sumdanId: e })}
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <p className="mb-2 text-sm font-semibold text-slate-700">Jenis pembiayaan</p>
                     <Select
-                      size="small"
-                      placeholder="Pilih Mitra..."
-                      options={sumdans.map((s) => ({
-                        label: s.code,
+                      size="middle"
+                      placeholder="Pilih Jenis..."
+                      options={jeniss.map((s) => ({
+                        label: s.name,
                         value: s.id,
                       }))}
-                      onChange={(e) =>
-                        setPageProps({ ...pageProps, sumdanId: e })
-                      }
+                      onChange={(e) => setPageProps({ ...pageProps, jenisPembiayaanId: e })}
                       allowClear
                       style={{ width: "100%" }}
                     />
                   </div>
-                )}
-                <div className="my-2">
-                  <p>Jenis pembiayaan :</p>
-                  <Select
-                    size="small"
-                    placeholder="Pilih Jenis..."
-                    options={jeniss.map((s) => ({
-                      label: s.name,
-                      value: s.id,
-                    }))}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, jenisPembiayaanId: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
+                  <div>
+                    <p className="mb-2 text-sm font-semibold text-slate-700">Status pembiayaan</p>
+                    <Select
+                      size="middle"
+                      placeholder="Pilih Status..."
+                      options={[
+                        { label: "Saved", value: "DRAFT" },
+                        { label: "Antri", value: "PENDING" },
+                        { label: "Proses", value: "PROCCESS" },
+                        { label: "Dropping", value: "APPROVED" },
+                        { label: "Batal", value: "CANCEL" },
+                        { label: "Lunas", value: "PAID_OFF" },
+                        { label: "Final", value: "final" },
+                      ]}
+                      onChange={(e) => setPageProps({ ...pageProps, dropping_status: e })}
+                      allowClear
+                      style={{ width: "100%" }}
+                    />
+                  </div>
                 </div>
-                <div className="my-2">
-                  <p>Status pembiayaan</p>
-                  <Select
-                    size="small"
-                    placeholder="Pilih Status..."
-                    options={[
-                      { label: "Saved", value: "DRAFT" },
-                      { label: "Antri", value: "PENDING" },
-                      { label: "Proses", value: "PROCCESS" },
-                      { label: "Dropping", value: "APPROVED" },
-                      { label: "Batal", value: "CANCEL" },
-                      { label: "Lunas", value: "PAID_OFF" },
-                      { label: "Final", value: "final" },
-                    ]}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, dropping_status: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
-                </div>
-              </>
-            }
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button
-            icon={<PrinterOutlined />}
-            size="small"
-            type="primary"
-            onClick={() =>
-              ExportToExcel(
-                [
-                  {
-                    sheetname: "alldata",
-                    data: MappingToExcelDapem(pageProps.data),
-                  },
-                  {
-                    sheetname: "antri",
-                    data: MappingToExcelDapem(
-                      pageProps.data.filter((d) =>
-                        ["DRAFT", "PENDING"].includes(d.dropping_status),
-                      ),
-                    ),
-                  },
-                  {
-                    sheetname: "final",
-                    data: MappingToExcelDapem(
-                      pageProps.data.filter((d) =>
-                        ["PROCCESS", "APPROVED"].includes(d.dropping_status),
-                      ),
-                    ),
-                  },
-                  {
-                    sheetname: "dropping",
-                    data: MappingToExcelDapem(
-                      pageProps.data.filter(
-                        (d) => d.dropping_status === "APPROVED",
-                      ),
-                    ),
-                  },
-                ],
-                "monitoring",
-              )
-            }
-          >
-            Excel
-          </Button>
-          <Button
-            icon={<PrinterOutlined />}
-            size="small"
-            type="primary"
-            onClick={() =>
-              printMonitoring(pageProps.data, sumdans, pageProps.backdate)
-            }
-          >
-            PDF
-          </Button>
-          {hasAccess("write") && (
+              }
+            />
             <Button
               icon={<PrinterOutlined />}
-              type="primary"
-              size="small"
-              onClick={() => printForm()}
+              onClick={() =>
+                ExportToExcel(
+                  [
+                    {
+                      sheetname: "alldata",
+                      data: MappingToExcelDapem(pageProps.data),
+                    },
+                    {
+                      sheetname: "antri",
+                      data: MappingToExcelDapem(
+                        pageProps.data.filter((d) => ["DRAFT", "PENDING"].includes(d.dropping_status)),
+                      ),
+                    },
+                    {
+                      sheetname: "final",
+                      data: MappingToExcelDapem(
+                        pageProps.data.filter((d) => ["PROCCESS", "APPROVED"].includes(d.dropping_status)),
+                      ),
+                    },
+                    {
+                      sheetname: "dropping",
+                      data: MappingToExcelDapem(pageProps.data.filter((d) => d.dropping_status === "APPROVED")),
+                    },
+                  ],
+                  "monitoring",
+                )
+              }
+              className="!rounded-2xl"
             >
-              Form
+              Excel
             </Button>
-          )}
-          <Input.Search
-            size="small"
-            style={{ width: 170 }}
-            placeholder="Cari nama..."
-            onChange={(e) =>
-              setPageProps({ ...pageProps, search: e.target.value })
-            }
-          />
+            <Button
+              icon={<PrinterOutlined />}
+              onClick={() => printMonitoring(pageProps.data, sumdans, pageProps.backdate)}
+              className="!rounded-2xl"
+            >
+              PDF
+            </Button>
+            {hasAccess("write") && (
+              <Button icon={<PrinterOutlined />} onClick={() => printForm()} className="!rounded-2xl">
+                Form
+              </Button>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
+            <Input.Search
+              size="large"
+              className="md:w-[260px]"
+              placeholder="Cari nama..."
+              onChange={(e) => setPageProps({ ...pageProps, search: e.target.value })}
+            />
+          </div>
         </div>
-      </div>
+      </section>
+
+      <section className="app-card p-3 md:p-4">
+          <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="app-section-title text-xl">Daftar monitoring</h2>
+            </div>
+            <div className="app-soft-pill">Periode: {pageProps.backdate ? pageProps.backdate.toString() : "bulan berjalan"}</div>
+          </div>
 
       <Table
+        className="app-table-modern"
         columns={columns}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         loading={loading}
         rowKey={"id"}
-        bordered
         scroll={{ x: "max-content", y: "60vh" }}
         pagination={{
           current: pageProps.page,
@@ -748,7 +770,7 @@ export default function Page() {
           );
 
           return (
-            <Table.Summary.Row className="text-xs bg-blue-400">
+            <Table.Summary.Row className="bg-slate-100 text-xs">
               <Table.Summary.Cell index={0} colSpan={2} className="text-center">
                 <b>SUMMARY</b>
               </Table.Summary.Cell>
@@ -771,6 +793,7 @@ export default function Page() {
           );
         }}
       />
+      </section>
 
       {selected.selected && selected.proses && (
         <SendSubmission
@@ -823,7 +846,7 @@ export default function Page() {
         setOpen={(v: boolean) => setViews({ ...views, open: v })}
         data={{ ...views }}
       />
-    </Card>
+    </div>
   );
 }
 

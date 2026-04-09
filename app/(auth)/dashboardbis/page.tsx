@@ -72,6 +72,28 @@ export default function Page() {
     return () => clearTimeout(timeout);
   }, [pageProps.backdate]);
 
+  const totalPlafond = pageProps.data
+    .flatMap((area) => area.Cabang)
+    .flatMap((cabang) => cabang.User)
+    .flatMap((user) => user.AODapem)
+    .reduce((acc, curr) => acc + curr.plafond, 0);
+
+  const totalTarget = pageProps.data
+    .flatMap((area) => area.Cabang)
+    .flatMap((cabang) => cabang.User)
+    .reduce((acc, curr) => acc + curr.target, 0);
+
+  const totalNoa = pageProps.data
+    .flatMap((area) => area.Cabang)
+    .flatMap((cabang) => cabang.User)
+    .flatMap((user) => user.AODapem).length;
+
+  const totalAo = pageProps.data
+    .flatMap((area) => area.Cabang)
+    .flatMap((cabang) => cabang.User).length;
+
+  const overallProgress = totalTarget > 0 ? (totalPlafond / totalTarget) * 100 : 0;
+
   const columns: TableProps<ISumdan>["columns"] = [
     {
       title: "ID",
@@ -133,155 +155,217 @@ export default function Page() {
 
   return (
     <Spin spinning={loading}>
-      <div className="p-2 bg-white">
-        <div className="flex gap-4 font-bold text-2xl m-2 items-end">
-          <p>Data Pencapaian By Area</p>
-          <RangePicker
-            size="small"
-            onChange={(date, dateStr) =>
-              setPageProps({ ...pageProps, backdate: dateStr })
-            }
-            style={{ width: 200 }}
-          />
-        </div>
-        <div className="flex flex-col mt-5 gap-4 overflow-auto">
-          {pageProps.data &&
-            pageProps.data.map((a) => (
-              <div key={a.id} className="flex border items-center">
-                <div className="border-r h-full font-bold text-2xl p-2 w-60 ">
-                  {(() => {
-                    const noa = a.Cabang.flatMap((ac) =>
-                      ac.User.flatMap((acu) => acu.AODapem),
-                    );
-                    const pencapaian = noa.reduce(
-                      (acc, curr) => acc + curr.plafond,
-                      0,
-                    );
-                    const target = a.Cabang.flatMap((ac) => ac.User).reduce(
-                      (acc, curr) => acc + curr.target,
-                      0,
-                    );
-                    return (
-                      <div className="italic flex flex-col gap-1 items-center justify-center text-center">
-                        <p>{a.name}</p>
-                        <p className="text-sm opacity-70">
-                          {IDRFormat(pencapaian)}/{IDRFormat(target)}
-                        </p>
-                        <p className="text-sm opacity-70">
-                          ({noa.length} NOA) (
-                          {((pencapaian / target) * 100).toFixed(2)}%)
-                        </p>
-                      </div>
-                    );
-                  })()}
-                </div>
-                <div className="flex flex-col flex-1 gap-4">
-                  {a.Cabang.map((c) => (
-                    <div className={`flex items-center border`} key={c.id}>
-                      <div className="border-r h-full font-semibold text-lg p-2 w-48 text-center">
-                        <p>{c.name}</p>
-                      </div>
-                      <div className="flex-1 flex flex-col">
-                        {c.User.map((u) => (
-                          <div
-                            className="flex justify-between gap-2 border-b border-gray-400"
-                            key={u.id}
-                          >
-                            <div className="border-r px-1 w-54">
-                              {u.fullname} ({u.position})
-                            </div>
-                            <div className="border-r px-1 flex-1 text-right">
-                              {IDRFormat(
-                                u.AODapem.reduce(
-                                  (acc, curr) => acc + curr.plafond,
-                                  0,
-                                ),
-                              )}{" "}
-                              ({u.AODapem.length})
-                            </div>
-                            <div className="border-r px-1 flex-1 text-right">
-                              {IDRFormat(u.target)}
-                            </div>
-                            <div
-                              className={`border-r px-1 w-26 text-right ${
-                                (u.AODapem.reduce(
-                                  (acc, curr) => acc + curr.plafond,
-                                  0,
-                                ) /
-                                  u.target) *
-                                  100 >=
-                                100
-                                  ? "text-green-500"
-                                  : "text-red-500"
-                              }`}
-                            >
-                              {(
-                                (u.AODapem.reduce(
-                                  (acc, curr) => acc + curr.plafond,
-                                  0,
-                                ) /
-                                  u.target) *
-                                100
-                              ).toFixed(2)}
-                              %
-                            </div>
-                          </div>
-                        ))}
-                        <div className="flex justify-between gap-2 font-bold text-right">
-                          <div className="border-r px-1 w-54">TOTAL</div>
-                          <div className="border-r px-1 flex-1">
-                            {IDRFormat(
-                              c.User.flatMap((cdp) => cdp.AODapem).reduce(
-                                (acc, curr) => acc + curr.plafond,
-                                0,
-                              ),
-                            )}{" "}
-                            ({c.User.flatMap((cdp) => cdp.AODapem).length})
-                          </div>
-                          <div className="border-r px-1 flex-1">
-                            {IDRFormat(
-                              c.User.reduce(
-                                (acc, curr) => acc + curr.target,
-                                0,
-                              ),
-                            )}
-                          </div>
+      <div className="space-y-6 p-1 md:p-2">
+        <section className="app-page-hero space-y-5 p-6 md:p-7">
+          <div className="relative z-10">
+            <h1 className="text-3xl font-bold tracking-[-0.03em] text-white md:text-4xl">
+              Dashboard Bisnis
+            </h1>
+          </div>
 
-                          <div className="border-r px-1 w-26">
-                            {(
-                              (c.User.flatMap((cdp) => cdp.AODapem).reduce(
-                                (acc, curr) => acc + curr.plafond,
-                                0,
-                              ) /
-                                c.User.reduce(
-                                  (acc, curr) => acc + curr.target,
-                                  0,
-                                )) *
-                              100
-                            ).toFixed(2)}
-                            %
-                          </div>
-                        </div>
+          <div className="relative z-10 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <HeroMetric label="Total pencapaian" value={`Rp. ${IDRFormat(totalPlafond)}`} />
+            <HeroMetric label="Total target" value={`Rp. ${IDRFormat(totalTarget)}`} />
+            <HeroMetric label="Total NOA" value={`${totalNoa}`} />
+            <HeroMetric label="Progress" value={`${overallProgress.toFixed(2)}%`} />
+          </div>
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="app-stat-tile">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Area aktif</div>
+            <div className="mt-2 text-3xl font-bold text-slate-900">{pageProps.data.length}</div>
+          </div>
+          <div className="app-stat-tile">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">AO terpantau</div>
+            <div className="mt-2 text-3xl font-bold text-slate-900">{totalAo}</div>
+          </div>
+          <div className="app-stat-tile">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Rata-rata area</div>
+            <div className="mt-2 text-3xl font-bold text-slate-900">
+              Rp. {IDRFormat(pageProps.data.length ? totalPlafond / pageProps.data.length : 0)}
+            </div>
+          </div>
+          <div className="app-stat-tile">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Mitra aktif</div>
+            <div className="mt-2 text-3xl font-bold text-slate-900">{sumdan.length}</div>
+          </div>
+        </section>
+
+        <section className="app-toolbar-panel p-4 md:p-5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                Filter data
+              </p>
+              <h2 className="text-xl font-semibold text-slate-900">Data pencapaian by area</h2>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-2">
+              <RangePicker
+                size="large"
+                onChange={(date, dateStr) => setPageProps({ ...pageProps, backdate: dateStr })}
+                style={{ width: 260 }}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="app-stat-strip gap-4">
+          {pageProps.data &&
+            pageProps.data.map((area) => {
+              const areaNoa = area.Cabang.flatMap((cabang) => cabang.User.flatMap((user) => user.AODapem));
+              const areaPencapaian = areaNoa.reduce((acc, curr) => acc + curr.plafond, 0);
+              const areaTarget = area.Cabang.flatMap((cabang) => cabang.User).reduce(
+                (acc, curr) => acc + curr.target,
+                0,
+              );
+              const areaProgress = areaTarget > 0 ? (areaPencapaian / areaTarget) * 100 : 0;
+
+              return (
+                <article key={area.id} className="app-card space-y-5 p-4 md:p-5">
+                  <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                    <div className="space-y-3">
+                      <div className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{area.name}</div>
+                      <div>
+                        <h3 className="text-2xl font-semibold tracking-[-0.03em] text-slate-900">
+                          {IDRFormat(areaPencapaian)}
+                        </h3>
+                        <p className="mt-1 text-sm text-slate-600">
+                          Target {IDRFormat(areaTarget)} · {areaNoa.length} NOA · {area.Cabang.length} cabang
+                        </p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-        </div>
-      </div>
-      <div className="p-2 bg-white ">
-        <Table
-          columns={columns}
-          dataSource={sumdan}
-          size="small"
-          loading={loading}
-          rowKey={"id"}
-          bordered
-          scroll={{ x: "max-content" }}
-          pagination={false}
-        />
+
+                    <div className="min-w-[240px] rounded-[24px] border border-slate-200 bg-slate-50/90 p-4">
+                      <div className="flex items-center justify-between text-sm font-medium text-slate-600">
+                        <span>Progress area</span>
+                        <span className={areaProgress >= 100 ? "text-emerald-600" : "text-amber-600"}>
+                          {areaProgress.toFixed(2)}%
+                        </span>
+                      </div>
+                      <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-200">
+                        <div
+                          className={`h-full rounded-full ${
+                            areaProgress >= 100 ? "bg-emerald-500" : "bg-sky-500"
+                          }`}
+                          style={{ width: `${Math.min(areaProgress, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 xl:grid-cols-2">
+                    {area.Cabang.map((cabang) => {
+                      const cabangNoa = cabang.User.flatMap((user) => user.AODapem);
+                      const cabangPencapaian = cabangNoa.reduce((acc, curr) => acc + curr.plafond, 0);
+                      const cabangTarget = cabang.User.reduce((acc, curr) => acc + curr.target, 0);
+                      const cabangProgress = cabangTarget > 0 ? (cabangPencapaian / cabangTarget) * 100 : 0;
+
+                      return (
+                        <div key={cabang.id} className="rounded-[24px] border border-slate-200 bg-slate-50/75 p-4 shadow-[0_12px_26px_rgba(15,23,42,0.04)]">
+                          <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                              <h4 className="text-lg font-semibold text-slate-900">{cabang.name}</h4>
+                              <p className="mt-1 text-sm text-slate-600">
+                                {cabang.User.length} AO · {cabangNoa.length} NOA
+                              </p>
+                            </div>
+                            <div className="text-sm text-slate-600 sm:text-right">
+                              <div className="font-semibold text-slate-900">{IDRFormat(cabangPencapaian)}</div>
+                              <div>Target {IDRFormat(cabangTarget)}</div>
+                              <div className={cabangProgress >= 100 ? "text-emerald-600" : "text-amber-600"}>
+                                {cabangProgress.toFixed(2)}%
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 space-y-3">
+                            {cabang.User.map((user) => {
+                              const userPencapaian = user.AODapem.reduce((acc, curr) => acc + curr.plafond, 0);
+                              const userProgress = user.target > 0 ? (userPencapaian / user.target) * 100 : 0;
+
+                              return (
+                                <div
+                                  key={user.id}
+                                  className="rounded-2xl border border-white/80 bg-white/90 p-3 shadow-[0_10px_24px_rgba(15,23,42,0.04)]"
+                                >
+                                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                    <div>
+                                      <div className="font-medium text-slate-900">
+                                        {user.fullname} <span className="text-slate-500">({user.position})</span>
+                                      </div>
+                                      <div className="mt-1 text-sm text-slate-600">
+                                        {user.AODapem.length} NOA · Target {IDRFormat(user.target)}
+                                      </div>
+                                    </div>
+                                    <div className="text-sm sm:text-right">
+                                      <div className="font-semibold text-slate-900">{IDRFormat(userPencapaian)}</div>
+                                      <div className={userProgress >= 100 ? "text-emerald-600" : "text-rose-600"}>
+                                        {userProgress.toFixed(2)}%
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
+                                    <div
+                                      className={`h-full rounded-full ${
+                                        userProgress >= 100 ? "bg-emerald-500" : "bg-rose-400"
+                                      }`}
+                                      style={{ width: `${Math.min(userProgress, 100)}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })}
+
+                            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-100/85 px-4 py-3 text-sm font-semibold text-slate-700">
+                              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                                <span>TOTAL CABANG</span>
+                                <span>
+                                  {IDRFormat(cabangPencapaian)} · {cabangNoa.length} NOA · {cabangProgress.toFixed(2)}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </article>
+              );
+            })}
+        </section>
+
+        <section className="app-card space-y-4 p-4 md:p-5">
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                Distribusi mitra
+              </p>
+              <h2 className="mt-1 text-xl font-semibold text-slate-900">Pencapaian berdasarkan mitra</h2>
+            </div>
+          </div>
+          <div className="app-table-modern">
+            <Table
+              columns={columns}
+              dataSource={sumdan}
+              size="small"
+              loading={loading}
+              rowKey={"id"}
+              scroll={{ x: "max-content" }}
+              pagination={false}
+            />
+          </div>
+        </section>
       </div>
     </Spin>
+  );
+}
+
+function HeroMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[24px] border border-white/12 bg-white/10 p-4 backdrop-blur xl:min-h-[112px]">
+      <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-100/82">{label}</div>
+      <div className="mt-2 text-2xl font-semibold text-white">{value}</div>
+    </div>
   );
 }
