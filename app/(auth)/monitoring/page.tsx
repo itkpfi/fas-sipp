@@ -41,7 +41,7 @@ import {
   RobotOutlined,
   SwapOutlined,
 } from "@ant-design/icons";
-import { JenisPembiayaan, Sumdan } from "@prisma/client";
+import { Area, Cabang, JenisPembiayaan, Sumdan } from "@prisma/client";
 import {
   App,
   Button,
@@ -78,6 +78,8 @@ export default function Page() {
     jenisPembiayaanId: "",
     dropping_status: "",
     backdate: "",
+    cabangId: "",
+    areaId: "",
   });
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<IActionTableAkad<IDapem>>({
@@ -89,6 +91,8 @@ export default function Page() {
   });
   const [sumdans, setSumdans] = useState<Sumdan[]>([]);
   const [jeniss, setJeniss] = useState<JenisPembiayaan[]>([]);
+  const [cabangs, setCabangs] = useState<Cabang[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
   const { modal } = App.useApp();
   const { hasAccess } = useAccess("/monitoring");
   const user = useUser();
@@ -111,6 +115,8 @@ export default function Page() {
     if (pageProps.dropping_status)
       params.append("dropping_status", pageProps.dropping_status);
     if (pageProps.backdate) params.append("backdate", pageProps.backdate);
+    if (pageProps.cabangId) params.append("cabangId", pageProps.cabangId);
+    if (pageProps.areaId) params.append("areaId", pageProps.areaId);
 
     const res = await fetch(`/api/dapem?${params.toString()}`);
     const json = await res.json();
@@ -135,6 +141,8 @@ export default function Page() {
     pageProps.jenisPembiayaanId,
     pageProps.dropping_status,
     pageProps.backdate,
+    pageProps.cabangId,
+    pageProps.areaId,
   ]);
 
   useEffect(() => {
@@ -145,6 +153,12 @@ export default function Page() {
       await fetch("/api/jenis")
         .then((res) => res.json())
         .then((res) => setJeniss(res.data));
+      await fetch("/api/unit")
+        .then((res) => res.json())
+        .then((res) => setCabangs(res.data));
+      await fetch("/api/area")
+        .then((res) => res.json())
+        .then((res) => setAreas(res.data));
     })();
   }, []);
 
@@ -617,6 +631,38 @@ export default function Page() {
                     ]}
                     onChange={(e) =>
                       setPageProps({ ...pageProps, dropping_status: e })
+                    }
+                    allowClear
+                    style={{ width: "100%" }}
+                  />
+                </div>
+                <div className="my-2">
+                  <p>Area</p>
+                  <Select
+                    size="small"
+                    placeholder="Pilih Area..."
+                    options={areas.map((a) => ({
+                      label: a.name,
+                      value: a.id,
+                    }))}
+                    onChange={(e) => setPageProps({ ...pageProps, areaId: e })}
+                    allowClear
+                    style={{ width: "100%" }}
+                  />
+                </div>
+                <div className="my-2">
+                  <p>Cabang</p>
+                  <Select
+                    size="small"
+                    placeholder="Pilih Cabang..."
+                    options={cabangs
+                      .filter((c) => c.areaId === pageProps.areaId)
+                      .map((c) => ({
+                        label: c.name,
+                        value: c.id,
+                      }))}
+                    onChange={(e) =>
+                      setPageProps({ ...pageProps, cabangId: e })
                     }
                     allowClear
                     style={{ width: "100%" }}

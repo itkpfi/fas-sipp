@@ -18,6 +18,8 @@ export const GET = async (request: NextRequest) => {
   const jenisPembiayaanId =
     request.nextUrl.searchParams.get("jenisPembiayaanId");
   const sumdanId = request.nextUrl.searchParams.get("sumdanId");
+  const areaId = request.nextUrl.searchParams.get("areaId");
+  const cabangId = request.nextUrl.searchParams.get("cabangId");
   const document_status = request.nextUrl.searchParams.get("document_status");
   const guarantee_status = request.nextUrl.searchParams.get("guarantee_status");
   const takeover_status = request.nextUrl.searchParams.get("takeover_status");
@@ -101,6 +103,8 @@ export const GET = async (request: NextRequest) => {
         Pelunasan: { status_paid: paid_status as ESubmissionStatus },
       }),
       ...(user.sumdanId && { ProdukPembiayaan: { sumdanId: user.sumdanId } }),
+      ...(areaId && { CreatedBy: { Cabang: { Area: { id: areaId } } } }),
+      ...(cabangId && { CreatedBy: { cabangId: cabangId } }),
       ...(backdate
         ? {
             created_at: {
@@ -214,6 +218,8 @@ export const GET = async (request: NextRequest) => {
         Pelunasan: { status_paid: paid_status as ESubmissionStatus },
       }),
       ...(user.sumdanId && { ProdukPembiayaan: { sumdanId: user.sumdanId } }),
+      ...(areaId && { CreatedBy: { Cabang: { Area: { id: areaId } } } }),
+      ...(cabangId && { CreatedBy: { cabangId: cabangId } }),
       ...(backdate
         ? {
             created_at: {

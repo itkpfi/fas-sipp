@@ -131,12 +131,12 @@ export const GetSisaPokokMargin = (data: IDapem) => {
       ? periode.date_paid
         ? periode.remaining
         : periode.remaining + periode.principal
-      : 0,
+      : data.plafond,
     count: periode
       ? periode.date_paid
         ? periode.counter
         : periode.counter + 1
-      : 0,
+      : 1,
     prevcount: periode
       ? periode.date_paid
         ? prev.length

@@ -2,11 +2,16 @@
 
 import { FormInput } from "@/components";
 import {
+  GetSisaPokokMargin,
   IDRFormat,
   IDRToNumber,
   serializeForApi,
 } from "@/components/utils/PembiayaanUtil";
-import { IActionTable, IPageProps } from "@/libs/IInterfaces";
+import {
+  IActionTable,
+  IPageProps,
+  IDapem as IDapemInterface,
+} from "@/libs/IInterfaces";
 import { useAccess } from "@/libs/Permission";
 import {
   BankOutlined,
@@ -135,7 +140,8 @@ export default function Page() {
         return (
           <div>
             <div className="text-xs  text-blue-400">
-              <p>Rounded : {IDRFormat(record.rounded)}</p>
+              <p>Rounded Debt: {IDRFormat(record.rounded)}</p>
+              <p>Rounded Mitra: {IDRFormat(record.rounded_sumdan)}</p>
               <p>DSR : {IDRFormat(record.dsr)}</p>
               <p>TBO : {record.tbo} Bulan</p>
               <p>Limit : {IDRFormat(Number(record.limit))}</p>
@@ -173,12 +179,13 @@ export default function Page() {
           0,
         );
         const os = record.ProdukPembiayaan.flatMap((d) =>
-          d.Dapem.filter((dp) => dp.dropping_status === "APPROVED").flatMap(
-            (dpa) => dpa.Angsuran,
-          ),
-        )
-          .filter((a) => a.date_paid !== null)
-          .sort((a, b) => b.counter - a.counter)[0].remaining;
+          d.Dapem.filter((dp) => dp.dropping_status === "APPROVED"),
+        ).reduce(
+          (acc, curr) =>
+            acc +
+            GetSisaPokokMargin(curr as unknown as IDapemInterface).principal,
+          0,
+        );
         return (
           <div className="flex flex-col">
             <Progress
@@ -893,6 +900,7 @@ function UpsertProduk({
 
   const handleSave = async () => {
     setLoading(true);
+    if ("Dapem" in data) delete data.Dapem;
     await fetch("/api/produk", {
       method: record ? "PUT" : "POST",
       body: JSON.stringify({ ...data, sumdanId: sumdan.id }),

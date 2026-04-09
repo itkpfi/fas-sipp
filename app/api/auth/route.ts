@@ -35,12 +35,14 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    const { Sumdan, Cabang, ...payload } = find;
+    const { Sumdan, Cabang, Role, password: userPass, ...payload } = find;
     await signIn({
       ...payload,
       sumdan: Sumdan ? Sumdan.name : null,
       cabang: Cabang.name || "",
       area: Cabang.Area.name || "",
+      password: userPass,
+      Role: { ...Role, permission: "[]" },
     });
     return NextResponse.json({ msg: "OK", status: 200 }, { status: 200 });
   } catch (err) {

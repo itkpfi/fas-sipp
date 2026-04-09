@@ -69,6 +69,7 @@ export const PUT = async (request: NextRequest) => {
       msg: "Berhasil memperbarui data produk pembiayaan.",
     });
   } catch (err) {
+    console.log(err);
     return NextResponse.json({
       status: 500,
       msg: "Gagal memperbarui data produk pembiayaan. internal server error.",
