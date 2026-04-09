@@ -247,7 +247,7 @@ export default function Page() {
             icon={<KeyOutlined />}
           />
           <StaticticItem
-            name="Pending Berkas & Jaminann"
+            name="Pending Berkas & Jaminan"
             all={`Jaminan ${data.droppingall.filter((d) => d.guarantee_status !== "MITRA" && d.dropping_status === "APPROVED").length} NOA`}
             month={`Berkas ${data.droppingall.filter((d) => d.document_status !== "MITRA" && d.dropping_status === "APPROVED").length} NOA`}
             color="text-gray-700"
