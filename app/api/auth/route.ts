@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import prisma from "@/libs/Prisma";
 import { getSession, signIn, signOut } from "@/libs/Auth";
+import { Role } from "@prisma/client";
 
 export const POST = async (req: NextRequest) => {
   const { username, password } = await req.json();
@@ -35,9 +36,10 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    const { Sumdan, Cabang, ...payload } = find;
+    const { Sumdan, Cabang, Role, ...payload } = find;
     await signIn({
       ...payload,
+      Role: { id: Role.id, name: Role.name } as Role,
       sumdan: Sumdan ? Sumdan.name : null,
       cabang: Cabang.name || "",
       area: Cabang.Area.name || "",

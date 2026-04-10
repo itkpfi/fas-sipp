@@ -7,6 +7,7 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   DeleteOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -22,7 +23,7 @@ import {
   Col,
 } from "antd";
 import moment from "moment";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface IAngsuranDetail {
   id: string;
@@ -201,12 +202,41 @@ const ModalDetailTagihan = ({
   open: boolean;
   setOpen: Function;
 }) => {
+  const printRef = useRef<HTMLDivElement>(null);
   const [editAngsuran, setEditAngsuran] = useState<IAngsuranDetail | null>(
     null,
   );
   const [editOpen, setEditOpen] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleDownloadImage = async () => {
+    if (printRef.current === null) {
+      message.warning("Data tagihan belum siap di-download");
+      return;
+    }
+
+    try {
+      const { toPng } = await import("html-to-image");
+      const dataUrl = await toPng(printRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+      });
+
+      const safeName = (data.fullname || "karyawan")
+        .replace(/[^a-z0-9]+/gi, "-")
+        .replace(/^-+|-+$/g, "")
+        .toLowerCase();
+
+      const link = document.createElement("a");
+      link.download = `tagihan-pinkar-${safeName || "karyawan"}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (error) {
+      console.error("Gagal mendownload data tagihan", error);
+      message.error("Gagal mendownload data tagihan");
+    }
+  };
 
   const angsuranBelumBayarList = data.angsuranList.filter((a) => !a.date_paid);
 
@@ -362,14 +392,11 @@ const ModalDetailTagihan = ({
     <Modal
       open={open}
       onCancel={() => setOpen(false)}
-      footer={[
-        <Button key="close" onClick={() => setOpen(false)}>
-          Tutup
-        </Button>,
-      ]}
+      footer={[]}
       width={1200}
       title="Detail Tagihan"
     >
+      <div ref={printRef} style={{ padding: 8, backgroundColor: "#fff" }}>
       {/* INFO UMUM */}
       <Card className="mb-4" title="Informasi Pinjaman">
         <Row gutter={[16, 16]}>
@@ -460,6 +487,18 @@ const ModalDetailTagihan = ({
           scroll={{ x: 800 }}
         />
       </Card>
+      </div>
+
+      <div className="flex justify-end gap-2 mt-2">
+        <Button onClick={() => setOpen(false)}>Tutup</Button>
+        <Button
+          type="primary"
+          icon={<DownloadOutlined />}
+          onClick={handleDownloadImage}
+        >
+          Download Data
+        </Button>
+      </div>
 
       {/* MODAL EDIT ANGSURAN */}
       {editAngsuran && (

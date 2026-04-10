@@ -6,6 +6,7 @@ import { hasAccess } from "./Permission";
 import { IUser } from "./IInterfaces";
 import { createHash } from "crypto";
 import { listMenuServer } from "@/components/IMenu";
+import prisma from "./Prisma";
 
 const secretKey = new TextEncoder().encode(process.env.APP_KEY || "secretcode");
 
@@ -46,6 +47,11 @@ export async function refreshToken(request: NextRequest) {
   if (!session) return NextResponse.redirect(new URL("/", request.url));
   const payload = await getSession();
   if (!payload) return NextResponse.redirect(new URL("/", request.url));
+  const user = await prisma.user.findFirst({
+    where: { id: payload.user.id },
+    include: { Role: true },
+  });
+  if (!user) return NextResponse.redirect(new URL("/", request.url));
 
   const pathname = request.nextUrl.pathname;
 
@@ -53,7 +59,7 @@ export async function refreshToken(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  const access = hasAccess(payload.user.Role, pathname, "read");
+  const access = hasAccess(user.Role, pathname, "read");
   const menuaccess = listMenuServer.find((f) => f.key === pathname);
   const needaccess = menuaccess ? menuaccess.needaccess : true;
   if (!access && needaccess)

@@ -36,14 +36,28 @@ interface IAngsuranRow {
 }
 
 const getRomanMonth = (date: moment.Moment) => {
-  const romans = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+  const romans = [
+    "I",
+    "II",
+    "III",
+    "IV",
+    "V",
+    "VI",
+    "VII",
+    "VIII",
+    "IX",
+    "X",
+    "XI",
+    "XII",
+  ];
   return romans[date.month()] || "-";
 };
 
 const formatCurrency = (amount: number) =>
   `Rp. ${Math.round(amount).toLocaleString("id-ID")}`;
 
-const wrapTerbilangRupiah = (amount: number) => `${NumberToWordsID(Math.round(amount))} Rupiah`;
+const wrapTerbilangRupiah = (amount: number) =>
+  `${NumberToWordsID(Math.round(amount))} Rupiah`;
 
 const parseSchedule = (scheduleJson: string): IAngsuranRow[] => {
   try {
@@ -211,7 +225,7 @@ export const generateContractHtmlPinkar = (record: IPinjamanData) => {
         <table class="header-table">
           <tr>
             <td class="logo-cell">${logo ? `<img class="logo" src="${logo}" alt="Logo kiri" />` : `&nbsp;`}</td>
-            <td class="title-cell">
+            <td class="title-cell" style="width: 500px; text-align: center; border: 1px solid black">
               <p class="title-main">Perjanjian Kredit Pinjaman Anggota</p>
               <p class="title-sub">Nomor: ${contractNumber}</p>
             </td>
@@ -304,7 +318,7 @@ export const generateContractHtmlPinkar = (record: IPinjamanData) => {
 
 export const printContractpinkar = (record: IPinjamanData) => {
   const htmlContent = generateContractHtmlPinkar(record);
-  const w = window.open("", "_blank");
+  const w = window.open("", "_blank", "width=800,height=600");
   if (!w) {
     alert("Popup diblokir. Mohon izinkan popup dari situs ini.");
     return;

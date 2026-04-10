@@ -1,7 +1,10 @@
 "use client";
 
 import { FormInput } from "@/components";
-import { downloadContractPdfPinkar } from "@/components/pdfutils/akad/PKPinkar";
+import {
+  downloadContractPdfPinkar,
+  printContractpinkar,
+} from "@/components/pdfutils/akad/PKPinkar";
 import { NumberToWordsID } from "@/components/pdfutils/utils";
 import { IDRFormat, IDRToNumber } from "@/components/utils/PembiayaanUtil";
 import { IUser } from "@/libs/IInterfaces";
@@ -23,7 +26,7 @@ import {
   Tag,
   Table,
   TableProps,
-  message,
+  App,
 } from "antd";
 import moment from "moment";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -168,18 +171,33 @@ const parsePinkarStartDate = (scheduleJson: string) => {
 };
 
 const getRomanMonth = (date: moment.Moment) => {
-  const romans = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+  const romans = [
+    "I",
+    "II",
+    "III",
+    "IV",
+    "V",
+    "VI",
+    "VII",
+    "VIII",
+    "IX",
+    "X",
+    "XI",
+    "XII",
+  ];
   return romans[date.month()] || "-";
 };
 
-const formatContractDate = (value: string | Date) => moment(value).format("DD-MM-YYYY");
+const formatContractDate = (value: string | Date) =>
+  moment(value).format("DD-MM-YYYY");
 
 const getContractNumber = (record: IPinjamanData) => {
   const created = moment(record.created_at);
   return `001/FAS/${getRomanMonth(created)}/${created.format("YYYY")}`;
 };
 
-const wrapTerbilangRupiah = (amount: number) => `${NumberToWordsID(Math.round(amount))} Rupiah`;
+const wrapTerbilangRupiah = (amount: number) =>
+  `${NumberToWordsID(Math.round(amount))} Rupiah`;
 
 const calculatePinkarLoan = (form: IEditablePinjaman): IPinkarCalc => {
   const { plafond, tenor, marginRate, adminRate } = form;
@@ -895,6 +913,7 @@ const ModalUpdatePinjaman = ({
     buildEditablePinjaman(data, members),
   );
   const [saving, setSaving] = useState(false);
+  const {message} = App.useApp()
 
   useEffect(() => {
     setForm(buildEditablePinjaman(data, members));
@@ -1236,7 +1255,8 @@ const ModalDokumenPinjaman = ({
   const contractAddress = memberAddress || userInfo?.address || "-";
   const contractDate = moment(data.created_at);
   const contractNumber = getContractNumber(data);
-  const firstDueDate = schedule[0]?.tanggal || formatContractDate(data.created_at);
+  const firstDueDate =
+    schedule[0]?.tanggal || formatContractDate(data.created_at);
   const lastDueDate =
     schedule[schedule.length - 1]?.tanggal ||
     contractDate.clone().add(data.tenor, "month").format("DD-MM-YYYY");
@@ -1252,7 +1272,7 @@ const ModalDokumenPinjaman = ({
 
   const handleDownloadTemplate = async () => {
     try {
-      await downloadContractPdfPinkar(data as never);
+      await printContractpinkar(data as never);
     } catch (error) {
       console.error("Gagal download template berkas PDF:", error);
       message.error("Gagal mengunduh template PDF");
@@ -1411,9 +1431,10 @@ const ModalDokumenPinjaman = ({
                 </div>
 
                 <p className="mb-5 text-justify">
-                  Pada hari ini, <b>{contractDate.format("dddd DD-MM-YYYY")}</b> (
-                  {moment.locale("id") && NumberToWordsID(contractDate.date())} {contractDate.format("MMMM YYYY")}),
-                  telah dibuat dan ditandatangani perjanjian ini oleh dan antara:
+                  Pada hari ini, <b>{contractDate.format("dddd DD-MM-YYYY")}</b>{" "}
+                  ({moment.locale("id") && NumberToWordsID(contractDate.date())}{" "}
+                  {contractDate.format("MMMM YYYY")}), telah dibuat dan
+                  ditandatangani perjanjian ini oleh dan antara:
                 </p>
 
                 <div className="space-y-3 text-justify">
@@ -1422,22 +1443,27 @@ const ModalDokumenPinjaman = ({
                     <p>
                       <b>Koperasi Jasa Fadillah Aqila Sejahtra</b>, beralamat di
                       Perum Pondok Permai Lestari Blok G-4 No.9 – Bandung, dalam
-                      hal ini diwakili oleh <b>Eva Fajar Nurhasanah</b> selaku Ketua
-                      Koperasi. Selanjutnya dalam perjanjian ini disebut <b>PIHAK PERTAMA</b>.
+                      hal ini diwakili oleh <b>Eva Fajar Nurhasanah</b> selaku
+                      Ketua Koperasi. Selanjutnya dalam perjanjian ini disebut{" "}
+                      <b>PIHAK PERTAMA</b>.
                     </p>
                   </div>
 
                   <div>
                     <p className="font-bold uppercase">Pihak Kedua</p>
                     <p>
-                      <b>{memberName.toUpperCase()}</b>, beralamat di {contractAddress},
-                      dengan nomor identitas/NIP <b>{memberNip}</b> dan bernomor telepon <b>{memberPhone}</b>
+                      <b>{memberName.toUpperCase()}</b>, beralamat di{" "}
+                      {contractAddress}, dengan nomor identitas/NIP{" "}
+                      <b>{memberNip}</b> dan bernomor telepon{" "}
+                      <b>{memberPhone}</b>
                       {memberPosition ? (
                         <>
-                          {" "}menjabat sebagai <b>{memberPosition}</b>
+                          {" "}
+                          menjabat sebagai <b>{memberPosition}</b>
                         </>
-                      ) : null}.
-                      Selanjutnya dalam perjanjian ini disebut <b>PIHAK KEDUA</b>.
+                      ) : null}
+                      . Selanjutnya dalam perjanjian ini disebut{" "}
+                      <b>PIHAK KEDUA</b>.
                     </p>
                   </div>
                 </div>
@@ -1445,87 +1471,131 @@ const ModalDokumenPinjaman = ({
                 <div className="mt-6 space-y-5 text-justify">
                   <section>
                     <p className="text-center font-bold uppercase">Pasal 1</p>
-                    <p className="text-center font-bold uppercase">Pemberian dan Jumlah Kredit</p>
+                    <p className="text-center font-bold uppercase">
+                      Pemberian dan Jumlah Kredit
+                    </p>
                     <ol className="mt-2 list-decimal space-y-2 pl-6">
                       <li>
-                        <b>PIHAK PERTAMA</b> dengan ini setuju memberikan pinjaman/kredit kepada <b>PIHAK KEDUA</b>
-                        dan <b>PIHAK KEDUA</b> setuju menerima pinjaman dari <b>PIHAK PERTAMA</b> sebesar
-                        <b> {IDRFormat(data.plafond)}</b> ({wrapTerbilangRupiah(data.plafond)}).
+                        <b>PIHAK PERTAMA</b> dengan ini setuju memberikan
+                        pinjaman/kredit kepada <b>PIHAK KEDUA</b>
+                        dan <b>PIHAK KEDUA</b> setuju menerima pinjaman dari{" "}
+                        <b>PIHAK PERTAMA</b> sebesar
+                        <b> {IDRFormat(data.plafond)}</b> (
+                        {wrapTerbilangRupiah(data.plafond)}).
                       </li>
                       <li>
-                        Biaya-biaya: <b>PIHAK KEDUA</b> dikenakan biaya admin sebesar <b>{data.adminRate}%</b>
+                        Biaya-biaya: <b>PIHAK KEDUA</b> dikenakan biaya admin
+                        sebesar <b>{data.adminRate}%</b>
                         dari jumlah pinjaman.
                       </li>
                       <li>
-                        Setiap bulannya <b>PIHAK KEDUA</b> wajib menyetorkan Simpanan Sukarela sebesar
+                        Setiap bulannya <b>PIHAK KEDUA</b> wajib menyetorkan
+                        Simpanan Sukarela sebesar
                         <b> Rp. 5.000</b> (Lima Ribu Rupiah).
                       </li>
-                      <li>Tujuan penggunaan pinjaman ini adalah untuk <b>Konsumtif</b>.</li>
+                      <li>
+                        Tujuan penggunaan pinjaman ini adalah untuk{" "}
+                        <b>Konsumtif</b>.
+                      </li>
                     </ol>
                   </section>
 
                   <section>
                     <p className="text-center font-bold uppercase">Pasal 2</p>
-                    <p className="text-center font-bold uppercase">Jangka Waktu dan Bunga/Jasa</p>
+                    <p className="text-center font-bold uppercase">
+                      Jangka Waktu dan Bunga/Jasa
+                    </p>
                     <ol className="mt-2 list-decimal space-y-2 pl-6">
                       <li>
-                        Jangka Waktu Pinjaman: Pinjaman ini diberikan untuk jangka waktu <b>{data.tenor} bulan</b>
-                        ({NumberToWordsID(data.tenor)} bulan), terhitung mulai tanggal <b>{firstDueDate}</b>
+                        Jangka Waktu Pinjaman: Pinjaman ini diberikan untuk
+                        jangka waktu <b>{data.tenor} bulan</b>(
+                        {NumberToWordsID(data.tenor)} bulan), terhitung mulai
+                        tanggal <b>{firstDueDate}</b>
                         sampai dengan tanggal <b>{lastDueDate}</b>.
                       </li>
                       <li>
-                        Bunga/Jasa Pinjaman: Atas pinjaman ini, <b>PIHAK KEDUA</b> dikenakan bunga/jasa
-                        pinjaman sebesar <b>{data.marginRate}%</b> ({NumberToWordsID(data.marginRate)} persen)
-                        per tahun yang dihitung dari saldo pinjaman.
+                        Bunga/Jasa Pinjaman: Atas pinjaman ini,{" "}
+                        <b>PIHAK KEDUA</b> dikenakan bunga/jasa pinjaman sebesar{" "}
+                        <b>{data.marginRate}%</b> (
+                        {NumberToWordsID(data.marginRate)} persen) per tahun
+                        yang dihitung dari saldo pinjaman.
                       </li>
                     </ol>
                   </section>
 
                   <section>
                     <p className="text-center font-bold uppercase">Pasal 3</p>
-                    <p className="text-center font-bold uppercase">Mekanisme Pembayaran Angsuran</p>
+                    <p className="text-center font-bold uppercase">
+                      Mekanisme Pembayaran Angsuran
+                    </p>
                     <ol className="mt-2 list-decimal space-y-2 pl-6">
                       <li>
-                        <b>PIHAK KEDUA</b> wajib membayar kembali pokok pinjaman dan bunga/jasa secara
-                        angsuran setiap bulan.
+                        <b>PIHAK KEDUA</b> wajib membayar kembali pokok pinjaman
+                        dan bunga/jasa secara angsuran setiap bulan.
                       </li>
                       <li>
-                        Jumlah Angsuran Per Bulan sebesar <b>{IDRFormat(data.angsuranPerBulan)}</b>
-                        ({wrapTerbilangRupiah(data.angsuranPerBulan)}).
+                        Jumlah Angsuran Per Bulan sebesar{" "}
+                        <b>{IDRFormat(data.angsuranPerBulan)}</b>(
+                        {wrapTerbilangRupiah(data.angsuranPerBulan)}).
                       </li>
                       <li>
-                        Tanggal Pembayaran: Angsuran wajib dibayarkan selambat-lambatnya pada tanggal
-                        <b> {schedule[0]?.tanggal?.slice(0, 2) || contractDate.format("DD")}</b> setiap bulannya.
+                        Tanggal Pembayaran: Angsuran wajib dibayarkan
+                        selambat-lambatnya pada tanggal
+                        <b>
+                          {" "}
+                          {schedule[0]?.tanggal?.slice(0, 2) ||
+                            contractDate.format("DD")}
+                        </b>{" "}
+                        setiap bulannya.
                       </li>
                       <li>
-                        Cara Pembayaran: Pembayaran angsuran dapat dilakukan melalui pemotongan gaji
-                        ataupun transfer kepada <b>PIHAK PERTAMA</b>.
+                        Cara Pembayaran: Pembayaran angsuran dapat dilakukan
+                        melalui pemotongan gaji ataupun transfer kepada{" "}
+                        <b>PIHAK PERTAMA</b>.
                       </li>
                     </ol>
                   </section>
 
                   <section>
                     <p className="text-center font-bold uppercase">Pasal 4</p>
-                    <p className="text-center font-bold uppercase">Peristiwa Cidera Janji</p>
-                    <p className="mt-2"><b>PIHAK KEDUA</b> dinyatakan cidera janji apabila:</p>
+                    <p className="text-center font-bold uppercase">
+                      Peristiwa Cidera Janji
+                    </p>
+                    <p className="mt-2">
+                      <b>PIHAK KEDUA</b> dinyatakan cidera janji apabila:
+                    </p>
                     <ol className="mt-2 list-decimal space-y-2 pl-6">
-                      <li>Tidak membayar angsuran selama 3 bulan berturut-turut.</li>
-                      <li>Menggunakan pinjaman tidak sesuai dengan tujuan yang disepakati.</li>
-                      <li>Memberikan keterangan palsu/tidak benar terkait data diri atau jaminan.</li>
                       <li>
-                        Dalam kondisi cidera janji, <b>PIHAK PERTAMA</b> berhak seketika menagih seluruh sisa
-                        pokok pinjaman dan bunga/jasa yang belum dibayar sekaligus tanpa diperlukan teguran terlebih dahulu.
+                        Tidak membayar angsuran selama 3 bulan berturut-turut.
+                      </li>
+                      <li>
+                        Menggunakan pinjaman tidak sesuai dengan tujuan yang
+                        disepakati.
+                      </li>
+                      <li>
+                        Memberikan keterangan palsu/tidak benar terkait data
+                        diri atau jaminan.
+                      </li>
+                      <li>
+                        Dalam kondisi cidera janji, <b>PIHAK PERTAMA</b> berhak
+                        seketika menagih seluruh sisa pokok pinjaman dan
+                        bunga/jasa yang belum dibayar sekaligus tanpa diperlukan
+                        teguran terlebih dahulu.
                       </li>
                     </ol>
                   </section>
 
                   <section>
                     <p className="text-center font-bold uppercase">Pasal 5</p>
-                    <p className="text-center font-bold uppercase">Penyelesaian Perselisihan</p>
+                    <p className="text-center font-bold uppercase">
+                      Penyelesaian Perselisihan
+                    </p>
                     <p className="mt-2">
-                      Apabila terjadi perselisihan dalam pelaksanaan perjanjian ini, para pihak sepakat
-                      untuk menyelesaikannya secara musyawarah untuk mufakat. Jika musyawarah tidak mencapai
-                      mufakat, maka para pihak sepakat untuk menyelesaikannya melalui Pengadilan Negeri.
+                      Apabila terjadi perselisihan dalam pelaksanaan perjanjian
+                      ini, para pihak sepakat untuk menyelesaikannya secara
+                      musyawarah untuk mufakat. Jika musyawarah tidak mencapai
+                      mufakat, maka para pihak sepakat untuk menyelesaikannya
+                      melalui Pengadilan Negeri.
                     </p>
                   </section>
                 </div>
@@ -1534,13 +1604,19 @@ const ModalDokumenPinjaman = ({
                   <div>
                     <p>Pihak Kedua</p>
                     <p>Penerima Pinjaman</p>
-                    <div className="mt-16 text-left text-[13px] normal-case font-normal">Materai 10.000</div>
-                    <div className="mt-16 border-t border-black pt-2">{memberName.toUpperCase()}</div>
+                    <div className="mt-16 text-left text-[13px] normal-case font-normal">
+                      Materai 10.000
+                    </div>
+                    <div className="mt-16 border-t border-black pt-2">
+                      {memberName.toUpperCase()}
+                    </div>
                   </div>
                   <div>
                     <p>Pihak Pertama</p>
                     <p>Pemberi Pinjaman</p>
-                    <div className="mt-32 border-t border-black pt-2">EVA FAJAR NURHASANAH</div>
+                    <div className="mt-32 border-t border-black pt-2">
+                      EVA FAJAR NURHASANAH
+                    </div>
                   </div>
                 </div>
               </div>
