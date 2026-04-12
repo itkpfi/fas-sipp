@@ -252,8 +252,8 @@ h6 {
 }
 
 .app-table-modern .ant-table-thead > tr > th {
-  background: #f5f8fb !important;
-  color: #334155 !important;
+  background: #f5f8fb;
+  color: #334155;
   font-size: 0.76rem !important;
   font-weight: 700 !important;
   text-transform: uppercase;

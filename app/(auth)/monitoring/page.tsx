@@ -260,6 +260,14 @@ export default function Page() {
       dataIndex: "verif_status",
       key: "verif_status",
       width: 250,
+      onHeaderCell: () => ({
+        style: {
+          background: 'linear-gradient(135deg, #0d9488, #14b8a6)' as string,
+          color: '#ffffff',
+          borderBottom: '2px solid #0f766e',
+          textShadow: '0 1px 2px rgba(0,0,0,0.15)',
+        } as React.CSSProperties,
+      }),
       render: (_, record, i) => {
         const temp = record.verif_desc
           ? (JSON.parse(record.verif_desc) as IDesc)
@@ -290,6 +298,14 @@ export default function Page() {
       dataIndex: "slik_status",
       key: "slik_status",
       width: 250,
+      onHeaderCell: () => ({
+        style: {
+          background: 'linear-gradient(135deg, #2563eb, #3b82f6)' as string,
+          color: '#ffffff',
+          borderBottom: '2px solid #1d4ed8',
+          textShadow: '0 1px 2px rgba(0,0,0,0.15)',
+        } as React.CSSProperties,
+      }),
       render: (_, record, i) => {
         const temp = record.slik_desc
           ? (JSON.parse(record.slik_desc) as IDesc)
@@ -320,6 +336,14 @@ export default function Page() {
       dataIndex: "approvel_status",
       key: "approvel_status",
       width: 250,
+      onHeaderCell: () => ({
+        style: {
+          background: 'linear-gradient(135deg, #d97706, #f59e0b)' as string,
+          color: '#ffffff',
+          borderBottom: '2px solid #b45309',
+          textShadow: '0 1px 2px rgba(0,0,0,0.15)',
+        } as React.CSSProperties,
+      }),
       render: (_, record, i) => {
         const temp = record.approv_desc
           ? (JSON.parse(record.approv_desc) as IDesc)
@@ -350,6 +374,14 @@ export default function Page() {
       dataIndex: "dropping_status",
       key: "dropping_status",
       width: 180,
+      onHeaderCell: () => ({
+        style: {
+          background: 'linear-gradient(135deg, #7c3aed, #8b5cf6)' as string,
+          color: '#ffffff',
+          borderBottom: '2px solid #6d28d9',
+          textShadow: '0 1px 2px rgba(0,0,0,0.15)',
+        } as React.CSSProperties,
+      }),
       render: (_, record, i) => {
         return (
           <div className="flex gap-1">
