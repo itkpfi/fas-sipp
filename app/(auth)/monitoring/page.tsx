@@ -262,9 +262,9 @@ export default function Page() {
       width: 250,
       onHeaderCell: () => ({
         style: {
-          background: 'linear-gradient(135deg, #0d9488, #14b8a6)' as string,
+          background: 'linear-gradient(135deg, #16a34a, #22c55e)' as string,
           color: '#ffffff',
-          borderBottom: '2px solid #0f766e',
+          borderBottom: '2px solid #15803d',
           textShadow: '0 1px 2px rgba(0,0,0,0.15)',
         } as React.CSSProperties,
       }),
@@ -300,9 +300,9 @@ export default function Page() {
       width: 250,
       onHeaderCell: () => ({
         style: {
-          background: 'linear-gradient(135deg, #2563eb, #3b82f6)' as string,
+          background: 'linear-gradient(135deg, #0284c7, #0ea5e9)' as string,
           color: '#ffffff',
-          borderBottom: '2px solid #1d4ed8',
+          borderBottom: '2px solid #0369a1',
           textShadow: '0 1px 2px rgba(0,0,0,0.15)',
         } as React.CSSProperties,
       }),
@@ -338,9 +338,9 @@ export default function Page() {
       width: 250,
       onHeaderCell: () => ({
         style: {
-          background: 'linear-gradient(135deg, #d97706, #f59e0b)' as string,
+          background: 'linear-gradient(135deg, #475569, #64748b)' as string,
           color: '#ffffff',
-          borderBottom: '2px solid #b45309',
+          borderBottom: '2px solid #334155',
           textShadow: '0 1px 2px rgba(0,0,0,0.15)',
         } as React.CSSProperties,
       }),
@@ -376,9 +376,9 @@ export default function Page() {
       width: 180,
       onHeaderCell: () => ({
         style: {
-          background: 'linear-gradient(135deg, #7c3aed, #8b5cf6)' as string,
+          background: 'linear-gradient(135deg, #db2777, #ec4899)' as string,
           color: '#ffffff',
-          borderBottom: '2px solid #6d28d9',
+          borderBottom: '2px solid #be185d',
           textShadow: '0 1px 2px rgba(0,0,0,0.15)',
         } as React.CSSProperties,
       }),
