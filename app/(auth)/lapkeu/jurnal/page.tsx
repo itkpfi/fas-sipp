@@ -15,6 +15,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   PlusCircleOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { CategoryOfAccount, JournalEntry, User } from "@prisma/client";
 import {
@@ -183,35 +184,36 @@ export default function Page() {
   return (
     <Card
       title={
-        <div className="flex gap-2 font-bold text-xl">
+        <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
           <AccountBookOutlined /> JournalEntry
         </div>
       }
-      styles={{ body: { padding: 5 } }}
+      className="app-master-card"
     >
-      <div className="flex justify-between my-1 gap-2 overflow-auto">
-        <div className="flex gap-2">
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap gap-2">
           {hasAccess("write") && (
             <Button
-              size="small"
+              size="middle"
               type="primary"
               icon={<PlusCircleOutlined />}
+              className="app-master-action"
               onClick={() => setAction({ ...action, upsert: true })}
             >
               Add New
             </Button>
           )}
           <RangePicker
-            style={{ width: 170 }}
-            size="small"
+            className="app-master-picker"
+            size="middle"
             onChange={(date, dateStr) =>
               setPageProps({ ...pageProps, backdate: dateStr })
             }
           />
           <Select
-            style={{ width: 170 }}
+            className="app-master-select min-w-[12rem]"
             placeholder="pilih akun..."
-            size="small"
+            size="middle"
             options={akuns.map((a) => ({
               label: `(${a.id}) ${a.name}`,
               value: a.id,
@@ -220,22 +222,26 @@ export default function Page() {
             allowClear
           />
         </div>
-        <Input.Search
-          size="small"
-          style={{ width: 170 }}
-          onChange={(e) =>
-            setPageProps({ ...pageProps, search: e.target.value })
-          }
-        />
+        <div className="app-master-toolbar-search">
+          <Input
+            size="middle"
+            className="app-master-search"
+            placeholder="Cari jurnal..."
+            prefix={<SearchOutlined className="text-slate-400" />}
+            allowClear
+            onChange={(e) =>
+              setPageProps({ ...pageProps, search: e.target.value })
+            }
+          />
+        </div>
       </div>
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         loading={loading}
         rowKey={"id"}
-        bordered
-        scroll={{ x: "max-content", y: "60vh" }}
         pagination={{
           current: pageProps.page,
           pageSize: pageProps.limit,
@@ -590,12 +596,12 @@ const ListJournalDetail = ({ records }: { records: IJournalEntry }) => {
   return (
     <div className="ms-15">
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={records.JournalDetail}
         rowKey={"id"}
         pagination={false}
-        size="small"
-        bordered
+        size="middle"
       />
     </div>
   );

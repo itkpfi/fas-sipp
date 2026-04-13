@@ -11,6 +11,7 @@ export const GET = async (request: NextRequest) => {
   const limit = request.nextUrl.searchParams.get("limit") || "50";
   const search = request.nextUrl.searchParams.get("search") || "";
   const backdate = request.nextUrl.searchParams.get("backdate");
+  const areaId = request.nextUrl.searchParams.get("areaId") || "";
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
   const session = await getSession();
@@ -22,6 +23,7 @@ export const GET = async (request: NextRequest) => {
 
   const find = await prisma.area.findMany({
     where: {
+      ...(areaId && { id: areaId }),
       ...(search && {
         OR: [
           { name: { contains: search } },
@@ -73,6 +75,7 @@ export const GET = async (request: NextRequest) => {
 
   const total = await prisma.area.count({
     where: {
+      ...(areaId && { id: areaId }),
       ...(search && {
         OR: [
           { name: { contains: search } },

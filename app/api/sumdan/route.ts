@@ -1,7 +1,7 @@
 import { serializeForApi } from "@/components/utils/PembiayaanUtil";
 import { getSession } from "@/libs/Auth";
 import prisma from "@/libs/Prisma";
-import { Sumdan } from "@prisma/client";
+import { EDapemStatus, Sumdan } from "@prisma/client";
 import moment from "moment";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -11,6 +11,7 @@ export const GET = async (request: NextRequest) => {
   const limit = request.nextUrl.searchParams.get("limit") || "50";
   const search = request.nextUrl.searchParams.get("search") || "";
   const backdate = request.nextUrl.searchParams.get("backdate");
+  const areaId = request.nextUrl.searchParams.get("areaId") || "";
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
   const session = await getSession();
@@ -21,12 +22,41 @@ export const GET = async (request: NextRequest) => {
   if (!user)
     return NextResponse.json({ data: [], status: 200 }, { status: 200 });
 
+  const dapemWhere = {
+    status: true,
+    dropping_status: { in: [EDapemStatus.APPROVED, EDapemStatus.PAID_OFF] },
+    ...(backdate && {
+      Dropping: {
+        process_at: {
+          gte: moment(backdate.split(",")[0]).toDate(),
+          lte: moment(backdate.split(",")[1]).toDate(),
+        },
+      },
+    }),
+    ...(areaId && {
+      AO: {
+        Cabang: {
+          areaId,
+        },
+      },
+    }),
+  };
+
   const find = await prisma.sumdan.findMany({
     where: {
       ...(search && {
         OR: [{ name: { contains: search } }, { code: { contains: search } }],
       }),
       ...(user.sumdanId && { id: user.sumdanId }),
+      ...(areaId && {
+        ProdukPembiayaan: {
+          some: {
+            Dapem: {
+              some: dapemWhere,
+            },
+          },
+        },
+      }),
       status: true,
     },
     skip: skip,
@@ -37,18 +67,7 @@ export const GET = async (request: NextRequest) => {
         ...(include && {
           include: {
             Dapem: {
-              where: {
-                status: true,
-                dropping_status: { in: ["APPROVED", "PAID_OFF"] },
-                ...(backdate && {
-                  Dropping: {
-                    process_at: {
-                      gte: moment(backdate.split(",")[0]).toDate(),
-                      lte: moment(backdate.split(",")[1]).toDate(),
-                    },
-                  },
-                }),
-              },
+              where: dapemWhere,
               include: { Angsuran: true },
             },
           },

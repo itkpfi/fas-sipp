@@ -8,8 +8,9 @@ import {
   DeleteOutlined,
   DropboxOutlined,
   EditOutlined,
-  PlusCircleFilled,
+  PlusCircleOutlined,
   SaveOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { JenisPembiayaan } from "@prisma/client";
 import {
@@ -164,18 +165,19 @@ export default function Page() {
   return (
     <Card
       title={
-        <div className="flex gap-2 font-bold text-xl">
+        <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
           <DropboxOutlined /> Jenis Pembiayaan
         </div>
       }
-      styles={{ body: { padding: 5 } }}
+      className="app-master-card"
     >
-      <div className="flex justify-between my-1">
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between">
         {hasAccess("write") && (
           <Button
-            size="small"
+            size="middle"
             type="primary"
-            icon={<PlusCircleFilled />}
+            icon={<PlusCircleOutlined />}
+            className="app-master-action"
             onClick={() =>
               setUpsert({ ...upsert, upsert: true, selected: undefined })
             }
@@ -183,24 +185,27 @@ export default function Page() {
             Add New
           </Button>
         )}
-        <Input.Search
-          size="small"
-          style={{ width: 170 }}
-          placeholder="Cari nama..."
-          onChange={(e) =>
-            setPageProps({ ...pageProps, search: e.target.value })
-          }
-        />
+        <div className="app-master-toolbar-search">
+          <Input
+            size="middle"
+            className="app-master-search"
+            placeholder="Cari nama..."
+            prefix={<SearchOutlined className="text-slate-400" />}
+            allowClear
+            onChange={(e) =>
+              setPageProps({ ...pageProps, search: e.target.value })
+            }
+          />
+        </div>
       </div>
 
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         loading={loading}
         rowKey={"id"}
-        bordered
-        scroll={{ x: "max-content", y: "60vh" }}
         pagination={{
           current: pageProps.page,
           pageSize: pageProps.limit,

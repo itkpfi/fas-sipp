@@ -14,8 +14,9 @@ import {
   EditOutlined,
   EnvironmentOutlined,
   PhoneOutlined,
-  PlusCircleFilled,
+  PlusCircleOutlined,
   SaveOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { Angsuran, Dapem, ProdukPembiayaan, Sumdan } from "@prisma/client";
 import {
@@ -103,7 +104,7 @@ export default function Page() {
         return (
           <div>
             <p>{record.name}</p>
-            <p className="text-xs text-blue-400">@{record.code}</p>
+            <p className="text-xs font-medium text-slate-500">@{record.code}</p>
           </div>
         );
       },
@@ -115,7 +116,7 @@ export default function Page() {
       render(value, record, index) {
         return (
           <div>
-            <div className="text-xs  text-blue-400">
+            <div className="text-xs text-slate-500">
               <p>
                 <EnvironmentOutlined /> {record.address}
               </p>
@@ -134,7 +135,7 @@ export default function Page() {
       render(value, record, index) {
         return (
           <div>
-            <div className="text-xs  text-blue-400">
+            <div className="text-xs text-slate-500">
               <p>Rounded : {IDRFormat(record.rounded)}</p>
               <p>DSR : {IDRFormat(record.dsr)}</p>
               <p>TBO : {record.tbo} Bulan</p>
@@ -151,7 +152,7 @@ export default function Page() {
       render(value, record, index) {
         return (
           <div>
-            <div className="text-xs text-blue-400">
+            <div className="text-xs text-slate-500">
               <p>Margin : {record.c_margin} %</p>
               <p>Admin : {record.c_adm} %</p>
               <p>Tatalaksana : {IDRFormat(record.c_gov)}</p>
@@ -249,18 +250,19 @@ export default function Page() {
   return (
     <Card
       title={
-        <div className="flex gap-2 font-bold text-xl">
+        <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
           <BankOutlined /> Mitra Pembiayaan
         </div>
       }
-      styles={{ body: { padding: 5 } }}
+      className="app-master-card"
     >
-      <div className="flex justify-between my-1">
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between">
         {hasAccess("write") && (
           <Button
-            size="small"
+            size="middle"
             type="primary"
-            icon={<PlusCircleFilled />}
+            icon={<PlusCircleOutlined />}
+            className="app-master-action"
             onClick={() =>
               setUpsert({ ...upsert, upsert: true, selected: undefined })
             }
@@ -268,24 +270,27 @@ export default function Page() {
             Add New
           </Button>
         )}
-        <Input.Search
-          size="small"
-          style={{ width: 170 }}
-          placeholder="Cari nama..."
-          onChange={(e) =>
-            setPageProps({ ...pageProps, search: e.target.value })
-          }
-        />
+        <div className="app-master-toolbar-search">
+          <Input
+            size="middle"
+            className="app-master-search"
+            placeholder="Cari nama..."
+            prefix={<SearchOutlined className="text-slate-400" />}
+            allowClear
+            onChange={(e) =>
+              setPageProps({ ...pageProps, search: e.target.value })
+            }
+          />
+        </div>
       </div>
 
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         loading={loading}
         rowKey={"id"}
-        bordered
-        scroll={{ x: "max-content", y: "60vh" }}
         pagination={{
           current: pageProps.page,
           pageSize: pageProps.limit,
@@ -759,7 +764,7 @@ function TableProduk({
       key: "kriteria",
       render(value, record, index) {
         return (
-          <div className="text-xs text-blue-400">
+          <div className="text-xs text-slate-500">
             <p>
               Usia Pengajuan : {record.min_age} - {record.max_age}
             </p>
@@ -776,7 +781,7 @@ function TableProduk({
       key: "biaya",
       render(value, record, index) {
         return (
-          <div className="text-xs text-blue-400">
+          <div className="text-xs text-slate-500">
             <div>
               Margin : {record.c_margin} % ({record.c_margin + records.c_margin}
               %)
@@ -831,12 +836,13 @@ function TableProduk({
   ];
 
   return (
-    <div>
+    <div className="space-y-3">
       {hasAccess("write") && (
         <Button
-          icon={<PlusCircleFilled />}
-          size="small"
+          icon={<PlusCircleOutlined />}
+          size="middle"
           type="primary"
+          className="app-master-action"
           onClick={() =>
             setUpsert({ ...upsert, upsert: true, selected: undefined })
           }
@@ -845,12 +851,12 @@ function TableProduk({
         </Button>
       )}
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={records.ProdukPembiayaan}
         rowKey={"id"}
         pagination={false}
-        size="small"
-        bordered
+        size="middle"
       />
       <UpsertProduk
         open={upsert.upsert}

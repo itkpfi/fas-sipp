@@ -2,6 +2,7 @@
 
 import { GetAngsuran, IDRFormat } from "@/components/utils/PembiayaanUtil";
 import { ICategoryOfAccount, IDapem, IPageProps } from "@/libs/IInterfaces";
+import { FundProjectionScreenOutlined } from "@ant-design/icons";
 import { DatePicker, Spin } from "antd";
 import { useEffect, useState } from "react";
 const { RangePicker } = DatePicker;
@@ -54,18 +55,23 @@ export default function Page() {
 
   return (
     <Spin spinning={loading}>
-      <div className="bg-white p-4">
-        <div className="flex flex-col font-bold items-center text-center">
-          <p className="text-2xl ">LAPORAN RUGI/LABA</p>
-          <p className="text-xl ">{process.env.NEXT_PUBLIC_APP_FULLNAME}</p>
+      <div className="app-report-shell">
+        <div className="app-report-toolbar">
           <div>
-            Periode :{" "}
+            <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
+              <FundProjectionScreenOutlined /> Rugi/Laba
+            </div>
+            <p className="mt-1 text-sm text-slate-500">
+              {process.env.NEXT_PUBLIC_APP_FULLNAME}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 md:justify-end">
             <RangePicker
-              size="small"
+              className="app-master-picker"
+              size="middle"
               onChange={(date, dateStr) =>
                 setPageProps({ ...pageProps, backdate: dateStr })
               }
-              style={{ width: 170 }}
             />
           </div>
         </div>

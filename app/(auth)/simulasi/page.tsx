@@ -449,12 +449,12 @@ export default function Page() {
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3">
-                  <div className="min-w-0 flex-1 text-sm font-medium text-slate-700">Biaya Administrasi</div>
-                  <div className="flex gap-2">
+                <div className="flex flex-col items-stretch gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0 text-sm font-medium text-slate-700 sm:flex-1">Biaya Administrasi</div>
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[17rem] sm:flex-row sm:justify-end">
             <Input
+              className="w-full sm:w-[5.25rem]"
               size="middle"
-              style={{ width: 80 }}
               disabled={!hasAccess("proses")}
               suffix={<span className="text-xs italic opacity-70">%</span>}
               value={data.c_adm}
@@ -464,6 +464,7 @@ export default function Page() {
               type={"number"}
             />
             <Input
+              className="w-full sm:min-w-[11rem]"
               size="middle"
               disabled
               value={IDRFormat((data.plafon * data.c_adm) / 100)}
@@ -472,12 +473,12 @@ export default function Page() {
           </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3">
-                  <div className="min-w-0 flex-1 text-sm font-medium text-slate-700">Biaya Asuransi</div>
-                  <div className="flex gap-2">
+                <div className="flex flex-col items-stretch gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0 text-sm font-medium text-slate-700 sm:flex-1">Biaya Asuransi</div>
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[17rem] sm:flex-row sm:justify-end">
             <Input
+              className="w-full sm:w-[5.25rem]"
               size="middle"
-              style={{ width: 80 }}
               disabled={!hasAccess("proses")}
               suffix={<span className="text-xs italic opacity-70">%</span>}
               value={data.c_insurance}
@@ -490,6 +491,7 @@ export default function Page() {
               type={"number"}
             />
             <Input
+              className="w-full sm:min-w-[11rem]"
               size="middle"
               disabled
               value={IDRFormat((data.plafon * data.c_insurance) / 100)}
@@ -500,6 +502,7 @@ export default function Page() {
 
                 <SimulasiRow label="Biaya Tatalaksana">
             <Input
+              className="w-full sm:min-w-[13rem]"
               size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_gov)}
@@ -512,6 +515,7 @@ export default function Page() {
 
                 <SimulasiRow label="Biaya Buka Rekening">
             <Input
+              className="w-full sm:min-w-[13rem]"
               size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_account)}
@@ -527,6 +531,7 @@ export default function Page() {
 
                 <SimulasiRow label="Biaya Provisi">
             <Input
+              className="w-full sm:min-w-[13rem]"
               size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_provisi)}
@@ -542,6 +547,7 @@ export default function Page() {
 
                 <SimulasiRow label="Biaya Data Informasi">
             <Input
+              className="w-full sm:min-w-[13rem]"
               size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_information)}
@@ -557,6 +563,7 @@ export default function Page() {
 
                 <SimulasiRow label="Biaya Materai">
             <Input
+              className="w-full sm:min-w-[13rem]"
               size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_stamp)}
@@ -572,6 +579,7 @@ export default function Page() {
 
                 <SimulasiRow label="Biaya Mutasi">
             <Input
+              className="w-full sm:min-w-[13rem]"
               size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_mutasi)}
@@ -585,12 +593,12 @@ export default function Page() {
             />
                 </SimulasiRow>
 
-                <div className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3">
-                  <div className="min-w-0 flex-1 text-sm font-medium text-slate-700">Blokir Angsuran</div>
-                  <div className="flex gap-2">
+                <div className="flex flex-col items-stretch gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0 text-sm font-medium text-slate-700 sm:flex-1">Blokir Angsuran</div>
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[17rem] sm:flex-row sm:justify-end">
             <Input
+              className="w-full sm:w-[5.25rem]"
               size="middle"
-              style={{ width: 80 }}
               suffix={<span className="text-xs italic opacity-70">%</span>}
               value={data.c_blokir}
               onChange={(e) =>
@@ -602,6 +610,7 @@ export default function Page() {
               type={"number"}
             />
             <Input
+              className="w-full sm:min-w-[11rem]"
               size="middle"
               disabled
               value={IDRFormat(data.c_blokir * data.angsuran)}
@@ -610,7 +619,7 @@ export default function Page() {
           </div>
                 </div>
 
-                <div className="flex items-center justify-between rounded-2xl border border-rose-200 bg-rose-50/90 px-4 py-3 font-semibold text-rose-600">
+                <div className="flex flex-col items-start gap-1 rounded-2xl border border-rose-200 bg-rose-50/90 px-4 py-3 font-semibold text-rose-600 sm:flex-row sm:items-center sm:justify-between">
                   <div>Total Biaya</div>
                   <div>{IDRFormat(totalBiaya)}</div>
                 </div>
@@ -622,13 +631,14 @@ export default function Page() {
                 Rincian Pembiayaan
               </div>
 
-              <div className="flex items-center justify-between rounded-2xl border border-sky-200 bg-sky-50/90 px-4 py-3 font-semibold text-sky-700">
+              <div className="flex flex-col items-start gap-1 rounded-2xl border border-sky-200 bg-sky-50/90 px-4 py-3 font-semibold text-sky-700 sm:flex-row sm:items-center sm:justify-between">
                 <div>Terima Kotor</div>
                 <div>{IDRFormat(terimaKotor)}</div>
               </div>
 
               <SimulasiRow label="BPP">
             <Input
+              className="w-full sm:min-w-[13rem]"
               size="middle"
               value={IDRFormat(data.c_bpp || 0)}
               style={{ textAlign: "right", color: "black" }}
@@ -643,6 +653,7 @@ export default function Page() {
 
               <SimulasiRow label="Nominal Takeover">
             <Input
+              className="w-full sm:min-w-[13rem]"
               size="middle"
               value={IDRFormat(data.c_takeover || 0)}
               style={{ textAlign: "right", color: "black" }}
@@ -655,7 +666,7 @@ export default function Page() {
             />
               </SimulasiRow>
 
-              <div className="flex items-center justify-between rounded-2xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 font-semibold text-emerald-700">
+              <div className="flex flex-col items-start gap-1 rounded-2xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 font-semibold text-emerald-700 sm:flex-row sm:items-center sm:justify-between">
                 <div>Terima Bersih</div>
                 <div>{IDRFormat(terimaBersih)}</div>
               </div>
@@ -664,11 +675,11 @@ export default function Page() {
             <div className="rounded-[24px] border border-slate-200 bg-slate-50/72 p-4 md:p-5">
               <Divider style={{ marginTop: 0, marginBottom: 12 }}>Informasi Tambahan</Divider>
               <div className="space-y-3 text-sm italic text-slate-700">
-                <div className="flex items-center justify-between rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3">
+                <div className="flex flex-col items-start gap-1 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>Sisa Gaji</div>
                   <div className="font-semibold">{IDRFormat(sisaGaji)}</div>
                 </div>
-                <div className="flex items-center justify-between rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3">
+                <div className="flex flex-col items-start gap-1 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>Debt Service Ratio</div>
                   <div className="font-semibold">
                     {dsr.toFixed(2)} % / {data.Sumdan.dsr} %
@@ -692,9 +703,9 @@ function SimulasiRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3">
-      <div className="min-w-0 flex-1 text-sm font-medium text-slate-700">{label}</div>
-      <div className="flex gap-2">{children}</div>
+    <div className="flex flex-col items-stretch gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0 text-sm font-medium text-slate-700 sm:flex-1">{label}</div>
+      <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[13rem] sm:justify-end">{children}</div>
     </div>
   );
 }

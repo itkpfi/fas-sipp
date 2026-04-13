@@ -14,9 +14,10 @@ import {
   EnvironmentOutlined,
   MailOutlined,
   PhoneOutlined,
-  PlusCircleFilled,
+  PlusCircleOutlined,
   PrinterOutlined,
   SaveOutlined,
+  SearchOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { Cabang, Role, Sumdan, User } from "@prisma/client";
@@ -266,19 +267,20 @@ export default function Page() {
   return (
     <Card
       title={
-        <div className="flex gap-2 font-bold text-xl">
+        <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
           <UserOutlined /> Users Management
         </div>
       }
-      styles={{ body: { padding: 5 } }}
+      className="app-master-card"
     >
-      <div className="flex justify-between my-1">
-        <div className="flex gap-2">
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap gap-2">
           {hasAccess("write") && (
             <Button
-              size="small"
+              size="middle"
               type="primary"
-              icon={<PlusCircleFilled />}
+              icon={<PlusCircleOutlined />}
+              className="app-master-action"
               onClick={() =>
                 setUpsert({ ...upsert, upsert: true, selected: undefined })
               }
@@ -287,6 +289,8 @@ export default function Page() {
             </Button>
           )}
           <FilterData
+            buttonSize="middle"
+            buttonClassName="app-master-action"
             children={
               <>
                 <div className="my-2">
@@ -364,11 +368,13 @@ export default function Page() {
             }
           />
         </div>
-        <div className="flex gap-2 justify-end">
-          <Input.Search
-            size="small"
-            style={{ width: 170 }}
+        <div className="app-master-toolbar-search flex justify-end">
+          <Input
+            size="middle"
+            className="app-master-search"
             placeholder="Cari user..."
+            prefix={<SearchOutlined className="text-slate-400" />}
+            allowClear
             onChange={(e) =>
               setPageProps({ ...pageProps, search: e.target.value })
             }
@@ -377,13 +383,12 @@ export default function Page() {
       </div>
 
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         loading={loading}
         rowKey={"id"}
-        bordered
-        scroll={{ x: "max-content", y: "60vh" }}
         pagination={{
           current: pageProps.page,
           pageSize: pageProps.limit,

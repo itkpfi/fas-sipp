@@ -284,6 +284,144 @@ h6 {
   box-shadow: none !important;
 }
 
+.app-master-card {
+  border-radius: 26px !important;
+  border: 1px solid rgba(219, 228, 238, 0.96) !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.06) !important;
+  overflow: hidden;
+}
+
+.app-master-card .ant-card-head {
+  min-height: auto;
+  padding: 1.1rem 1.25rem 0;
+  border-bottom: none;
+}
+
+.app-master-card .ant-card-head-title {
+  padding: 0;
+}
+
+.app-master-card .ant-card-body {
+  padding: 1rem 1.25rem 1.25rem !important;
+}
+
+.app-master-table {
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.app-master-table .ant-table {
+  background: transparent;
+}
+
+.app-master-table .ant-table-container {
+  border-inline-start: none !important;
+  border-top: none !important;
+}
+
+.app-master-table .ant-table-thead > tr > th {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  color: #475569;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.95) !important;
+}
+
+.app-master-table .ant-table-tbody > tr > td {
+  padding-top: 0.78rem !important;
+  padding-bottom: 0.78rem !important;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.95) !important;
+  vertical-align: top;
+}
+
+.app-master-table .ant-table-tbody > tr:hover > td {
+  background: rgba(15, 23, 42, 0.018) !important;
+}
+
+.app-master-table .ant-pagination {
+  padding: 0.95rem 1rem 1rem;
+}
+
+.app-master-action {
+  height: 2.45rem;
+  border-radius: 18px !important;
+  padding-inline: 1rem !important;
+  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.app-master-toolbar-search {
+  width: 100%;
+}
+
+.app-master-search {
+  width: 100%;
+}
+
+.app-master-search.ant-input-affix-wrapper,
+.app-master-search.ant-input,
+.app-master-search {
+  border-radius: 16px !important;
+  height: 2.45rem;
+}
+
+.app-master-search.ant-input-affix-wrapper {
+  padding-inline: 0.85rem;
+}
+
+.app-master-select .ant-select-selector,
+.app-master-picker.ant-picker {
+  min-height: 2.45rem !important;
+  border-radius: 16px !important;
+  align-items: center;
+}
+
+.app-master-select.ant-select .ant-select-selection-item,
+.app-master-select.ant-select .ant-select-selection-placeholder {
+  line-height: 2.25rem !important;
+}
+
+.app-master-picker.ant-picker {
+  padding-inline: 0.85rem;
+}
+
+.app-report-shell {
+  border-radius: 26px;
+  border: 1px solid rgba(219, 228, 238, 0.96);
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.06);
+  padding: 1.25rem;
+}
+
+.app-report-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+}
+
+@media (min-width: 768px) {
+  .app-report-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@media (min-width: 768px) {
+  .app-master-toolbar-search {
+    width: min(100%, 14rem);
+    margin-left: auto;
+  }
+}
+
 .app-auth-shell {
   position: relative;
   overflow: hidden;

@@ -3,7 +3,7 @@
 import { printNeraca } from "@/components/pdfutils/lapkeu/printNeraca";
 import { IDRFormat } from "@/components/utils/PembiayaanUtil";
 import { ICategoryOfAccount, IJournalDetail } from "@/libs/IInterfaces";
-import { PrinterOutlined } from "@ant-design/icons";
+import { PrinterOutlined, SnippetsOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Spin } from "antd";
 import { useEffect, useState } from "react";
 const { RangePicker } = DatePicker;
@@ -50,28 +50,34 @@ export default function Page() {
 
   return (
     <Spin spinning={loading}>
-      <div className="p-2 border border-gray-300 rounded   bg-white">
-        <div className="text-center my-2 p-2 font-bold text-lg border-b">
-          <p>LAPORAN KEUANGAN</p>
-          <p>{process.env.NEXT_PUBLIC_APP_FULLNAME}</p>
-          <div className="flex gap-2 items-center justify-center">
-            <p className="text-sm">Periode : </p>
+      <div className="app-report-shell">
+        <div className="app-report-toolbar">
+          <div>
+            <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
+              <SnippetsOutlined /> Neraca
+            </div>
+            <p className="mt-1 text-sm text-slate-500">
+              {process.env.NEXT_PUBLIC_APP_FULLNAME}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 md:justify-end">
             <RangePicker
-              style={{ width: 170 }}
-              size="small"
+              className="app-master-picker"
+              size="middle"
               onChange={(date, dateStr) =>
                 setBackdate((dateStr || "").toString())
               }
             />
+            <Button
+              size="middle"
+              type="primary"
+              className="app-master-action"
+              icon={<PrinterOutlined />}
+              onClick={() => printNeraca(data, backdate || undefined)}
+            >
+              Cetak
+            </Button>
           </div>
-          <Button
-            size="small"
-            type="primary"
-            icon={<PrinterOutlined />}
-            onClick={() => printNeraca(data, backdate || undefined)}
-          >
-            Cetak
-          </Button>
         </div>
         <div className="flex sm:flex-row flex-col gap-8 ">
           <div className="flex-1 flex flex-col justify-between ">

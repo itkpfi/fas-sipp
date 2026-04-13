@@ -10,7 +10,7 @@ import {
   Sumdan,
   User,
 } from "@prisma/client";
-import { DatePicker, Spin, Table, TableProps } from "antd";
+import { DatePicker, Select, Spin, Table, TableProps } from "antd";
 import { useEffect, useState } from "react";
 const { RangePicker } = DatePicker;
 
@@ -41,8 +41,10 @@ export default function Page() {
     data: [],
     search: "",
     backdate: "",
+    areaId: undefined,
   });
   const [sumdan, setSumdan] = useState<ISumdan[]>([]);
+  const [areaOptions, setAreaOptions] = useState<Array<{ label: string; value: string }>>([]);
 
   const getData = async () => {
     setLoading(true);
@@ -51,6 +53,7 @@ export default function Page() {
     params.append("include", "true");
     params.append("limit", String(pageProps.limit));
     if (pageProps.backdate) params.append("backdate", pageProps.backdate);
+    if (pageProps.areaId) params.append("areaId", pageProps.areaId);
 
     const res = await fetch(`/api/area?${params.toString()}`);
     const json = await res.json();
@@ -59,6 +62,14 @@ export default function Page() {
       data: json.data,
       total: json.total,
     }));
+    if (!pageProps.areaId) {
+      setAreaOptions(
+        (json.data || []).map((area: IArea) => ({
+          label: area.name,
+          value: area.id,
+        })),
+      );
+    }
     await fetch(`/api/sumdan?${params.toString()}`)
       .then((res) => res.json())
       .then((res) => setSumdan(res.data));
@@ -70,7 +81,7 @@ export default function Page() {
       await getData();
     }, 200);
     return () => clearTimeout(timeout);
-  }, [pageProps.backdate]);
+  }, [pageProps.backdate, pageProps.areaId]);
 
   const totalPlafond = pageProps.data
     .flatMap((area) => area.Cabang)
@@ -140,12 +151,13 @@ export default function Page() {
           .flatMap((s) => s.ProdukPembiayaan)
           .flatMap((s) => s.Dapem)
           .reduce((acc, curr) => acc + curr.plafond, 0);
+        const percentage = all > 0 ? (total / all) * 100 : 0;
         return (
           <div>
             {IDRFormat(total)} (
             {record.ProdukPembiayaan.flatMap((r) => r.Dapem).length} NOA)
             <span className="italic opacity-70">
-              ({((total / all) * 100).toFixed(2)}%)
+              ({percentage.toFixed(2)}%)
             </span>
           </div>
         );
@@ -200,10 +212,29 @@ export default function Page() {
               </p>
               <h2 className="text-xl font-semibold text-slate-900">Data pencapaian by area</h2>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-2">
+            <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50/90 p-2 sm:flex-row">
+              <Select
+                allowClear
+                size="large"
+                placeholder="Pilih area spesifik"
+                options={areaOptions}
+                value={pageProps.areaId}
+                onChange={(value) =>
+                  setPageProps((prev) => ({
+                    ...prev,
+                    areaId: value,
+                  }))
+                }
+                className="min-w-[220px]"
+              />
               <RangePicker
                 size="large"
-                onChange={(date, dateStr) => setPageProps({ ...pageProps, backdate: dateStr })}
+                onChange={(date, dateStr) =>
+                  setPageProps((prev) => ({
+                    ...prev,
+                    backdate: dateStr,
+                  }))
+                }
                 style={{ width: 260 }}
               />
             </div>
@@ -211,6 +242,11 @@ export default function Page() {
         </section>
 
         <section className="app-stat-strip gap-4">
+          {pageProps.data.length === 0 ? (
+            <div className="app-card p-5 text-sm text-slate-600">
+              Belum ada data untuk filter area dan tanggal yang dipilih.
+            </div>
+          ) : null}
           {pageProps.data &&
             pageProps.data.map((area) => {
               const areaNoa = area.Cabang.flatMap((cabang) => cabang.User.flatMap((user) => user.AODapem));

@@ -8,8 +8,9 @@ import {
   EditOutlined,
   EnvironmentOutlined,
   PhoneOutlined,
-  PlusCircleFilled,
+  PlusCircleOutlined,
   SaveOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { Cabang } from "@prisma/client";
 import { App, Button, Card, Input, Modal, Table, TableProps, Tag } from "antd";
@@ -117,41 +118,45 @@ export default function Page() {
   return (
     <Card
       title={
-        <div className="flex gap-2 font-bold text-xl">
+        <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
           <EnvironmentOutlined /> Unit Pelayanan
         </div>
       }
-      styles={{ body: { padding: 5 } }}
+      className="app-master-card"
     >
-      <div className="flex justify-between my-1">
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between">
         <Button
-          size="small"
+          size="middle"
           type="primary"
-          icon={<PlusCircleFilled />}
+          icon={<PlusCircleOutlined />}
+          className="app-master-action"
           onClick={() =>
             setUpsert({ ...upsert, upsert: true, selected: undefined })
           }
         >
           Add Area
         </Button>
-        <Input.Search
-          size="small"
-          style={{ width: 170 }}
-          placeholder="Cari area/cabang..."
-          onChange={(e) =>
-            setPageProps({ ...pageProps, search: e.target.value })
-          }
-        />
+        <div className="app-master-toolbar-search">
+          <Input
+            size="middle"
+            className="app-master-search"
+            placeholder="Cari area/cabang..."
+            prefix={<SearchOutlined className="text-slate-400" />}
+            allowClear
+            onChange={(e) =>
+              setPageProps({ ...pageProps, search: e.target.value })
+            }
+          />
+        </div>
       </div>
 
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         loading={loading}
         rowKey={"id"}
-        scroll={{ x: "max-content", y: "60vh" }}
-        bordered
         pagination={{
           current: pageProps.page,
           pageSize: pageProps.limit,
@@ -440,12 +445,13 @@ function TableCabang({
   ];
 
   return (
-    <div>
+    <div className="space-y-3">
       {hasAccess("write") && (
         <Button
-          icon={<PlusCircleFilled />}
-          size="small"
+          icon={<PlusCircleOutlined />}
+          size="middle"
           type="primary"
+          className="app-master-action"
           onClick={() =>
             setUpsert({ ...upsert, upsert: true, selected: undefined })
           }
@@ -454,12 +460,12 @@ function TableCabang({
         </Button>
       )}
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={record}
         rowKey={"id"}
         pagination={false}
-        size="small"
-        bordered
+        size="middle"
       />
       <UpsertCabang
         open={upsert.upsert}
