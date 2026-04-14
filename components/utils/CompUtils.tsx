@@ -14,7 +14,12 @@ import { FormInput } from "./FormUtils";
 import { GetAngsuran, IDRFormat } from "./PembiayaanUtil";
 import * as XLSX from "xlsx";
 import moment from "moment";
-import { FilterOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
+  FilterOutlined,
+} from "@ant-design/icons";
 
 export const GetStatusTag = (status: ESubmissionStatus | undefined | null) => {
   if (status) {
@@ -109,6 +114,50 @@ export const ProsesPembiayaan = ({
       ? (JSON.parse(data[(name + "_desc") as keyof IDapem] as string) as IDesc)
       : defaultDesc,
   );
+  const statusKey = `${name}_status` as keyof IDapem;
+  const currentStatus = temp[statusKey];
+
+  const handleStatusChange = (status: ESubmissionStatus) => {
+    setTemp({
+      ...temp,
+      [statusKey]: status,
+      ...(status === "APPROVED" && {
+        [nextname]: nextnameValue || "PENDING",
+      }),
+      ...(status === "REJECTED" && {
+        dropping_status: "REJECTED",
+      }),
+      ...(status !== "REJECTED" && temp.dropping_status === "REJECTED" && {
+        dropping_status: "DRAFT",
+      }),
+    });
+  };
+
+  const statusActions: Array<{
+    label: string;
+    value: ESubmissionStatus;
+    icon: React.ReactNode;
+    activeClassName: string;
+  }> = [
+    {
+      label: "Batal",
+      value: "REJECTED",
+      icon: <CloseCircleOutlined />,
+      activeClassName: "!border-rose-500 !bg-rose-500 !text-white hover:!border-rose-500 hover:!bg-rose-500",
+    },
+    {
+      label: "Pending",
+      value: "PENDING",
+      icon: <ClockCircleOutlined />,
+      activeClassName: "!border-amber-500 !bg-amber-500 !text-white hover:!border-amber-500 hover:!bg-amber-500",
+    },
+    {
+      label: "Approve",
+      value: "APPROVED",
+      icon: <CheckCircleOutlined />,
+      activeClassName: "!border-emerald-500 !bg-emerald-500 !text-white hover:!border-emerald-600 hover:!bg-emerald-600",
+    },
+  ];
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -139,13 +188,49 @@ export const ProsesPembiayaan = ({
 
   return (
     <Modal
-      onOk={() => handleSubmit()}
       open={open}
       onCancel={() => setOpen(false)}
       loading={loading}
       title={"Proses Pembiayaan " + data.id}
       style={{ top: 20 }}
-      okText="Submit"
+      footer={
+        <div className="border-t border-slate-200 pt-4">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Status Pembiayaan
+              </div>
+              <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:justify-end">
+                {statusActions.map((status) => {
+                  const isActive = currentStatus === status.value;
+
+                  return (
+                    <Button
+                      key={status.value}
+                      icon={status.icon}
+                      onClick={() => handleStatusChange(status.value)}
+                      className={[
+                        "!h-10 !min-w-[6.9rem] !rounded-[14px] !border !px-4 !font-medium !shadow-none transition-all",
+                        isActive
+                          ? status.activeClassName
+                          : "!border-slate-200 !bg-white !text-slate-700 hover:!border-slate-300 hover:!bg-slate-50",
+                      ].join(" ")}
+                    >
+                      {status.label}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
+              <Button onClick={() => setOpen(false)}>Cancel</Button>
+              <Button type="primary" loading={loading} onClick={() => handleSubmit()}>
+                Submit
+              </Button>
+            </div>
+          </div>
+        </div>
+      }
     >
       <div className="flex my-4 flex-col gap-2">
         <FormInput
@@ -205,30 +290,6 @@ export const ProsesPembiayaan = ({
           }}
         />
         <Divider style={{ fontSize: 12 }}>Proses Pembiayaan</Divider>
-        <FormInput
-          data={{
-            label: "Status Pembiayaan",
-            required: true,
-            type: "select",
-            options: [
-              { label: "PENDING", value: "PENDING" },
-              { label: "APPROVED", value: "APPROVED" },
-              { label: "REJECTED", value: "REJECTED" },
-            ],
-            value: temp[(name + "_status") as keyof IDapem],
-            onChange: (e: string) =>
-              setTemp({
-                ...temp,
-                [(name + "_status") as keyof IDapem]: e,
-                ...(e === "APPROVED" && {
-                  [nextname]: nextnameValue || "PENDING",
-                }),
-                ...(e === "REJECTED" && {
-                  dropping_status: "REJECTED",
-                }),
-              }),
-          }}
-        />
         <FormInput
           data={{
             label: "Keterangan",

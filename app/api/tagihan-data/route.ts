@@ -1,11 +1,38 @@
+import { getSession } from "@/libs/Auth";
 import prisma from "@/libs/Prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 // GET all tagihan data (Dapem + Angsuran)
 export async function GET(req: NextRequest) {
   try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorize" },
+        { status: 401 },
+      );
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { id: session.user.id },
+      select: { id: true, sumdanId: true },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorize" },
+        { status: 401 },
+      );
+    }
+
+    const sumdanId = req.nextUrl.searchParams.get("sumdanId");
+
     const dapemList = await prisma.dapem.findMany({
-      where: { status: true },
+      where: {
+        status: true,
+        ...(user.sumdanId && { ProdukPembiayaan: { sumdanId: user.sumdanId } }),
+        ...(sumdanId && { ProdukPembiayaan: { sumdanId } }),
+      },
       include: {
         Debitur: true,
         Angsuran: {

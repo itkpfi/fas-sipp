@@ -75,10 +75,10 @@ export default function Page() {
             />
           </div>
         </div>
-        <div className="flex gap-8 sm:flex-row flex-col">
-          <div className="flex-1 ">
-            <p className="font-bold text-lg my-2">PENDAPATAN</p>
-            <div className="flex gap-2 border-b border-dashed border-gray-300">
+        <div className="app-report-grid">
+          <div className="app-report-panel">
+            <p className="app-report-panel-title">PENDAPATAN</p>
+            <div className="app-report-row">
               <p className="w-52">Administrasi</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -90,7 +90,7 @@ export default function Page() {
                 )}
               </p>
             </div>
-            <div className="flex gap-2 border-b border-dashed border-gray-300">
+            <div className="app-report-row">
               <p className="w-52">Asuransi</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -103,7 +103,7 @@ export default function Page() {
                 )}
               </p>
             </div>
-            <div className="flex gap-2 border-b border-dashed border-gray-300">
+            <div className="app-report-row">
               <p className="w-52">Tatalaksana</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -112,7 +112,7 @@ export default function Page() {
                 )}
               </p>
             </div>
-            <div className="flex gap-2 border-b border-dashed border-gray-300">
+            <div className="app-report-row">
               <p className="w-52">Data Informasi</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -124,7 +124,7 @@ export default function Page() {
                 )}
               </p>
             </div>
-            <div className="flex gap-2 border-b border-dashed border-gray-300">
+            <div className="app-report-row">
               <p className="w-52">Materai</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -133,7 +133,7 @@ export default function Page() {
                 )}
               </p>
             </div>
-            <div className="flex gap-2 border-b border-dashed border-gray-300">
+            <div className="app-report-row">
               <p className="w-52">Mutasi</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -142,7 +142,7 @@ export default function Page() {
                 )}
               </p>
             </div>
-            <div className="flex gap-2 border-b border-dashed border-gray-300">
+            <div className="app-report-row">
               <p className="w-52">Pelunasan</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -154,7 +154,7 @@ export default function Page() {
                 )}
               </p>
             </div>
-            <div className="flex gap-2 border-b border-dashed border-gray-300">
+            <div className="app-report-row">
               <p className="w-52">Blokir Angsuran</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -175,7 +175,7 @@ export default function Page() {
                 )}
               </p>
             </div>
-            <div className="flex gap-2 border-b border-dashed border-gray-300 font-bold my-2">
+            <div className="app-report-total my-2">
               <p className="w-52">TOTAL PENDAPATAN</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -207,13 +207,10 @@ export default function Page() {
               </p>
             </div>
           </div>
-          <div className="flex-1 ">
-            <p className="font-bold text-lg my-2">BEBAN</p>
+          <div className="app-report-panel">
+            <p className="app-report-panel-title">BEBAN</p>
             {bebans.map((b) => (
-              <div
-                className="flex gap-2 border-b border-dashed border-gray-300"
-                key={b.id}
-              >
+              <div className="app-report-row" key={b.id}>
                 <p className="w-52">{b.name}</p>
                 <p className="w-4">:</p>
                 <p className="flex-1 text-right">
@@ -226,7 +223,7 @@ export default function Page() {
                 </p>
               </div>
             ))}
-            <div className="flex gap-2 border-b border-dashed border-gray-300">
+            <div className="app-report-row">
               <p className="w-52">BLOKIR ANGSURAN</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -247,7 +244,7 @@ export default function Page() {
                 )}
               </p>
             </div>
-            <div className="flex gap-2 border-b border-dashed border-gray-300">
+            <div className="app-report-row">
               <p className="w-52">PELUNASAN</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -259,7 +256,7 @@ export default function Page() {
                 )}
               </p>
             </div>
-            <div className="flex gap-2 border-b border-dashed border-gray-300 font-bold my-2">
+            <div className="app-report-total my-2">
               <p className="w-52">TOTAL BEBAN</p>
               <p className="w-4">:</p>
               <p className="flex-1 text-right">
@@ -292,7 +289,7 @@ export default function Page() {
             </div>
           </div>
         </div>
-        <div className="text-center font-bold text-lg my-2">
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-lg font-bold text-slate-900">
           TOTAL :{" "}
           {IDRFormat(
             (() => {

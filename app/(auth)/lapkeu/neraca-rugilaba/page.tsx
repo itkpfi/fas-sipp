@@ -70,15 +70,12 @@ export default function Page() {
             </Button>
           </div>
         </div>
-        <div className="flex gap-8 sm:flex-row flex-co border-t">
-          <div className="flex-1 flex flex-col justify-between">
-            <p className="font-bold text-lg my-2">PENDAPATAN</p>
-            <div>
+        <div className="app-report-grid border-t border-slate-200 pt-4">
+          <div className="app-report-panel flex flex-col justify-between">
+            <p className="app-report-panel-title">PENDAPATAN</p>
+            <div className="space-y-1">
               {data.pendapatan.map((d) => (
-                <div
-                  className="flex gap-2 border-b border-dashed border-gray-300"
-                  key={d.id}
-                >
+                <div className="app-report-row" key={d.id}>
                   <p className="flex-1">{d.name}</p>
                   <p className="flex-1 text-right">
                     {IDRFormat(
@@ -92,7 +89,7 @@ export default function Page() {
               ))}
             </div>
 
-            <div className="flex gap-2 border-b border-dashed border-gray-300 font-bold my-2">
+            <div className="app-report-total my-2">
               <p className="flex-1">TOTAL PENDAPATAN</p>
               <p className="flex-1 text-right">
                 {IDRFormat(
@@ -103,14 +100,11 @@ export default function Page() {
               </p>
             </div>
           </div>
-          <div className="flex-1 flex flex-col justify-between">
-            <p className="font-bold text-lg my-2">BEBAN</p>
-            <div>
+          <div className="app-report-panel flex flex-col justify-between">
+            <p className="app-report-panel-title">BEBAN</p>
+            <div className="space-y-1">
               {data.beban.map((d) => (
-                <div
-                  className="flex gap-2 border-b border-dashed border-gray-300"
-                  key={d.id}
-                >
+                <div className="app-report-row" key={d.id}>
                   <p className="flex-1">{d.name}</p>
                   <p className="flex-1 text-right">
                     {IDRFormat(
@@ -123,7 +117,7 @@ export default function Page() {
                 </div>
               ))}
             </div>
-            <div className="flex gap-2 border-b border-dashed border-gray-300 font-bold my-2">
+            <div className="app-report-total my-2">
               <p className="flex-1">TOTAL BEBAN</p>
               <p className="flex-1 text-right">
                 {IDRFormat(
@@ -135,7 +129,7 @@ export default function Page() {
             </div>
           </div>
         </div>
-        <div className="text-center font-bold text-lg my-2">
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-lg font-bold text-slate-900">
           TOTAL :{" "}
           {IDRFormat(
             (() => {

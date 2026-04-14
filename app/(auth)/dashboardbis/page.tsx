@@ -10,7 +10,7 @@ import {
   Sumdan,
   User,
 } from "@prisma/client";
-import { DatePicker, Select, Spin, Table, TableProps } from "antd";
+import { DatePicker, Pagination, Select, Spin, Table, TableProps } from "antd";
 import { useEffect, useState } from "react";
 const { RangePicker } = DatePicker;
 
@@ -32,74 +32,104 @@ interface ISumdan extends Sumdan {
   ProdukPembiayaan: IProduk[];
 }
 
+const getProdukDapem = (produk: IProduk[] = []) =>
+  produk.flatMap((item) => item.Dapem ?? []).filter((item): item is Dapem => Boolean(item));
+
 export default function Page() {
   const [loading, setLoading] = useState(false);
   const [pageProps, setPageProps] = useState<IPageProps<IArea>>({
     page: 1,
-    limit: 1000,
+    limit: 4,
     total: 0,
     data: [],
     search: "",
     backdate: "",
     areaId: undefined,
   });
+  const [summaryAreas, setSummaryAreas] = useState<IArea[]>([]);
   const [sumdan, setSumdan] = useState<ISumdan[]>([]);
   const [areaOptions, setAreaOptions] = useState<Array<{ label: string; value: string }>>([]);
 
   const getData = async () => {
     setLoading(true);
-    const params = new URLSearchParams();
-    params.append("ao", "ao");
-    params.append("include", "true");
-    params.append("limit", String(pageProps.limit));
-    if (pageProps.backdate) params.append("backdate", pageProps.backdate);
-    if (pageProps.areaId) params.append("areaId", pageProps.areaId);
+    const areaParams = new URLSearchParams();
+    areaParams.append("ao", "ao");
+    areaParams.append("include", "true");
+    areaParams.append("page", String(pageProps.page));
+    areaParams.append("limit", String(pageProps.limit));
+    if (pageProps.backdate) areaParams.append("backdate", pageProps.backdate);
+    if (pageProps.areaId) areaParams.append("areaId", pageProps.areaId);
 
-    const res = await fetch(`/api/area?${params.toString()}`);
+    const sumdanParams = new URLSearchParams();
+    sumdanParams.append("include", "true");
+    sumdanParams.append("limit", "1000");
+    if (pageProps.backdate) sumdanParams.append("backdate", pageProps.backdate);
+    if (pageProps.areaId) sumdanParams.append("areaId", pageProps.areaId);
+
+    const summaryParams = new URLSearchParams();
+    summaryParams.append("ao", "ao");
+    summaryParams.append("include", "true");
+    summaryParams.append("limit", "1000");
+    if (pageProps.backdate) summaryParams.append("backdate", pageProps.backdate);
+    if (pageProps.areaId) summaryParams.append("areaId", pageProps.areaId);
+
+    const res = await fetch(`/api/area?${areaParams.toString()}`);
     const json = await res.json();
     setPageProps((prev) => ({
       ...prev,
       data: json.data,
       total: json.total,
     }));
-    if (!pageProps.areaId) {
-      setAreaOptions(
-        (json.data || []).map((area: IArea) => ({
-          label: area.name,
-          value: area.id,
-        })),
-      );
-    }
-    await fetch(`/api/sumdan?${params.toString()}`)
+    await fetch(`/api/area?${summaryParams.toString()}`)
+      .then((res) => res.json())
+      .then((res) => setSummaryAreas(res.data || []));
+    await fetch(`/api/sumdan?${sumdanParams.toString()}`)
       .then((res) => res.json())
       .then((res) => setSumdan(res.data));
     setLoading(false);
   };
+
+  const getAreaOptions = async () => {
+    const params = new URLSearchParams();
+    params.append("limit", "1000");
+    const res = await fetch(`/api/area?${params.toString()}`);
+    const json = await res.json();
+    setAreaOptions(
+      (json.data || []).map((area: IArea) => ({
+        label: area.name,
+        value: area.id,
+      })),
+    );
+  };
+
+  useEffect(() => {
+    void getAreaOptions();
+  }, []);
 
   useEffect(() => {
     const timeout = setTimeout(async () => {
       await getData();
     }, 200);
     return () => clearTimeout(timeout);
-  }, [pageProps.backdate, pageProps.areaId]);
+  }, [pageProps.page, pageProps.limit, pageProps.backdate, pageProps.areaId]);
 
-  const totalPlafond = pageProps.data
+  const totalPlafond = summaryAreas
     .flatMap((area) => area.Cabang)
     .flatMap((cabang) => cabang.User)
     .flatMap((user) => user.AODapem)
     .reduce((acc, curr) => acc + curr.plafond, 0);
 
-  const totalTarget = pageProps.data
+  const totalTarget = summaryAreas
     .flatMap((area) => area.Cabang)
     .flatMap((cabang) => cabang.User)
     .reduce((acc, curr) => acc + curr.target, 0);
 
-  const totalNoa = pageProps.data
+  const totalNoa = summaryAreas
     .flatMap((area) => area.Cabang)
     .flatMap((cabang) => cabang.User)
     .flatMap((user) => user.AODapem).length;
 
-  const totalAo = pageProps.data
+  const totalAo = summaryAreas
     .flatMap((area) => area.Cabang)
     .flatMap((cabang) => cabang.User).length;
 
@@ -134,28 +164,21 @@ export default function Page() {
       dataIndex: "limit",
       key: "limit",
       sorter: (a, b) =>
-        a.ProdukPembiayaan.flatMap((aa) => aa.Dapem).reduce(
-          (acc, curr) => acc + curr.plafond,
-          0,
-        ) -
-        b.ProdukPembiayaan.flatMap((ab) => ab.Dapem).reduce(
-          (acc, curr) => acc + curr.plafond,
-          0,
-        ),
+        getProdukDapem(a.ProdukPembiayaan).reduce((acc, curr) => acc + curr.plafond, 0) -
+        getProdukDapem(b.ProdukPembiayaan).reduce((acc, curr) => acc + curr.plafond, 0),
       render(value, record, index) {
-        const total = record.ProdukPembiayaan.flatMap((d) => d.Dapem).reduce(
+        const total = getProdukDapem(record.ProdukPembiayaan).reduce(
           (acc, curr) => acc + curr.plafond,
           0,
         );
         const all = sumdan
-          .flatMap((s) => s.ProdukPembiayaan)
-          .flatMap((s) => s.Dapem)
+          .flatMap((s) => getProdukDapem(s.ProdukPembiayaan))
           .reduce((acc, curr) => acc + curr.plafond, 0);
         const percentage = all > 0 ? (total / all) * 100 : 0;
         return (
           <div>
             {IDRFormat(total)} (
-            {record.ProdukPembiayaan.flatMap((r) => r.Dapem).length} NOA)
+            {getProdukDapem(record.ProdukPembiayaan).length} NOA)
             <span className="italic opacity-70">
               ({percentage.toFixed(2)}%)
             </span>
@@ -186,7 +209,7 @@ export default function Page() {
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="app-stat-tile">
             <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Area aktif</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">{pageProps.data.length}</div>
+            <div className="mt-2 text-3xl font-bold text-slate-900">{pageProps.total}</div>
           </div>
           <div className="app-stat-tile">
             <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">AO terpantau</div>
@@ -195,9 +218,9 @@ export default function Page() {
           <div className="app-stat-tile">
             <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Rata-rata area</div>
             <div className="mt-2 text-3xl font-bold text-slate-900">
-              Rp. {IDRFormat(pageProps.data.length ? totalPlafond / pageProps.data.length : 0)}
-            </div>
-          </div>
+               Rp. {IDRFormat(pageProps.total ? totalPlafond / pageProps.total : 0)}
+             </div>
+           </div>
           <div className="app-stat-tile">
             <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Mitra aktif</div>
             <div className="mt-2 text-3xl font-bold text-slate-900">{sumdan.length}</div>
@@ -222,6 +245,7 @@ export default function Page() {
                 onChange={(value) =>
                   setPageProps((prev) => ({
                     ...prev,
+                    page: 1,
                     areaId: value,
                   }))
                 }
@@ -232,6 +256,7 @@ export default function Page() {
                 onChange={(date, dateStr) =>
                   setPageProps((prev) => ({
                     ...prev,
+                    page: 1,
                     backdate: dateStr,
                   }))
                 }
@@ -258,9 +283,9 @@ export default function Page() {
               const areaProgress = areaTarget > 0 ? (areaPencapaian / areaTarget) * 100 : 0;
 
               return (
-                <article key={area.id} className="app-card space-y-5 p-4 md:p-5">
-                  <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                    <div className="space-y-3">
+                <article key={area.id} className="app-card space-y-4 p-4 md:p-5">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="space-y-2.5">
                       <div className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{area.name}</div>
                       <div>
                         <h3 className="text-2xl font-semibold tracking-[-0.03em] text-slate-900">
@@ -272,7 +297,7 @@ export default function Page() {
                       </div>
                     </div>
 
-                    <div className="min-w-[240px] rounded-[24px] border border-slate-200 bg-slate-50/90 p-4">
+                    <div className="rounded-[24px] border border-slate-200 bg-slate-50/90 p-4 lg:min-w-[220px] xl:min-w-[240px]">
                       <div className="flex items-center justify-between text-sm font-medium text-slate-600">
                         <span>Progress area</span>
                         <span className={areaProgress >= 100 ? "text-emerald-600" : "text-amber-600"}>
@@ -290,7 +315,7 @@ export default function Page() {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 xl:grid-cols-2">
+                  <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
                     {area.Cabang.map((cabang) => {
                       const cabangNoa = cabang.User.flatMap((user) => user.AODapem);
                       const cabangPencapaian = cabangNoa.reduce((acc, curr) => acc + curr.plafond, 0);
@@ -370,6 +395,27 @@ export default function Page() {
               );
             })}
         </section>
+
+        {pageProps.total > pageProps.limit && (
+          <section className="flex justify-center">
+            <div className="app-card px-4 py-3">
+              <Pagination
+                current={pageProps.page}
+                pageSize={pageProps.limit}
+                total={pageProps.total}
+                showSizeChanger
+                pageSizeOptions={[4, 6, 8, 12]}
+                onChange={(page, pageSize) =>
+                  setPageProps((prev) => ({
+                    ...prev,
+                    page,
+                    limit: pageSize,
+                  }))
+                }
+              />
+            </div>
+          </section>
+        )}
 
         <section className="app-card space-y-4 p-4 md:p-5">
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">

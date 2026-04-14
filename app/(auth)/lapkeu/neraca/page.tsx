@@ -79,19 +79,16 @@ export default function Page() {
             </Button>
           </div>
         </div>
-        <div className="flex sm:flex-row flex-col gap-8 ">
-          <div className="flex-1 flex flex-col justify-between ">
-            <p className="font-bold text-lg">ASSET</p>
+        <div className="app-report-grid">
+          <div className="app-report-panel flex flex-col justify-between">
+            <p className="app-report-panel-title">ASSET</p>
             {data.asset.map((d) => (
-              <div
-                key={d.id}
-                className="border border-gray-300 border-dashed my-1 p-2"
-              >
-                <p className="font-bold">{d.name}</p>
+              <div key={d.id} className="app-report-card my-1">
+                <p className="font-bold text-slate-900">{d.name}</p>
                 <div className="ml-4">
                   {d.Children.map((dc) => (
                     <div key={dc.id}>
-                      <div className="flex justify-between">
+                      <div className="app-report-row">
                         <p>{dc.name}</p>
                         <p className="text-right">
                           {IDRFormat(
@@ -105,7 +102,7 @@ export default function Page() {
                     </div>
                   ))}
                 </div>
-                <div className="font-bold border-t border-dashed border-gray-300 flex justify-between gap-2">
+                <div className="app-report-total">
                   <span>Total {d.name}</span>
                   <span className="text-right">
                     {IDRFormat(
@@ -118,7 +115,7 @@ export default function Page() {
                 </div>
               </div>
             ))}
-            <div className="font-bold text-lg flex justify-between pr-2">
+            <div className="app-report-total text-lg pr-2">
               <p>JUMLAH ASSET</p>
               <p className="text-right">
                 {IDRFormat(
@@ -131,18 +128,15 @@ export default function Page() {
               </p>
             </div>
           </div>
-          <div className="flex-1 flex flex-col justify-between">
-            <p className="font-bold text-lg">KEWAJIBAN DAN MODAL</p>
+          <div className="app-report-panel flex flex-col justify-between">
+            <p className="app-report-panel-title">KEWAJIBAN DAN MODAL</p>
             {data.kewajiban.map((d) => (
-              <div
-                key={d.id}
-                className="border border-gray-300 border-dashed my-1 p-2"
-              >
-                <p className="font-bold">{d.name}</p>
+              <div key={d.id} className="app-report-card my-1">
+                <p className="font-bold text-slate-900">{d.name}</p>
                 <div className="ml-4 ">
                   {d.Children.map((dc) => (
                     <div key={dc.id}>
-                      <div className="flex justify-between">
+                      <div className="app-report-row">
                         <p>{dc.name}</p>
                         <p className="text-right">
                           {IDRFormat(
@@ -156,7 +150,7 @@ export default function Page() {
                     </div>
                   ))}
                 </div>
-                <div className="font-bold border-t border-dashed border-gray-300 flex justify-between gap-2 ">
+                <div className="app-report-total">
                   <span>Total {d.name}</span>
                   <span className="text-right">
                     {IDRFormat(
@@ -170,15 +164,12 @@ export default function Page() {
               </div>
             ))}
             {data.modal.map((d) => (
-              <div
-                key={d.id}
-                className="border border-gray-300 border-dashed my-1 p-2"
-              >
-                <p className="font-bold">{d.name}</p>
+              <div key={d.id} className="app-report-card my-1">
+                <p className="font-bold text-slate-900">{d.name}</p>
                 <div className="ml-4">
                   {d.Children.map((dc) => (
                     <div key={dc.id}>
-                      <div className="flex justify-between">
+                      <div className="app-report-row">
                         <p>{dc.name}</p>
                         <p className="text-right">
                           {IDRFormat(
@@ -191,12 +182,12 @@ export default function Page() {
                       </div>
                     </div>
                   ))}
-                  <div className="flex justify-between">
+                  <div className="app-report-row">
                     <p>SHU Tahun Berjalan</p>
                     <p className="text-right">{IDRFormat(data.shu)}</p>
                   </div>
                 </div>
-                <div className="font-bold border-t border-dashed border-gray-300 flex justify-between gap-2">
+                <div className="app-report-total">
                   <span>Total {d.name}</span>
                   <span className="text-right">
                     {IDRFormat(
@@ -209,7 +200,7 @@ export default function Page() {
                 </div>
               </div>
             ))}
-            <div className="font-bold text-lg flex justify-between">
+            <div className="app-report-total text-lg">
               <p>JUMLAH KEWAJIBAN DAN MODAL</p>
               <p className="text-right">
                 {IDRFormat(

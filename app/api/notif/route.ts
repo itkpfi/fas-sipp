@@ -90,9 +90,7 @@ export const GET = async (req: NextRequest) => {
       prisma.dropping.count({
         where: {
           status: false,
-          ...(user.sumdanId && {
-            ProdukPembiayaan: { sumdanId: user.sumdanId },
-          }),
+          ...(user.sumdanId && { sumdanId: user.sumdanId }),
         },
       }),
       prisma.dapem.count({
@@ -108,9 +106,7 @@ export const GET = async (req: NextRequest) => {
       prisma.berkas.count({
         where: {
           status: "DELIVERY",
-          ...(user.sumdanId && {
-            ProdukPembiayaan: { sumdanId: user.sumdanId },
-          }),
+          ...(user.sumdanId && { sumdanId: user.sumdanId }),
         },
       }),
       prisma.dapem.count({
@@ -126,9 +122,7 @@ export const GET = async (req: NextRequest) => {
       prisma.jaminan.count({
         where: {
           status: "DELIVERY",
-          ...(user.sumdanId && {
-            ProdukPembiayaan: { sumdanId: user.sumdanId },
-          }),
+          ...(user.sumdanId && { sumdanId: user.sumdanId }),
         },
       }),
       prisma.pelunasan.count({

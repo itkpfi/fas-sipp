@@ -32,6 +32,7 @@ import {
   MoneyCollectOutlined,
   PayCircleOutlined,
   PrinterOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { Angsuran, ESettleStatus, Sumdan } from "@prisma/client";
 import {
@@ -39,7 +40,6 @@ import {
   Button,
   Card,
   DatePicker,
-  Divider,
   Input,
   Modal,
   Progress,
@@ -164,8 +164,8 @@ export default function Page() {
       render(value, record, index) {
         return (
           <div>
-            <div>{record.Debitur.fullname}</div>
-            <div className="text-xs opacity-80">@{record.Debitur.nopen}</div>
+            <div className="font-medium text-slate-900">{record.Debitur.fullname}</div>
+            <div className="text-xs text-slate-500">@{record.Debitur.nopen}</div>
           </div>
         );
       },
@@ -179,10 +179,15 @@ export default function Page() {
           <div>
             <div>
               <DollarCircleOutlined />{" "}
-              <Tag color={"blue"}>{IDRFormat(record.plafond)}</Tag>
+              <span className="inline-flex rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700">
+                {IDRFormat(record.plafond)}
+              </span>
             </div>
             <div>
-              <HistoryOutlined /> <Tag color={"blue"}>{record.tenor} Bulan</Tag>
+              <HistoryOutlined />{" "}
+              <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
+                {record.tenor} Bulan
+              </span>
             </div>
           </div>
         );
@@ -196,7 +201,7 @@ export default function Page() {
         return (
           <div>
             <div>{record.no_contract}</div>
-            <div className="text-xs opacity-80">
+            <div className="text-xs text-slate-500">
               {moment(record.date_contract).format("DD/MM/YYY")}
             </div>
           </div>
@@ -228,13 +233,17 @@ export default function Page() {
         return (
           <div className="flex flex-col gap-1">
             <div className="flex gap-1">
-              <Tag color={"blue"}>{IDRFormat(angs)}</Tag>
-              <Tag color={"blue"}>{IDRFormat(angssumdan)}</Tag>
+              <span className="inline-flex rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700">
+                {IDRFormat(angs)}
+              </span>
+              <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
+                {IDRFormat(angssumdan)}
+              </span>
             </div>
-            <Tag color={"blue"} style={{ marginLeft: 2 }}>
+            <span className="inline-flex w-fit rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
               Ke {find ? find.counter : 0} |{" "}
               {IDRFormat(find ? find.remaining : 0)}
-            </Tag>
+            </span>
           </div>
         );
       },
@@ -249,12 +258,12 @@ export default function Page() {
         );
         return (
           <div className="flex flex-col gap-1">
-            <Tag color={"blue"} style={{ textAlign: "right" }}>
+            <span className="inline-flex w-fit justify-end rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
               {IDRFormat(find ? find.principal : 0)}
-            </Tag>
-            <Tag color={"blue"} style={{ textAlign: "right" }}>
+            </span>
+            <span className="inline-flex w-fit justify-end rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700">
               {IDRFormat(find ? find.margin : 0)}
-            </Tag>
+            </span>
           </div>
         );
       },
@@ -274,7 +283,7 @@ export default function Page() {
                 <Tag color={find.date_paid ? "green" : "red"} variant="solid">
                   {find.date_paid ? "PAID" : "UNPAID"}
                 </Tag>
-                <div className="text-xs opacity-80">
+                <div className="text-xs text-slate-500">
                   <div>
                     <CalendarOutlined />{" "}
                     {moment(find.date_pay).format("DD/MM/YYYY")}
@@ -317,7 +326,7 @@ export default function Page() {
             <Tooltip title="Update tagihan">
               <Button
                 size="small"
-                type="primary"
+                className="app-table-action-btn"
                 icon={<EditOutlined />}
                 onClick={() =>
                   setAction({ ...action, upsert: true, selected: record })
@@ -329,7 +338,7 @@ export default function Page() {
             <Tooltip title="Buat Pelunasan">
               <Button
                 size="small"
-                type="primary"
+                className="app-table-action-btn"
                 icon={<FormOutlined />}
                 onClick={() =>
                   setAction({ ...action, delete: true, selected: record })
@@ -383,17 +392,18 @@ export default function Page() {
   return (
     <Card
       title={
-        <div className="flex gap-2 font-bold text-xl">
-          <MoneyCollectOutlined /> Data Tagihan
+        <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
+          <MoneyCollectOutlined /> Tagihan Pembiayaan
         </div>
       }
-      styles={{ body: { padding: 5 } }}
+      className="app-master-card"
     >
-      <div className="flex justify-between my-1 gap-2 overflow-auto">
-        <div className="flex gap-2">
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap gap-2">
           {hasAccess("update") && (
             <Button
-              size="small"
+              size="middle"
+              className="app-master-action"
               icon={<FormOutlined />}
               type="primary"
               onClick={() => setAction({ ...action, proses: true })}
@@ -405,19 +415,23 @@ export default function Page() {
             <Button
               icon={<CheckCircleOutlined />}
               type="primary"
-              size="small"
+              size="middle"
+              className="app-master-action"
               onClick={() => setCek({ open: true, msg: [] })}
             >
               Cek Tagihan
             </Button>
           )}
           <FilterData
+            buttonSize="middle"
+            buttonClassName="app-master-action"
             children={
               <>
                 <div className="my-2">
                   <p>Periode :</p>
                   <DatePicker
-                    size="small"
+                    size="middle"
+                    className="app-master-picker"
                     picker="month"
                     onChange={(date, dateStr) =>
                       setPageProps({ ...pageProps, backdate: dateStr })
@@ -429,7 +443,8 @@ export default function Page() {
                   <div className="my-2">
                     <p>Mitra Pembiayaan : </p>
                     <Select
-                      size="small"
+                      size="middle"
+                      className="app-master-select"
                       placeholder="Pilih Mitra..."
                       options={sumdans.map((s) => ({
                         label: s.code,
@@ -446,7 +461,8 @@ export default function Page() {
                 <div>
                   <p>Status Tagihan :</p>
                   <Select
-                    size="small"
+                    size="middle"
+                    className="app-master-select"
                     placeholder="Pilih Status..."
                     options={[
                       { label: "Tertagih", value: "paid" },
@@ -463,11 +479,12 @@ export default function Page() {
             }
           />
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
           <Button
             icon={<PrinterOutlined />}
-            size="small"
+            size="middle"
             type="primary"
+            className="app-master-action"
             onClick={() =>
               ExportToExcel(
                 [
@@ -482,25 +499,34 @@ export default function Page() {
           >
             Excel
           </Button>
-          <Input.Search
-            size="small"
-            style={{ width: 170 }}
-            placeholder="Cari nama..."
-            onChange={(e) =>
-              setPageProps({ ...pageProps, search: e.target.value })
-            }
-            width={170}
-          />
+          <div className="app-master-toolbar-search">
+            <Input
+              size="middle"
+              className="app-master-search"
+              prefix={<SearchOutlined className="text-slate-400" />}
+              allowClear
+              placeholder="Cari nama..."
+              onChange={(e) =>
+                setPageProps({ ...pageProps, search: e.target.value })
+              }
+            />
+          </div>
+        </div>
+      </div>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500">
+        <p>Monitoring tagihan bulanan dengan filter mitra, status, dan periode.</p>
+        <div className="app-soft-pill !rounded-full !bg-slate-100 !px-3 !py-1 !text-slate-600 !shadow-none">
+          Total data {pageProps.total}
         </div>
       </div>
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         loading={loading}
         rowKey={"id"}
-        bordered
-        scroll={{ x: "max-content", y: "60vh" }}
+        scroll={{ x: "max-content" }}
         rowSelection={rowSelection}
         pagination={{
           current: pageProps.page,
@@ -571,11 +597,11 @@ export default function Page() {
             )
             .reduce((acc, curr) => acc + (curr ? curr.remaining : 0), 0);
           return (
-            <Table.Summary.Row className="text-xs bg-blue-400">
-              <Table.Summary.Cell index={0} colSpan={2} className="text-center">
+            <Table.Summary.Row className="bg-slate-50 text-xs text-slate-700">
+              <Table.Summary.Cell index={0} colSpan={2} className="text-center font-semibold">
                 <b>SUMMARY</b>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={3} className="text-center">
+              <Table.Summary.Cell index={3} className="text-center font-semibold text-slate-800">
                 <b>
                   {IDRFormat(
                     pageData.reduce((acc, item) => acc + item.plafond, 0),
@@ -586,17 +612,17 @@ export default function Page() {
                 index={4}
                 className="text-center"
               ></Table.Summary.Cell>
-              <Table.Summary.Cell index={5} className="text-center font-bold">
+              <Table.Summary.Cell index={5} className="text-center font-semibold text-slate-800">
                 <div>
                   {IDRFormat(angs)} - {IDRFormat(angsSumdan)}
                 </div>
-                <div className="border-t border-gray-500">
+                <div className="border-t border-slate-300 text-slate-600">
                   {IDRFormat(angs - angsSumdan)}
                 </div>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={5} className="font-bold text-right">
+              <Table.Summary.Cell index={5} className="text-right font-semibold text-slate-800">
                 <div>{IDRFormat(pokok)}</div>
-                <div>{IDRFormat(margin)}</div>
+                <div className="text-slate-600">{IDRFormat(margin)}</div>
               </Table.Summary.Cell>
             </Table.Summary.Row>
           );
@@ -649,13 +675,21 @@ export default function Page() {
         />
       )}
       <Modal
-        title={"PROSES TAGIHAN"}
+        title={
+          <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
+            <CheckCircleOutlined className="text-slate-500" /> Proses Tagihan
+          </div>
+        }
         open={action.proses}
         onCancel={() => setAction({ ...action, proses: false })}
         onOk={handleProses}
         loading={loading}
+        okButtonProps={{ className: "app-master-action" }}
+        cancelButtonProps={{ className: "!rounded-xl" }}
       >
-        <p className="m-4">Konfirmasi proses tagihan untuk data yg dipilih?</p>
+        <p className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          Konfirmasi proses tagihan untuk data yang dipilih.
+        </p>
       </Modal>
     </Card>
   );
@@ -708,13 +742,19 @@ const UpdateTagihan = ({
   return (
     <Modal
       style={{ top: 30 }}
-      title={"Update Data Tagihan " + rootrecord.id}
+      title={
+        <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
+          <EditOutlined className="text-slate-500" /> Update Data Tagihan {rootrecord.id}
+        </div>
+      }
       open={open}
       onCancel={() => setOpen(false)}
       onOk={handleSubmit}
       loading={loading}
+      okButtonProps={{ className: "app-master-action" }}
+      cancelButtonProps={{ className: "!rounded-xl" }}
     >
-      <div className="flex flex-col gap-2">
+      <div className="mt-2 flex flex-col gap-3">
         <FormInput
           data={{
             label: "Pemohon",
@@ -748,7 +788,7 @@ const UpdateTagihan = ({
               setData({ ...data, date_paid: new Date(e) }),
           }}
         />
-        <div className="italic text-xs text-blue-500">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
           Isi tanggal bayar untuk update status menjadi tertagih, kosongkan jika
           tidak tertagih!
         </div>
@@ -830,21 +870,27 @@ const CreatePelunasan = ({
   return (
     <Modal
       style={{ top: 10 }}
-      title={"Permohonan Pelunasan " + rootrecord.id}
+      title={
+        <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
+          <FormOutlined className="text-slate-500" /> Permohonan Pelunasan {rootrecord.id}
+        </div>
+      }
       open={open}
       onCancel={() => setOpen(false)}
       onOk={handleSubmit}
       loading={loading}
-      width={1300}
+      width={1180}
+      cancelButtonProps={{ className: "!rounded-xl" }}
       okButtonProps={{
+        className: "app-master-action",
         disabled:
           rootrecord.dropping_status === "PAID_OFF" ||
           (rootrecord.Pelunasan &&
             rootrecord.Pelunasan.status_paid !== "REJECTED"),
       }}
     >
-      <div className="flex flex-col sm:flex-row gap-2">
-        <div className="flex-1 sm:w-[40%] flex flex-col gap-2">
+      <div className="mt-2 flex flex-col gap-4 lg:flex-row">
+        <div className="app-card-muted flex flex-1 flex-col gap-3 !rounded-2xl !shadow-none lg:w-[40%]">
           <FormInput
             data={{
               label: "Pemohon",
@@ -938,15 +984,15 @@ const CreatePelunasan = ({
           {rootrecord.dropping_status === "PAID_OFF" ||
             (rootrecord.Pelunasan &&
               rootrecord.Pelunasan.status_paid !== "REJECTED" && (
-                <p className="italic text-blue-500 my-2 p-1 border rounded">
+                <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
                   Data ini sudah lunas atau sedang diajukan pelunasan!!. Mohon
                   tunggu proses selesai atau hapus proses sebelumnya di menu
                   Pelunasan Debitur!
                 </p>
               ))}
         </div>
-        <div className="flex-1">
-          <div className="flex flex-col gap-1 mb-1">
+        <div className="app-card-muted flex-1 !rounded-2xl !shadow-none">
+          <div className="mb-3 flex flex-col gap-2 border-b border-slate-200 pb-3">
             <FormInput
               data={{
                 label: "Sisa Pokok",
@@ -990,13 +1036,13 @@ const CreatePelunasan = ({
             />
           </div>
           <Table
+            className="app-master-table"
             columns={columnsangsuran}
             dataSource={rootrecord.Angsuran}
-            size="small"
+            size="middle"
             loading={loading}
             rowKey={"id"}
-            bordered
-            scroll={{ y: "30vh" }}
+            scroll={{ x: "max-content" }}
             pagination={{ pageSize: 12 }}
           />
         </div>
@@ -1062,37 +1108,43 @@ const CekTagihan = ({
 
   return (
     <Modal
-      title={"CEK TAGIHAN"}
+      title={
+        <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
+          <CheckCircleOutlined className="text-slate-500" /> Cek Tagihan
+        </div>
+      }
       open={open}
       onCancel={() => setOpen(false)}
       footer={null}
-      width={1000}
+      width={980}
       style={{ top: 20 }}
     >
-      <div className="min-h-32">
-        <div className="my-1 flex gap-5 items-center">
-          <p className="w-52">Download Format</p>
+      <div className="mt-2 min-h-32 space-y-3">
+        <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-medium text-slate-700">Download Format</p>
           <a href="/format_upload_tagihan.xlsx" download>
-            <Button type="primary" size="small" icon={<DownloadOutlined />}>
+            <Button type="primary" size="middle" className="app-master-action" icon={<DownloadOutlined />}>
               Download
             </Button>
           </a>
         </div>
-        <div className="my-1 flex gap-5 items-center">
-          <p className="w-52">Periode Tagihan</p>
+        <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-medium text-slate-700">Periode Tagihan</p>
           <DatePicker
             picker="month"
             onChange={(val, datestr) => setPeriode(datestr || "")}
-            size="small"
+            size="middle"
+            className="app-master-picker"
           />
         </div>
-        <div className="my-1 flex items-center gap-5">
-          <span className="w-52">Upload File</span>
+        <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-sm font-medium text-slate-700">Upload File</span>
           <Upload {...props} disabled={!periode}>
             <Button
               type="primary"
               icon={<CloudUploadOutlined />}
-              size="small"
+              size="middle"
+              className="app-master-action"
               disabled={!periode}
             >
               Browse
@@ -1100,16 +1152,15 @@ const CekTagihan = ({
           </Upload>
         </div>
         {msg.length > 0 && (
-          <div className="mt-4 text-xs">
-            <Divider style={{ marginTop: 5, marginBottom: 5 }} />
-            <p className="font-bold mb-2">Hasil Cek Tagihan:</p>
-            <ul className="list-decimal list-inside">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600">
+            <p className="mb-3 text-sm font-semibold text-slate-800">Hasil Cek Tagihan</p>
+            <ul className="list-decimal list-inside space-y-2">
               {msg.map((m, i) => (
-                <li key={i} className="flex gap-2">
-                  <p className="w-52">{m.name}</p>
+                <li key={i} className="flex gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
+                  <p className="w-52 font-medium text-slate-700">{m.name}</p>
                   <p className="w-5">:</p>
                   <div className="flex-1">
-                    <ul className="list-disc list-inside">
+                    <ul className="list-disc list-inside space-y-1">
                       {m.value.length !== 0 &&
                         m.value.map((mc, ind) => <li key={ind}>{mc}</li>)}
                     </ul>

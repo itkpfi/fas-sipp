@@ -151,7 +151,7 @@ export default function Page() {
         </div>
       </section>
 
-      <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+      <div className="grid gap-4 2xl:grid-cols-[1.12fr_0.88fr]">
         <Card
           loading={loading}
           className="app-card"
@@ -413,7 +413,7 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="flex justify-between gap-3 pt-2">
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
               <Button danger icon={<HistoryOutlined />} onClick={() => setData(defaultData)}>
                 Reset
               </Button>
@@ -449,11 +449,11 @@ export default function Page() {
               </div>
 
               <div className="space-y-3">
-                <div className="flex flex-col items-stretch gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0 text-sm font-medium text-slate-700 sm:flex-1">Biaya Administrasi</div>
-                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[17rem] sm:flex-row sm:justify-end">
+                <div className="grid gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,21rem)] lg:items-center">
+                  <div className="min-w-0 text-sm font-medium text-slate-700">Biaya Administrasi</div>
+                  <div className="grid w-full gap-2 md:grid-cols-[5.25rem_minmax(0,1fr)]">
             <Input
-              className="w-full sm:w-[5.25rem]"
+              className="w-full"
               size="middle"
               disabled={!hasAccess("proses")}
               suffix={<span className="text-xs italic opacity-70">%</span>}
@@ -464,7 +464,7 @@ export default function Page() {
               type={"number"}
             />
             <Input
-              className="w-full sm:min-w-[11rem]"
+              className="w-full"
               size="middle"
               disabled
               value={IDRFormat((data.plafon * data.c_adm) / 100)}
@@ -473,11 +473,11 @@ export default function Page() {
           </div>
                 </div>
 
-                <div className="flex flex-col items-stretch gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0 text-sm font-medium text-slate-700 sm:flex-1">Biaya Asuransi</div>
-                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[17rem] sm:flex-row sm:justify-end">
+                <div className="grid gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,21rem)] lg:items-center">
+                  <div className="min-w-0 text-sm font-medium text-slate-700">Biaya Asuransi</div>
+                  <div className="grid w-full gap-2 md:grid-cols-[5.25rem_minmax(0,1fr)]">
             <Input
-              className="w-full sm:w-[5.25rem]"
+              className="w-full"
               size="middle"
               disabled={!hasAccess("proses")}
               suffix={<span className="text-xs italic opacity-70">%</span>}
@@ -491,7 +491,7 @@ export default function Page() {
               type={"number"}
             />
             <Input
-              className="w-full sm:min-w-[11rem]"
+              className="w-full"
               size="middle"
               disabled
               value={IDRFormat((data.plafon * data.c_insurance) / 100)}
@@ -502,7 +502,7 @@ export default function Page() {
 
                 <SimulasiRow label="Biaya Tatalaksana">
             <Input
-              className="w-full sm:min-w-[13rem]"
+              className="w-full lg:min-w-[13rem]"
               size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_gov)}
@@ -515,7 +515,7 @@ export default function Page() {
 
                 <SimulasiRow label="Biaya Buka Rekening">
             <Input
-              className="w-full sm:min-w-[13rem]"
+              className="w-full lg:min-w-[13rem]"
               size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_account)}
@@ -531,7 +531,7 @@ export default function Page() {
 
                 <SimulasiRow label="Biaya Provisi">
             <Input
-              className="w-full sm:min-w-[13rem]"
+              className="w-full lg:min-w-[13rem]"
               size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_provisi)}
@@ -547,7 +547,7 @@ export default function Page() {
 
                 <SimulasiRow label="Biaya Data Informasi">
             <Input
-              className="w-full sm:min-w-[13rem]"
+              className="w-full lg:min-w-[13rem]"
               size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_information)}
@@ -563,7 +563,7 @@ export default function Page() {
 
                 <SimulasiRow label="Biaya Materai">
             <Input
-              className="w-full sm:min-w-[13rem]"
+              className="w-full lg:min-w-[13rem]"
               size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_stamp)}
@@ -579,7 +579,7 @@ export default function Page() {
 
                 <SimulasiRow label="Biaya Mutasi">
             <Input
-              className="w-full sm:min-w-[13rem]"
+              className="w-full lg:min-w-[13rem]"
               size="middle"
               disabled={!hasAccess}
               value={IDRFormat(data.c_mutasi)}
@@ -593,11 +593,11 @@ export default function Page() {
             />
                 </SimulasiRow>
 
-                <div className="flex flex-col items-stretch gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0 text-sm font-medium text-slate-700 sm:flex-1">Blokir Angsuran</div>
-                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[17rem] sm:flex-row sm:justify-end">
+                <div className="grid gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,21rem)] lg:items-center">
+                  <div className="min-w-0 text-sm font-medium text-slate-700">Blokir Angsuran</div>
+                  <div className="grid w-full gap-2 md:grid-cols-[5.25rem_minmax(0,1fr)]">
             <Input
-              className="w-full sm:w-[5.25rem]"
+              className="w-full"
               size="middle"
               suffix={<span className="text-xs italic opacity-70">%</span>}
               value={data.c_blokir}
@@ -610,7 +610,7 @@ export default function Page() {
               type={"number"}
             />
             <Input
-              className="w-full sm:min-w-[11rem]"
+              className="w-full"
               size="middle"
               disabled
               value={IDRFormat(data.c_blokir * data.angsuran)}
@@ -619,9 +619,9 @@ export default function Page() {
           </div>
                 </div>
 
-                <div className="flex flex-col items-start gap-1 rounded-2xl border border-rose-200 bg-rose-50/90 px-4 py-3 font-semibold text-rose-600 sm:flex-row sm:items-center sm:justify-between">
+                <div className="grid gap-1 rounded-2xl border border-rose-200 bg-rose-50/90 px-4 py-3 font-semibold text-rose-600 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                   <div>Total Biaya</div>
-                  <div>{IDRFormat(totalBiaya)}</div>
+                  <div className="sm:text-right">{IDRFormat(totalBiaya)}</div>
                 </div>
               </div>
             </div>
@@ -638,7 +638,7 @@ export default function Page() {
 
               <SimulasiRow label="BPP">
             <Input
-              className="w-full sm:min-w-[13rem]"
+              className="w-full lg:min-w-[13rem]"
               size="middle"
               value={IDRFormat(data.c_bpp || 0)}
               style={{ textAlign: "right", color: "black" }}
@@ -653,7 +653,7 @@ export default function Page() {
 
               <SimulasiRow label="Nominal Takeover">
             <Input
-              className="w-full sm:min-w-[13rem]"
+              className="w-full lg:min-w-[13rem]"
               size="middle"
               value={IDRFormat(data.c_takeover || 0)}
               style={{ textAlign: "right", color: "black" }}
@@ -666,22 +666,22 @@ export default function Page() {
             />
               </SimulasiRow>
 
-              <div className="flex flex-col items-start gap-1 rounded-2xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 font-semibold text-emerald-700 sm:flex-row sm:items-center sm:justify-between">
+              <div className="grid gap-1 rounded-2xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 font-semibold text-emerald-700 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                 <div>Terima Bersih</div>
-                <div>{IDRFormat(terimaBersih)}</div>
+                <div className="sm:text-right">{IDRFormat(terimaBersih)}</div>
               </div>
             </div>
 
             <div className="rounded-[24px] border border-slate-200 bg-slate-50/72 p-4 md:p-5">
               <Divider style={{ marginTop: 0, marginBottom: 12 }}>Informasi Tambahan</Divider>
               <div className="space-y-3 text-sm italic text-slate-700">
-                <div className="flex flex-col items-start gap-1 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="grid gap-1 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                   <div>Sisa Gaji</div>
-                  <div className="font-semibold">{IDRFormat(sisaGaji)}</div>
+                  <div className="font-semibold sm:text-right">{IDRFormat(sisaGaji)}</div>
                 </div>
-                <div className="flex flex-col items-start gap-1 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="grid gap-1 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                   <div>Debt Service Ratio</div>
-                  <div className="font-semibold">
+                  <div className="font-semibold sm:text-right">
                     {dsr.toFixed(2)} % / {data.Sumdan.dsr} %
                   </div>
                 </div>
@@ -703,9 +703,9 @@ function SimulasiRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-stretch gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="min-w-0 text-sm font-medium text-slate-700 sm:flex-1">{label}</div>
-      <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[13rem] sm:justify-end">{children}</div>
+    <div className="grid gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,16rem)] lg:items-center">
+      <div className="min-w-0 text-sm font-medium text-slate-700">{label}</div>
+      <div className="flex w-full flex-col gap-2 lg:w-auto lg:justify-end">{children}</div>
     </div>
   );
 }

@@ -7,17 +7,18 @@ import {
   CalendarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
+  FileTextOutlined,
+  ProfileOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 import {
   Button,
   Card,
-  Divider,
   Modal,
   Table,
   TableProps,
   Tag,
   message,
-  Collapse,
   Statistic,
   Row,
   Col,
@@ -158,6 +159,7 @@ export default function Page() {
         <Button
           type="primary"
           size="small"
+          className="app-table-action-btn"
           icon={<EyeOutlined />}
           onClick={() => handleView(record)}
         />
@@ -167,23 +169,34 @@ export default function Page() {
 
   return (
     <div className="flex flex-col gap-3">
-      <Card>
-        <div className="w-full">
-          <h1 className="text-xl font-bold mb-2">📋 Data Tagihan</h1>
-          <Divider style={{ margin: "8px 0" }} />
+      <Card
+        className="app-master-card"
+        title={
+          <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
+            <FileTextOutlined /> Data Tagihan
+          </div>
+        }
+      >
+        <div className="mb-4 flex flex-col gap-2 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-slate-500">
+            Ringkasan tagihan dan detail angsuran aktif per debitur.
+          </p>
+          <div className="app-soft-pill w-fit !bg-slate-50 !text-slate-600 !shadow-none">
+            Total data {data.length}
+          </div>
         </div>
         <Table
+          className="app-master-table"
           columns={columns}
           dataSource={data}
           rowKey="id"
           loading={loading}
-          size="small"
+          size="middle"
           pagination={{
             pageSize: 20,
             showTotal: (total) => `Total ${total} data`,
           }}
-          bordered
-          scroll={{ x: 1400 }}
+          scroll={{ x: "max-content" }}
         />
       </Card>
 
@@ -263,102 +276,141 @@ const ModalDetailTagihan = ({
       open={open}
       onCancel={() => setOpen(false)}
       footer={[
-        <Button key="close" onClick={() => setOpen(false)}>
+        <Button
+          key="close"
+          onClick={() => setOpen(false)}
+          size="middle"
+          className="app-master-action"
+        >
           Tutup
         </Button>,
       ]}
-      width={1200}
-      title="Detail Tagihan"
+      width={1080}
+      title={
+        <div className="flex items-center gap-2 text-lg font-bold text-slate-900">
+          <ProfileOutlined /> Detail Tagihan
+        </div>
+      }
     >
-      {/* INFO UMUM */}
-      <Card className="mb-4" title="Informasi Debitur">
+      <div className="space-y-4">
+      <Card
+        className="app-card-muted !rounded-2xl !shadow-none"
+        title={
+          <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
+            <ProfileOutlined /> Informasi Debitur
+          </div>
+        }
+      >
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12}>
-            <div className="flex justify-between py-2 border-b">
-              <span className="font-semibold">NOPEN</span>
-              <span>{data.nopen}</span>
+            <div className="flex justify-between gap-4 border-b border-slate-200 py-2 text-sm">
+              <span className="font-semibold text-slate-600">NOPEN</span>
+              <span className="text-right font-medium text-slate-900">{data.nopen}</span>
             </div>
-            <div className="flex justify-between py-2 border-b">
-              <span className="font-semibold">Nama Debitur</span>
-              <span>{data.fullname}</span>
+            <div className="flex justify-between gap-4 border-b border-slate-200 py-2 text-sm">
+              <span className="font-semibold text-slate-600">Nama Debitur</span>
+              <span className="text-right font-medium text-slate-900">{data.fullname}</span>
             </div>
-            <div className="flex justify-between py-2 border-b">
-              <span className="font-semibold">No Kontrak</span>
-              <span>{data.noKontrak}</span>
+            <div className="flex justify-between gap-4 border-b border-slate-200 py-2 text-sm">
+              <span className="font-semibold text-slate-600">No Kontrak</span>
+              <span className="text-right font-medium text-slate-900">{data.noKontrak}</span>
             </div>
           </Col>
           <Col xs={24} sm={12}>
-            <div className="flex justify-between py-2 border-b">
-              <span className="font-semibold">Plafond</span>
-              <span className="font-bold text-blue-600">
+            <div className="flex justify-between gap-4 border-b border-slate-200 py-2 text-sm">
+              <span className="font-semibold text-slate-600">Plafond</span>
+              <span className="text-right font-bold text-emerald-600">
                 {IDRFormat(data.plafond)}
               </span>
             </div>
-            <div className="flex justify-between py-2 border-b">
-              <span className="font-semibold">Tenor</span>
-              <span>{data.tenor} Bulan</span>
+            <div className="flex justify-between gap-4 border-b border-slate-200 py-2 text-sm">
+              <span className="font-semibold text-slate-600">Tenor</span>
+              <span className="text-right font-medium text-slate-900">{data.tenor} Bulan</span>
             </div>
-            <div className="flex justify-between py-2 border-b">
-              <span className="font-semibold">Tanggal Pinjaman</span>
-              <span>{moment(data.createdAt).format("DD-MM-YYYY")}</span>
+            <div className="flex justify-between gap-4 border-b border-slate-200 py-2 text-sm">
+              <span className="font-semibold text-slate-600">Tanggal Pinjaman</span>
+              <span className="text-right font-medium text-slate-900">
+                {moment(data.createdAt).format("DD-MM-YYYY")}
+              </span>
             </div>
           </Col>
         </Row>
       </Card>
 
-      {/* STATISTIK TAGIHAN */}
-      <Card className="mb-4" title="Statistik Tagihan">
+      <Card
+        className="app-card-muted !rounded-2xl !shadow-none"
+        title={
+          <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
+            <BarChartOutlined /> Statistik Tagihan
+          </div>
+        }
+      >
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={6}>
-            <Statistic
-              title="Total Tagihan"
-              value={data.totalAngsuran}
-              valueStyle={{ color: "#1890ff" }}
-            />
+            <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+              <Statistic
+                title="Total Tagihan"
+                value={data.totalAngsuran}
+                valueStyle={{ color: "#0f172a" }}
+              />
+            </div>
           </Col>
           <Col xs={24} sm={6}>
-            <Statistic
-              title="Sudah Dibayar"
-              value={data.angsuranSudahBayar}
-              valueStyle={{ color: "#52c41a" }}
-              prefix={<CheckCircleOutlined />}
-            />
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 px-4 py-3">
+              <Statistic
+                title="Sudah Dibayar"
+                value={data.angsuranSudahBayar}
+                valueStyle={{ color: "#059669" }}
+                prefix={<CheckCircleOutlined />}
+              />
+            </div>
           </Col>
           <Col xs={24} sm={6}>
-            <Statistic
-              title="Belum Dibayar"
-              value={data.angsuranBelumBayar}
-              valueStyle={{ color: "#f5222d" }}
-              prefix={<ClockCircleOutlined />}
-            />
+            <div className="rounded-2xl border border-rose-200 bg-rose-50/70 px-4 py-3">
+              <Statistic
+                title="Belum Dibayar"
+                value={data.angsuranBelumBayar}
+                valueStyle={{ color: "#e11d48" }}
+                prefix={<ClockCircleOutlined />}
+              />
+            </div>
           </Col>
           <Col xs={24} sm={6}>
-            <Statistic
-              title="Progress"
-              value={
-                data.totalAngsuran > 0
-                  ? Math.round(
-                      (data.angsuranSudahBayar / data.totalAngsuran) * 100,
-                    )
-                  : 0
-              }
-              suffix="%"
-              valueStyle={{ color: "#1890ff" }}
-            />
+            <div className="rounded-2xl border border-sky-200 bg-sky-50/70 px-4 py-3">
+              <Statistic
+                title="Progress"
+                value={
+                  data.totalAngsuran > 0
+                    ? Math.round(
+                        (data.angsuranSudahBayar / data.totalAngsuran) * 100,
+                      )
+                    : 0
+                }
+                suffix="%"
+                valueStyle={{ color: "#0284c7" }}
+                prefix={<CalendarOutlined />}
+              />
+            </div>
           </Col>
         </Row>
       </Card>
 
-      {/* TABEL JADWAL YANG BELUM DIBAYAR */}
       {angsuranBelumBayarList.length > 0 && (
-        <Card className="mb-4" title="📌 TAGIHAN YANG JATUH TEMPO">
+        <Card
+          className="app-card-muted !rounded-2xl !shadow-none"
+          title={
+            <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
+              <ClockCircleOutlined /> Tagihan yang Jatuh Tempo
+            </div>
+          }
+        >
           <Table
+            className="app-master-table"
             columns={angsuranColumns}
             dataSource={angsuranBelumBayarList}
             rowKey="id"
-            size="small"
+            size="middle"
             pagination={false}
-            bordered
             scroll={{ x: 600 }}
             summary={() => {
               const totalPokok = angsuranBelumBayarList.reduce(
@@ -373,18 +425,18 @@ const ModalDetailTagihan = ({
 
               return (
                 <Table.Summary fixed>
-                  <Table.Summary.Row>
-                    <Table.Summary.Cell index={0} colSpan={2} align="center">
+                  <Table.Summary.Row className="bg-slate-50 text-slate-700">
+                    <Table.Summary.Cell index={0} colSpan={2} align="center" className="font-semibold">
                       <strong>TOTAL</strong>
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={2} align="right">
+                    <Table.Summary.Cell index={2} align="right" className="font-semibold text-slate-900">
                       <strong>{IDRFormat(totalPokok)}</strong>
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={3} align="right">
+                    <Table.Summary.Cell index={3} align="right" className="font-semibold text-slate-900">
                       <strong>{IDRFormat(totalMargin)}</strong>
                     </Table.Summary.Cell>
-                    <Table.Summary.Cell index={4} align="right">
-                      <strong className="text-red-600">
+                    <Table.Summary.Cell index={4} align="right" className="font-semibold text-rose-600">
+                      <strong>
                         {IDRFormat(totalAngsuran)}
                       </strong>
                     </Table.Summary.Cell>
@@ -397,21 +449,28 @@ const ModalDetailTagihan = ({
         </Card>
       )}
 
-      {/* TABEL JADWAL SEMUA */}
-      <Card className="mb-4" title="📊 JADWAL LENGKAP ANGSURAN">
+      <Card
+        className="app-card-muted !rounded-2xl !shadow-none"
+        title={
+          <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
+            <BarChartOutlined /> Jadwal Lengkap Angsuran
+          </div>
+        }
+      >
         <Table
+          className="app-master-table"
           columns={angsuranColumns}
           dataSource={data.angsuranList}
           rowKey="id"
-          size="small"
+          size="middle"
           pagination={{
             pageSize: 10,
             showTotal: (total) => `Total ${total} angsuran`,
           }}
-          bordered
           scroll={{ x: 600 }}
         />
       </Card>
+      </div>
     </Modal>
   );
 };

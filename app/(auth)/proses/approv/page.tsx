@@ -20,6 +20,7 @@ import {
   FormOutlined,
   PayCircleOutlined,
   PrinterOutlined,
+  SearchOutlined,
   SwapOutlined,
 } from "@ant-design/icons";
 import { JenisPembiayaan, Sumdan } from "@prisma/client";
@@ -374,6 +375,7 @@ export default function Page() {
               icon={<FolderOutlined />}
               type="primary"
               size="small"
+              className="app-table-action-btn"
               onClick={() =>
                 setSelected({ ...selected, upsert: true, selected: record })
               }
@@ -384,6 +386,7 @@ export default function Page() {
               size="small"
               type="primary"
               icon={<FormOutlined />}
+              className="app-table-action-btn"
               onClick={() =>
                 setSelected({ ...selected, proses: true, selected: record })
               }
@@ -397,21 +400,24 @@ export default function Page() {
   return (
     <Card
       title={
-        <div className="flex gap-2 font-bold text-xl">
+        <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
           <FileProtectOutlined /> Approval Pembiayaan
         </div>
       }
-      styles={{ body: { padding: 5 } }}
+      className="app-master-card"
     >
-      <div className="flex justify-between my-1 gap-2 overflow-auto">
-        <div className="flex gap-2">
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap gap-2">
           <FilterData
+            buttonSize="middle"
+            buttonClassName="app-master-action"
             children={
               <>
                 <div className="my-2">
                   <p>Periode :</p>
                   <RangePicker
-                    size="small"
+                    size="middle"
+                    className="app-master-picker"
                     onChange={(date, dateStr) =>
                       setPageProps({ ...pageProps, backdate: dateStr })
                     }
@@ -422,7 +428,8 @@ export default function Page() {
                   <div className="my-2">
                     <p>Mitra pembiayaan :</p>
                     <Select
-                      size="small"
+                      size="middle"
+                      className="app-master-select"
                       placeholder="Pilih Mitra..."
                       options={sumdans.map((s) => ({
                         label: s.code,
@@ -439,7 +446,8 @@ export default function Page() {
                 <div className="my-2">
                   <p>Jenis pembiayaan :</p>
                   <Select
-                    size="small"
+                    size="middle"
+                    className="app-master-select"
                     placeholder="Pilih Jenis..."
                     options={jeniss.map((s) => ({
                       label: s.name,
@@ -455,7 +463,8 @@ export default function Page() {
                 <div className="my-2">
                   <p>Status pembiayaan</p>
                   <Select
-                    size="small"
+                    size="middle"
+                    className="app-master-select"
                     placeholder="Pilih Status..."
                     options={[
                       { label: "PENDING", value: "PENDING" },
@@ -473,11 +482,12 @@ export default function Page() {
             }
           />
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
           <Button
             icon={<PrinterOutlined />}
-            size="small"
+            size="middle"
             type="primary"
+            className="app-master-action"
             onClick={() =>
               ExportToExcel(
                 [
@@ -516,25 +526,29 @@ export default function Page() {
           >
             Excel
           </Button>
-          <Input.Search
-            size="small"
-            style={{ width: 170 }}
-            placeholder="Cari nama..."
-            onChange={(e) =>
-              setPageProps({ ...pageProps, search: e.target.value })
-            }
-          />
+          <div className="app-master-toolbar-search">
+            <Input
+              size="middle"
+              className="app-master-search"
+              prefix={<SearchOutlined className="text-slate-400" />}
+              allowClear
+              placeholder="Cari nama..."
+              onChange={(e) =>
+                setPageProps({ ...pageProps, search: e.target.value })
+              }
+            />
+          </div>
         </div>
       </div>
 
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         loading={loading}
         rowKey={"id"}
-        bordered
-        scroll={{ x: "max-content", y: "60vh" }}
+        scroll={{ x: "max-content" }}
         pagination={{
           current: pageProps.page,
           pageSize: pageProps.limit,
@@ -575,22 +589,22 @@ export default function Page() {
           );
 
           return (
-            <Table.Summary.Row className="text-xs bg-blue-400">
-              <Table.Summary.Cell index={0} colSpan={2} className="text-center">
+            <Table.Summary.Row className="bg-slate-50 text-xs text-slate-700">
+              <Table.Summary.Cell index={0} colSpan={2} className="text-center font-semibold">
                 <b>SUMMARY</b>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={3} className="text-center">
+              <Table.Summary.Cell index={3} className="text-center font-semibold text-slate-900">
                 <b>
                   {IDRFormat(
                     pageData.reduce((acc, item) => acc + item.plafond, 0),
                   )}{" "}
                 </b>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={4} className="text-center font-bold">
+              <Table.Summary.Cell index={4} className="text-center font-bold text-slate-900">
                 <div>
                   {IDRFormat(angsuran)} - {IDRFormat(angssudan)}
                 </div>
-                <div className="border-t border-gray-500">
+                <div className="mt-1 border-t border-slate-300 pt-1 text-slate-700">
                   {IDRFormat(angsuran - angssudan)}
                 </div>
               </Table.Summary.Cell>

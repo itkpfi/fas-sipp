@@ -568,10 +568,12 @@ export default function Page() {
   ];
 
   const totalPlafond = pageProps.data.reduce((acc, item) => acc + item.plafond, 0);
-  const totalApproved = pageProps.data.filter((item) => item.dropping_status === "APPROVED").length;
   const totalQueue = pageProps.data.filter((item) => ["DRAFT", "PENDING"].includes(item.dropping_status)).length;
-  const totalProcess = pageProps.data.filter((item) => item.dropping_status === "PROCCESS").length;
-  const totalFinal = pageProps.data.filter((item) => ["APPROVED", "PAID_OFF"].includes(item.dropping_status)).length;
+  const totalFinal = pageProps.data.filter(
+    (item) =>
+      item.approv_status === "APPROVED" ||
+      ["PROCCESS", "APPROVED", "PAID_OFF"].includes(item.dropping_status),
+  ).length;
 
   return (
     <div className="space-y-5">
@@ -594,23 +596,15 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="app-stat-tile">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Antrian</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">{totalQueue}</div>
-          </div>
-          <div className="app-stat-tile">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Proses</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">{totalProcess}</div>
-          </div>
-          <div className="app-stat-tile">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Approved</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">{totalApproved}</div>
-          </div>
-          <div className="app-stat-tile">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Final</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">{totalFinal}</div>
-          </div>
+      <section className="grid gap-4 md:grid-cols-2">
+        <div className="app-stat-tile">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Total Antrian</div>
+          <div className="mt-2 text-3xl font-bold text-slate-900">{totalQueue}</div>
+        </div>
+        <div className="app-stat-tile">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Total Final</div>
+          <div className="mt-2 text-3xl font-bold text-slate-900">{totalFinal}</div>
+        </div>
       </section>
 
       <section className="app-toolbar-panel p-4 md:p-5">

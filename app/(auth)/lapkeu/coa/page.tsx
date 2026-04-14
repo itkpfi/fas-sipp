@@ -133,7 +133,7 @@ export default function Page() {
         record.parentId ? (
           <div className="flex flex-col gap-1">
             <Tag color="gold">Child</Tag>
-            <span className="text-xs text-gray-500">Parent: {record.Parent?.id}</span>
+            <span className="text-xs text-slate-500">Parent: {record.Parent?.id}</span>
           </div>
         ) : (
           <Tag color="blue">Parent</Tag>
@@ -146,14 +146,14 @@ export default function Page() {
       render(value, record) {
         const isChild = Boolean(record.parentId);
         return (
-          <div className={isChild ? "ml-4 border-l-4 border-orange-300 pl-4" : ""}>
+          <div className={isChild ? "ml-4 border-l-4 border-orange-200 pl-4" : ""}>
             <div className="flex items-center gap-2 flex-wrap">
               {isChild ? (
                 <Tag color="orange">Sub Akun</Tag>
               ) : (
                 <Tag color="processing">Akun Utama</Tag>
               )}
-              <span className="opacity-70 text-xs">
+              <span className="text-xs text-slate-500">
                 (
                 {record.type === "ASSET"
                   ? "D"
@@ -169,12 +169,12 @@ export default function Page() {
                 -{record.id})
               </span>
               {record.parentId && record.Parent?.name && (
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-slate-500">
                   turunan dari <b>{record.Parent.name}</b>
                 </span>
               )}
             </div>
-            <div className={isChild ? "font-medium text-gray-700" : "font-semibold"}>
+            <div className={isChild ? "font-medium text-slate-700" : "font-semibold text-slate-900"}>
               {record.name}
             </div>
           </div>
@@ -197,6 +197,7 @@ export default function Page() {
               icon={<EditOutlined />}
               size="small"
               type="primary"
+              className="app-table-action-btn"
               onClick={() =>
                 setSelected({ ...selected, selected: record, upsert: true })
               }
@@ -207,6 +208,7 @@ export default function Page() {
               icon={<DeleteOutlined />}
               size="small"
               type="primary"
+              className="app-table-action-btn"
               danger
               onClick={() =>
                 setSelected({ ...selected, delete: true, selected: record })

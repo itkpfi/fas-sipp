@@ -159,6 +159,7 @@ export default function Page() {
                 icon={<EditOutlined />}
                 type="primary"
                 size="small"
+                className="app-table-action-btn"
                 onClick={() =>
                   setAction({ ...action, upsert: true, selected: record })
                 }
@@ -170,6 +171,7 @@ export default function Page() {
                 type="primary"
                 danger
                 size="small"
+                className="app-table-action-btn"
                 onClick={() =>
                   setAction({ ...action, delete: true, selected: record })
                 }
@@ -355,11 +357,11 @@ const UpsertData = ({
               onChange: (e: string) => setData({ ...data, date: new Date(e) }),
             }}
           />
-          <div className="w-full border border-dashed p-2">
-            <p className="text-center font-bold text-lg border-b">
+          <div className="w-full rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-3">
+            <p className="border-b border-dashed border-slate-300 pb-2 text-center text-lg font-bold text-slate-900">
               Daftar Transaksi
             </p>
-            <div className="flex gap-4 my-2 font-bold">
+            <div className="my-3 flex gap-4 font-bold text-slate-700">
               <div className="w-56">KETERANGAN</div>
               <div className="w-56">DEBIT</div>
               <div className="w-56">KREDIT</div>
@@ -367,7 +369,10 @@ const UpsertData = ({
               <div className="w-56">ID ANGGOTA</div>
             </div>
             {data.JournalDetail.map((d, i) => (
-              <div className="flex gap-4 my-2 flex-wrap" key={i}>
+              <div
+                className="my-2 flex flex-wrap gap-4 rounded-xl border border-slate-200/80 bg-white p-3"
+                key={i}
+              >
                 <div className="w-52">
                   <Input.TextArea
                     value={d.desciption || ""}
@@ -469,7 +474,7 @@ const UpsertData = ({
                 </div>
               </div>
             ))}
-            <div className="flex gap-24 my-2 border-t border-dashed font-bold">
+            <div className="my-3 flex gap-24 border-t border-dashed border-slate-300 pt-3 font-bold text-slate-800">
               <div className="w-56"></div>
               <div className="w-56">
                 <div>TOTAL DEBIT</div>
@@ -506,9 +511,9 @@ const UpsertData = ({
                   return (
                     <>
                       {debit !== credit && (
-                        <span className="text-red-600">
-                          Selisih {IDRFormat(debit - credit)}
-                        </span>
+                          <span className="text-sm text-red-600">
+                            Selisih {IDRFormat(debit - credit)}
+                          </span>
                       )}
                     </>
                   );
@@ -563,12 +568,12 @@ const ListJournalDetail = ({ records }: { records: IJournalEntry }) => {
       key: "akun",
       render(value, record, index) {
         return (
-          <div className="italic text-xs">
-            <div>
+          <div className="text-xs text-slate-600">
+            <div className="font-medium text-slate-700">
               ({TypeAccount(record.CategoryOfAccount)}-
               {record.CategoryOfAccount.id}) {record.CategoryOfAccount.name}
             </div>
-            <div className="opacity-80">
+            <div className="mt-0.5 text-slate-500">
               {record.User && `${record.User.fullname} (${record.User.nip})`}
             </div>
           </div>
@@ -594,7 +599,7 @@ const ListJournalDetail = ({ records }: { records: IJournalEntry }) => {
   ];
 
   return (
-    <div className="ms-15">
+    <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-3">
       <Table
         className="app-master-table"
         columns={columns}

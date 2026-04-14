@@ -234,9 +234,6 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className={styles.headerActions}>
-              {notif.count > 0 && (
-                <div className="app-soft-pill hidden md:inline-flex">Notifikasi aktif {notif.count}</div>
-              )}
               <Dropdown
                 trigger={["hover"]}
                 placement="bottomRight"
