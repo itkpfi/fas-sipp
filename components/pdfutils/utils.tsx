@@ -79,42 +79,46 @@ export const ListStyle = (
   list: string[],
   type: "number" | "bullet" | "lower" | "number-alpha" | "lower-alpha",
 ) => {
+  const alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
+
   switch (type) {
     case "number":
-      return `<ol style="list-style-type: decimal; padding-left: 20px;">${list
-        .map((item) => `<li>${item}</li>`)
+      // Menggunakan padding-left pada li untuk memberi jarak dari marker
+      return `<ol style="list-style-type: decimal; padding-left: 30px;">${list
+        .map((item) => `<li style="padding-left: 8px;">${item}</li>`)
         .join("")}</ol>`;
+
     case "bullet":
-      return `<ul style="list-style-type: disc; padding-left: 20px;">${list
-        .map((item) => `<li>${item}</li>`)
+      return `<ul style="list-style-type: disc; padding-left: 30px;">${list
+        .map((item) => `<li style="padding-left: 8px;">${item}</li>`)
         .join("")}</ul>`;
+
     case "lower":
-      return `<ol style="list-style-type: lower-alpha; padding-left: 20px;">${list
-        .map((item) => `<li>${item}</li>`)
+      return `<ol style="list-style-type: lower-alpha; padding-left: 30px;">${list
+        .map((item) => `<li style="padding-left: 8px;">${item}</li>`)
         .join("")}</ol>`;
+
     case "number-alpha":
-      return `
-          ${list
-            .map(
-              (item, index) => `
-            <div class="flex gap-2">
-              <div class="w-6">(${index + 1})</div>
-              <div class="flex-1">${item}</div>
-            </div>`,
-            )
-            .join("")}`;
+      return list
+        .map(
+          (item, index) => `
+        <div class="flex" style="gap: 12px; margin-bottom: 4px;">
+          <div style="min-width: 25px;">(${index + 1})</div>
+          <div class="flex-1">${item}</div>
+        </div>`,
+        )
+        .join("");
+
     case "lower-alpha":
-      return `
-          ${list
-            .map(
-              (item, index) => `
-            <div class="flex gap-2">
-              <div class="w-6">(${alplhabet[index]})</div>
-              <div class="flex-1">${item}</div>
-            </div>`,
-            )
-            .join("")}
-      `;
+      return list
+        .map(
+          (item, index) => `
+        <div class="flex" style="gap: 12px; margin-bottom: 4px;">
+          <div style="min-width: 25px;">(${alphabet[index]})</div>
+          <div class="flex-1">${item}</div>
+        </div>`,
+        )
+        .join("");
   }
 };
 

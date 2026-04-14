@@ -179,7 +179,7 @@ export default function Page() {
           ),
         )
           .filter((a) => a.date_paid !== null)
-          .sort((a, b) => b.counter - a.counter)[0].remaining;
+          .sort((a, b) => b.counter - a.counter)[0]?.remaining;
         return (
           <div className="flex flex-col">
             <Progress

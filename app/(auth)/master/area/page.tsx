@@ -125,17 +125,19 @@ export default function Page() {
       className="app-master-card"
     >
       <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between">
-        <Button
-          size="middle"
-          type="primary"
-          icon={<PlusCircleOutlined />}
-          className="app-master-action"
-          onClick={() =>
-            setUpsert({ ...upsert, upsert: true, selected: undefined })
-          }
-        >
-          Add Area
-        </Button>
+        {hasAccess("write") && (
+          <Button
+            size="middle"
+            type="primary"
+            icon={<PlusCircleOutlined />}
+            className="app-master-action"
+            onClick={() =>
+              setUpsert({ ...upsert, upsert: true, selected: undefined })
+            }
+          >
+            Add Area
+          </Button>
+        )}
         <div className="app-master-toolbar-search">
           <Input
             size="middle"

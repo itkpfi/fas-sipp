@@ -1613,10 +1613,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
               <span>
                 {IDRFormat(
                   data.plafond -
-                    (GetBiaya(data) +
-                      data.c_bpp +
-                      data.c_takeover +
-                      data.c_blokir * temp.angsuran),
+                    (GetBiaya(data) + data.c_bpp + data.c_takeover),
                 )}
               </span>
             </div>

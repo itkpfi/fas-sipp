@@ -1,3 +1,2 @@
-- PK & SI sesuaikan sumdan KOPJAS FAS   [x]
-- Angsuran Sumdan by sumdan_rounded     [x]
-- Rp pada berkas generate
+- Update password user di menu manajemen user
+- Fix data tagihan by sumdan
