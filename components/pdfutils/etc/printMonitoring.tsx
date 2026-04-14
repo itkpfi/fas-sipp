@@ -6,11 +6,35 @@ import { Sumdan } from "@prisma/client";
 
 moment.locale("id");
 
+const getEffectiveDroppingStatus = (record: IDapem) => {
+  if (record.approv_status !== "APPROVED") {
+    if (["PROCCESS", "APPROVED", "PAID_OFF"].includes(record.dropping_status)) {
+      return "PENDING";
+    }
+  }
+
+  return record.dropping_status;
+};
+
 const generateMonitoring = (
   records: IDapem[],
   sumdans: Sumdan[],
   periode?: string,
 ) => {
+  const totalQueueRecords = records.filter((record) =>
+    ["DRAFT", "PENDING"].includes(getEffectiveDroppingStatus(record)),
+  );
+  const totalFinalRecords = records.filter(
+    (record) =>
+      record.approv_status === "APPROVED" &&
+      ["PROCCESS", "APPROVED", "PAID_OFF"].includes(getEffectiveDroppingStatus(record)),
+  );
+  const totalDroppingRecords = records.filter(
+    (record) =>
+      record.approv_status === "APPROVED" &&
+      getEffectiveDroppingStatus(record) === "APPROVED",
+  );
+
   const html = `
   <!doctype html>
   <html>
@@ -73,21 +97,21 @@ const generateMonitoring = (
         </div>
         <div class="font-bold text-yellow-500 flex-1 border rounded p-2">
           <p class="opacity-70">ANTRIAN</p>
-          <p class="text-lg">Rp. ${IDRFormat(records.reduce((acc, curr) => acc + (["DRAFT", "PENDING"].includes(curr.dropping_status) ? curr.plafond : 0), 0))}</p>
+          <p class="text-lg">Rp. ${IDRFormat(totalQueueRecords.reduce((acc, curr) => acc + curr.plafond, 0))}</p>
           <div class="border-t border-gray-100 my-1"></div>
-          <p class="text-lg">NOA ${records.filter((r) => ["DRAFT", "PENDING"].includes(r.dropping_status)).length}</p>
+          <p class="text-lg">NOA ${totalQueueRecords.length}</p>
         </div>
         <div class="font-bold text-blue-500 flex-1 border rounded p-2">
           <p class="opacity-70">FINAL APPROVED</p>
-          <p class="text-lg">Rp. ${IDRFormat(records.reduce((acc, curr) => acc + (["PROCCESS", "APPROVED"].includes(curr.dropping_status) ? curr.plafond : 0), 0))}</p>
+          <p class="text-lg">Rp. ${IDRFormat(totalFinalRecords.reduce((acc, curr) => acc + curr.plafond, 0))}</p>
           <div class="border-t border-gray-100 my-1"></div>
-          <p class="text-lg">NOA ${records.filter((r) => ["PROCCESS", "APPROVED"].includes(r.dropping_status)).length}</p>
+          <p class="text-lg">NOA ${totalFinalRecords.length}</p>
         </div>
         <div class="font-bold text-green-500 flex-1 border rounded p-2">
           <p class="opacity-70">DROPPING</p>
-          <p class="text-lg">Rp. ${IDRFormat(records.reduce((acc, curr) => acc + (curr.dropping_status === "APPROVED" ? curr.plafond : 0), 0))}</p>
+          <p class="text-lg">Rp. ${IDRFormat(totalDroppingRecords.reduce((acc, curr) => acc + curr.plafond, 0))}</p>
           <div class="border-t border-gray-100 my-1"></div>
-          <p class="text-lg">NOA ${records.filter((r) => r.dropping_status === "APPROVED").length}</p>
+          <p class="text-lg">NOA ${totalDroppingRecords.length}</p>
         </div>
       </div>
 
@@ -111,7 +135,7 @@ const generateMonitoring = (
           <tbody>
             ${records
               .sort((a, b) =>
-                a.dropping_status.localeCompare(b.dropping_status),
+                getEffectiveDroppingStatus(a).localeCompare(getEffectiveDroppingStatus(b)),
               )
               .map(
                 (r, i) => `
@@ -125,7 +149,7 @@ const generateMonitoring = (
                 </td>
                 <td class="border border-gray-400 p-2">${IDRFormat(r.plafond)}</td>
                 <td class="border border-gray-400 p-2">${r.tenor} Bln</td>
-              <td class="border border-gray-400 p-2">${r.dropping_status}</td>
+              <td class="border border-gray-400 p-2">${getEffectiveDroppingStatus(r)}</td>
               <td class="border border-gray-400 p-2">${r.ProdukPembiayaan.Sumdan.code}</td>
                 <td class="border border-gray-400 p-2">${moment(r.created_at).format("DD MMM YYYY")}</td>
               </tr>
@@ -164,7 +188,7 @@ const generateMonitoring = (
                 ${records
                   .filter((r) => r.ProdukPembiayaan.sumdanId === s.id)
                   .sort((a, b) =>
-                    a.dropping_status.localeCompare(b.dropping_status),
+                    getEffectiveDroppingStatus(a).localeCompare(getEffectiveDroppingStatus(b)),
                   )
                   .map(
                     (r, i) => `
@@ -178,7 +202,7 @@ const generateMonitoring = (
                     </td>
                     <td class="border border-gray-400 p-2">${IDRFormat(r.plafond)}</td>
                     <td class="border border-gray-400 p-2">${r.tenor} Bln</td>
-                    <td class="border border-gray-400 p-2">${r.dropping_status}</td>
+                    <td class="border border-gray-400 p-2">${getEffectiveDroppingStatus(r)}</td>
                     <td class="border border-gray-400 p-2">${r.ProdukPembiayaan.Sumdan.code}</td>
                     <td class="border border-gray-400 p-2">
                       ${moment(r.created_at).format("DD MMM YYYY")}
@@ -212,7 +236,7 @@ const generateMonitoring = (
                   const data = records.filter(
                     (r) =>
                       r.ProdukPembiayaan.sumdanId === s.id &&
-                      ["DRAFT", "PENDING"].includes(r.dropping_status),
+                      ["DRAFT", "PENDING"].includes(getEffectiveDroppingStatus(r)),
                   );
                   return `Rp. ${IDRFormat(data.reduce((acc, curr) => acc + curr.plafond, 0))} (NOA ${data.length})`;
                 })()}</div>
@@ -224,7 +248,8 @@ const generateMonitoring = (
                   const data = records.filter(
                     (r) =>
                       r.ProdukPembiayaan.sumdanId === s.id &&
-                      ["PROCCESS", "APPROVED"].includes(r.dropping_status),
+                      r.approv_status === "APPROVED" &&
+                      ["PROCCESS", "APPROVED", "PAID_OFF"].includes(getEffectiveDroppingStatus(r)),
                   );
                   return `Rp. ${IDRFormat(data.reduce((acc, curr) => acc + curr.plafond, 0))} (NOA ${data.length})`;
                 })()}</div>
@@ -236,7 +261,8 @@ const generateMonitoring = (
                   const data = records.filter(
                     (r) =>
                       r.ProdukPembiayaan.sumdanId === s.id &&
-                      r.dropping_status === "APPROVED",
+                      r.approv_status === "APPROVED" &&
+                      getEffectiveDroppingStatus(r) === "APPROVED",
                   );
                   return `Rp. ${IDRFormat(data.reduce((acc, curr) => acc + curr.plafond, 0))} (NOA ${data.length})`;
                 })()}</div>

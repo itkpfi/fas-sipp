@@ -1,5 +1,6 @@
 "use client";
 
+import { ApartmentOutlined, DownOutlined, RightOutlined, TeamOutlined } from "@ant-design/icons";
 import { IDRFormat } from "@/components/utils/PembiayaanUtil";
 import { IPageProps } from "@/libs/IInterfaces";
 import {
@@ -49,6 +50,8 @@ export default function Page() {
   const [summaryAreas, setSummaryAreas] = useState<IArea[]>([]);
   const [sumdan, setSumdan] = useState<ISumdan[]>([]);
   const [areaOptions, setAreaOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [expandedAreaId, setExpandedAreaId] = useState<string | null>(null);
+  const [expandedCabangIdByArea, setExpandedCabangIdByArea] = useState<Record<string, string | null>>({});
 
   const getData = async () => {
     setLoading(true);
@@ -113,6 +116,11 @@ export default function Page() {
     return () => clearTimeout(timeout);
   }, [pageProps.page, pageProps.limit, pageProps.backdate, pageProps.areaId]);
 
+  useEffect(() => {
+    setExpandedAreaId(null);
+    setExpandedCabangIdByArea({});
+  }, [pageProps.page, pageProps.limit, pageProps.backdate, pageProps.areaId]);
+
   const totalPlafond = summaryAreas
     .flatMap((area) => area.Cabang)
     .flatMap((cabang) => cabang.User)
@@ -134,6 +142,39 @@ export default function Page() {
     .flatMap((cabang) => cabang.User).length;
 
   const overallProgress = totalTarget > 0 ? (totalPlafond / totalTarget) * 100 : 0;
+
+  const getCabangSummary = (cabang: ICabang) => {
+    const noa = cabang.User.flatMap((user) => user.AODapem);
+    const pencapaian = noa.reduce((acc, curr) => acc + curr.plafond, 0);
+    const target = cabang.User.reduce((acc, curr) => acc + curr.target, 0);
+    const progress = target > 0 ? (pencapaian / target) * 100 : 0;
+
+    return { noa, pencapaian, target, progress };
+  };
+
+  const getAreaSummary = (area: IArea) => {
+    const noa = area.Cabang.flatMap((cabang) => getCabangSummary(cabang).noa);
+    const pencapaian = noa.reduce((acc, curr) => acc + curr.plafond, 0);
+    const target = area.Cabang.flatMap((cabang) => cabang.User).reduce((acc, curr) => acc + curr.target, 0);
+    const progress = target > 0 ? (pencapaian / target) * 100 : 0;
+
+    return { noa, pencapaian, target, progress };
+  };
+
+  const toggleArea = (areaId: string) => {
+    setExpandedAreaId((prev) => (prev === areaId ? null : areaId));
+    setExpandedCabangIdByArea((prev) => ({
+      ...prev,
+      [areaId]: prev[areaId] ?? null,
+    }));
+  };
+
+  const toggleCabang = (areaId: string, cabangId: string) => {
+    setExpandedCabangIdByArea((prev) => ({
+      ...prev,
+      [areaId]: prev[areaId] === cabangId ? null : cabangId,
+    }));
+  };
 
   const columns: TableProps<ISumdan>["columns"] = [
     {
@@ -274,25 +315,28 @@ export default function Page() {
           ) : null}
           {pageProps.data &&
             pageProps.data.map((area) => {
-              const areaNoa = area.Cabang.flatMap((cabang) => cabang.User.flatMap((user) => user.AODapem));
-              const areaPencapaian = areaNoa.reduce((acc, curr) => acc + curr.plafond, 0);
-              const areaTarget = area.Cabang.flatMap((cabang) => cabang.User).reduce(
-                (acc, curr) => acc + curr.target,
-                0,
-              );
-              const areaProgress = areaTarget > 0 ? (areaPencapaian / areaTarget) * 100 : 0;
+              const areaSummary = getAreaSummary(area);
+              const isAreaExpanded = expandedAreaId === area.id;
+              const expandedCabangId = expandedCabangIdByArea[area.id] ?? null;
 
               return (
-                <article key={area.id} className="app-card space-y-4 p-4 md:p-5">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <article key={area.id} className="app-card p-4 md:p-5">
+                  <button
+                    type="button"
+                    onClick={() => toggleArea(area.id)}
+                    className="flex w-full flex-col gap-4 text-left lg:flex-row lg:items-start lg:justify-between"
+                  >
                     <div className="space-y-2.5">
-                      <div className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{area.name}</div>
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                        {isAreaExpanded ? <DownOutlined /> : <RightOutlined />}
+                        <span>{area.name}</span>
+                      </div>
                       <div>
                         <h3 className="text-2xl font-semibold tracking-[-0.03em] text-slate-900">
-                          {IDRFormat(areaPencapaian)}
+                          {IDRFormat(areaSummary.pencapaian)}
                         </h3>
                         <p className="mt-1 text-sm text-slate-600">
-                          Target {IDRFormat(areaTarget)} · {areaNoa.length} NOA · {area.Cabang.length} cabang
+                          Target {IDRFormat(areaSummary.target)} · {areaSummary.noa.length} NOA · {area.Cabang.length} cabang
                         </p>
                       </div>
                     </div>
@@ -300,97 +344,142 @@ export default function Page() {
                     <div className="rounded-[24px] border border-slate-200 bg-slate-50/90 p-4 lg:min-w-[220px] xl:min-w-[240px]">
                       <div className="flex items-center justify-between text-sm font-medium text-slate-600">
                         <span>Progress area</span>
-                        <span className={areaProgress >= 100 ? "text-emerald-600" : "text-amber-600"}>
-                          {areaProgress.toFixed(2)}%
+                        <span className={areaSummary.progress >= 100 ? "text-emerald-600" : "text-amber-600"}>
+                          {areaSummary.progress.toFixed(2)}%
                         </span>
                       </div>
                       <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-200">
                         <div
                           className={`h-full rounded-full ${
-                            areaProgress >= 100 ? "bg-emerald-500" : "bg-sky-500"
+                            areaSummary.progress >= 100 ? "bg-emerald-500" : "bg-sky-500"
                           }`}
-                          style={{ width: `${Math.min(areaProgress, 100)}%` }}
+                          style={{ width: `${Math.min(areaSummary.progress, 100)}%` }}
                         />
                       </div>
                     </div>
-                  </div>
+                  </button>
 
-                  <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-                    {area.Cabang.map((cabang) => {
-                      const cabangNoa = cabang.User.flatMap((user) => user.AODapem);
-                      const cabangPencapaian = cabangNoa.reduce((acc, curr) => acc + curr.plafond, 0);
-                      const cabangTarget = cabang.User.reduce((acc, curr) => acc + curr.target, 0);
-                      const cabangProgress = cabangTarget > 0 ? (cabangPencapaian / cabangTarget) * 100 : 0;
+                  {isAreaExpanded ? (
+                    <div className="mt-5 space-y-4 border-t border-slate-200 pt-5">
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        <ApartmentOutlined />
+                        Pilih cabang untuk melihat AO
+                      </div>
 
-                      return (
-                        <div key={cabang.id} className="rounded-[24px] border border-slate-200 bg-slate-50/75 p-4 shadow-[0_12px_26px_rgba(15,23,42,0.04)]">
-                          <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-start sm:justify-between">
-                            <div>
-                              <h4 className="text-lg font-semibold text-slate-900">{cabang.name}</h4>
-                              <p className="mt-1 text-sm text-slate-600">
-                                {cabang.User.length} AO · {cabangNoa.length} NOA
-                              </p>
-                            </div>
-                            <div className="text-sm text-slate-600 sm:text-right">
-                              <div className="font-semibold text-slate-900">{IDRFormat(cabangPencapaian)}</div>
-                              <div>Target {IDRFormat(cabangTarget)}</div>
-                              <div className={cabangProgress >= 100 ? "text-emerald-600" : "text-amber-600"}>
-                                {cabangProgress.toFixed(2)}%
-                              </div>
-                            </div>
-                          </div>
+                      {area.Cabang.length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 px-4 py-5 text-sm text-slate-600">
+                          Belum ada cabang aktif di area ini.
+                        </div>
+                      ) : null}
 
-                          <div className="mt-4 space-y-3">
-                            {cabang.User.map((user) => {
-                              const userPencapaian = user.AODapem.reduce((acc, curr) => acc + curr.plafond, 0);
-                              const userProgress = user.target > 0 ? (userPencapaian / user.target) * 100 : 0;
+                      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+                        {area.Cabang.map((cabang) => {
+                          const cabangSummary = getCabangSummary(cabang);
+                          const isCabangExpanded = expandedCabangId === cabang.id;
 
-                              return (
-                                <div
-                                  key={user.id}
-                                  className="rounded-2xl border border-white/80 bg-white/90 p-3 shadow-[0_10px_24px_rgba(15,23,42,0.04)]"
-                                >
-                                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                                    <div>
-                                      <div className="font-medium text-slate-900">
-                                        {user.fullname} <span className="text-slate-500">({user.position})</span>
-                                      </div>
-                                      <div className="mt-1 text-sm text-slate-600">
-                                        {user.AODapem.length} NOA · Target {IDRFormat(user.target)}
-                                      </div>
-                                    </div>
-                                    <div className="text-sm sm:text-right">
-                                      <div className="font-semibold text-slate-900">{IDRFormat(userPencapaian)}</div>
-                                      <div className={userProgress >= 100 ? "text-emerald-600" : "text-rose-600"}>
-                                        {userProgress.toFixed(2)}%
-                                      </div>
-                                    </div>
+                          return (
+                            <div
+                              key={cabang.id}
+                              className="rounded-[24px] border border-slate-200 bg-slate-50/75 p-4 shadow-[0_12px_26px_rgba(15,23,42,0.04)]"
+                            >
+                              <button
+                                type="button"
+                                onClick={() => toggleCabang(area.id, cabang.id)}
+                                className="flex w-full flex-col gap-3 border-b border-slate-200 pb-4 text-left sm:flex-row sm:items-start sm:justify-between"
+                              >
+                                <div>
+                                  <div className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+                                    {isCabangExpanded ? <DownOutlined className="text-sm" /> : <RightOutlined className="text-sm" />}
+                                    <span>{cabang.name}</span>
                                   </div>
-                                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
-                                    <div
-                                      className={`h-full rounded-full ${
-                                        userProgress >= 100 ? "bg-emerald-500" : "bg-rose-400"
-                                      }`}
-                                      style={{ width: `${Math.min(userProgress, 100)}%` }}
-                                    />
+                                  <p className="mt-1 text-sm text-slate-600">
+                                    {cabang.User.length} AO · {cabangSummary.noa.length} NOA
+                                  </p>
+                                </div>
+                                <div className="text-sm text-slate-600 sm:text-right">
+                                  <div className="font-semibold text-slate-900">{IDRFormat(cabangSummary.pencapaian)}</div>
+                                  <div>Target {IDRFormat(cabangSummary.target)}</div>
+                                  <div className={cabangSummary.progress >= 100 ? "text-emerald-600" : "text-amber-600"}>
+                                    {cabangSummary.progress.toFixed(2)}%
                                   </div>
                                 </div>
-                              );
-                            })}
+                              </button>
 
-                            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-100/85 px-4 py-3 text-sm font-semibold text-slate-700">
-                              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                                <span>TOTAL CABANG</span>
-                                <span>
-                                  {IDRFormat(cabangPencapaian)} · {cabangNoa.length} NOA · {cabangProgress.toFixed(2)}%
-                                </span>
-                              </div>
+                              {isCabangExpanded ? (
+                                <div className="mt-4 space-y-3">
+                                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                                    <TeamOutlined />
+                                    Daftar AO cabang
+                                  </div>
+
+                                  {cabang.User.length === 0 ? (
+                                    <div className="rounded-2xl border border-dashed border-slate-300 bg-white/80 px-4 py-4 text-sm text-slate-600">
+                                      Belum ada AO aktif di cabang ini.
+                                    </div>
+                                  ) : null}
+
+                                  {cabang.User.map((user) => {
+                                    const userPencapaian = user.AODapem.reduce((acc, curr) => acc + curr.plafond, 0);
+                                    const userProgress = user.target > 0 ? (userPencapaian / user.target) * 100 : 0;
+
+                                    return (
+                                      <div
+                                        key={user.id}
+                                        className="rounded-2xl border border-white/80 bg-white/90 p-3 shadow-[0_10px_24px_rgba(15,23,42,0.04)]"
+                                      >
+                                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                          <div>
+                                            <div className="font-medium text-slate-900">
+                                              {user.fullname} <span className="text-slate-500">({user.position})</span>
+                                            </div>
+                                            <div className="mt-1 text-sm text-slate-600">
+                                              {user.AODapem.length} NOA · Target {IDRFormat(user.target)}
+                                            </div>
+                                          </div>
+                                          <div className="text-sm sm:text-right">
+                                            <div className="font-semibold text-slate-900">{IDRFormat(userPencapaian)}</div>
+                                            <div className={userProgress >= 100 ? "text-emerald-600" : "text-rose-600"}>
+                                              {userProgress.toFixed(2)}%
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
+                                          <div
+                                            className={`h-full rounded-full ${
+                                              userProgress >= 100 ? "bg-emerald-500" : "bg-rose-400"
+                                            }`}
+                                            style={{ width: `${Math.min(userProgress, 100)}%` }}
+                                          />
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+
+                                  <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-100/85 px-4 py-3 text-sm font-semibold text-slate-700">
+                                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                                      <span>TOTAL CABANG</span>
+                                      <span>
+                                        {IDRFormat(cabangSummary.pencapaian)} · {cabangSummary.noa.length} NOA ·{" "}
+                                        {cabangSummary.progress.toFixed(2)}%
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white/70 px-4 py-3 text-sm text-slate-600">
+                                  Klik cabang ini untuk menampilkan AO yang ada di dalamnya.
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50/75 px-4 py-4 text-sm text-slate-600">
+                      Klik area ini untuk menampilkan daftar cabang, lalu pilih cabang untuk melihat AO.
+                    </div>
+                  )}
                 </article>
               );
             })}

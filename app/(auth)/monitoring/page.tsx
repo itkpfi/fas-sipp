@@ -66,6 +66,16 @@ interface IActionTableAkad<T> extends IActionTable<T> {
   cetakAkad: boolean;
 }
 
+const getEffectiveDroppingStatus = (item: IDapem) => {
+  if (item.approv_status !== "APPROVED") {
+    if (["PROCCESS", "APPROVED", "PAID_OFF"].includes(item.dropping_status)) {
+      return "PENDING";
+    }
+  }
+
+  return item.dropping_status;
+};
+
 export default function Page() {
   const [pageProps, setPageProps] = useState<IPageProps<IDapem>>({
     page: 1,
@@ -383,10 +393,11 @@ export default function Page() {
         } as React.CSSProperties,
       }),
       render: (_, record, i) => {
+        const effectiveDroppingStatus = getEffectiveDroppingStatus(record);
         return (
           <div className="flex gap-1">
-            {GetDroppingStatusTag(record.dropping_status)}
-            {record.Dropping && record.Dropping.process_at && (
+            {GetDroppingStatusTag(effectiveDroppingStatus)}
+            {effectiveDroppingStatus !== "PENDING" && record.Dropping && record.Dropping.process_at && (
               <div className="text-xs">
                 {moment(record.Dropping.process_at).format("DD/MM/YYYY HH:mm")}
               </div>
@@ -568,11 +579,13 @@ export default function Page() {
   ];
 
   const totalPlafond = pageProps.data.reduce((acc, item) => acc + item.plafond, 0);
-  const totalQueue = pageProps.data.filter((item) => ["DRAFT", "PENDING"].includes(item.dropping_status)).length;
+  const totalQueue = pageProps.data.filter((item) =>
+    ["DRAFT", "PENDING"].includes(getEffectiveDroppingStatus(item)),
+  ).length;
   const totalFinal = pageProps.data.filter(
     (item) =>
-      item.approv_status === "APPROVED" ||
-      ["PROCCESS", "APPROVED", "PAID_OFF"].includes(item.dropping_status),
+      item.approv_status === "APPROVED" &&
+      ["PROCCESS", "APPROVED", "PAID_OFF"].includes(getEffectiveDroppingStatus(item)),
   ).length;
 
   return (
@@ -694,18 +707,26 @@ export default function Page() {
                     {
                       sheetname: "antri",
                       data: MappingToExcelDapem(
-                        pageProps.data.filter((d) => ["DRAFT", "PENDING"].includes(d.dropping_status)),
+                        pageProps.data.filter((d) => ["DRAFT", "PENDING"].includes(getEffectiveDroppingStatus(d))),
                       ),
                     },
                     {
                       sheetname: "final",
                       data: MappingToExcelDapem(
-                        pageProps.data.filter((d) => ["PROCCESS", "APPROVED"].includes(d.dropping_status)),
+                        pageProps.data.filter(
+                          (d) =>
+                            d.approv_status === "APPROVED" &&
+                            ["PROCCESS", "APPROVED", "PAID_OFF"].includes(getEffectiveDroppingStatus(d)),
+                        ),
                       ),
                     },
                     {
                       sheetname: "dropping",
-                      data: MappingToExcelDapem(pageProps.data.filter((d) => d.dropping_status === "APPROVED")),
+                      data: MappingToExcelDapem(
+                        pageProps.data.filter(
+                          (d) => d.approv_status === "APPROVED" && getEffectiveDroppingStatus(d) === "APPROVED",
+                        ),
+                      ),
                     },
                   ],
                   "monitoring",
