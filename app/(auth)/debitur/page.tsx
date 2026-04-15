@@ -9,6 +9,7 @@ import {
   DollarCircleOutlined,
   DollarOutlined,
   HistoryOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import {
   Card,
@@ -102,13 +103,18 @@ export default function Page() {
       key: "tgl_lahir_penerima",
       render(value, record, index) {
         return (
-          <div>
-            <div>
-              <CalendarOutlined />{" "}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm text-slate-700">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-sky-100 text-sky-600">
+                <CalendarOutlined />
+              </span>
               {moment(record.birthdate, "YYYY-MM-DD").format("DD/MM/YYYY")}
             </div>
-            <div>
-              <DollarOutlined /> {IDRFormat(record.salary)}
+            <div className="flex items-center gap-2 text-sm font-medium text-slate-800">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                <DollarOutlined />
+              </span>
+              {IDRFormat(record.salary)}
             </div>
           </div>
         );
@@ -150,16 +156,17 @@ export default function Page() {
   return (
     <Card
       title={
-        <div className="flex gap-2 font-bold text-xl">
+        <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
           <BookOutlined /> Data Debitur
         </div>
       }
-      styles={{ body: { padding: 5 } }}
+      className="app-master-card"
     >
-      <div className="flex justify-between my-1 gap-2 flex-wrap">
-        <div className="flex gap-2 flex-wrap">
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-wrap gap-2">
           <Select
-            size="small"
+            size="middle"
+            className="app-master-select"
             placeholder="Kelompok..."
             options={[
               { label: "TASPEN", value: "TASPEN" },
@@ -171,27 +178,33 @@ export default function Page() {
             style={{ width: 170 }}
           />
           <Input.Search
-            size="small"
+            size="middle"
+            className="app-master-search"
             style={{ width: 170 }}
             placeholder="Kantor Bayar..."
+            prefix={<SearchOutlined className="text-slate-400" />}
             onChange={(e) =>
               setPageProps({ ...pageProps, pay_office: e.target.value })
             }
           />
         </div>
-        <div className="flex gap-2 justify-end">
+        <div className="flex flex-col gap-2 md:flex-row md:justify-end">
           <Input.Search
-            size="small"
+            size="middle"
+            className="app-master-search"
             style={{ width: 170 }}
             placeholder="Cari nama..."
+            prefix={<SearchOutlined className="text-slate-400" />}
             onChange={(e) =>
               setPageProps({ ...pageProps, search: e.target.value })
             }
           />
           <Input.Search
-            size="small"
+            size="middle"
+            className="app-master-search"
             style={{ width: 170 }}
             placeholder="Cari alamat..."
+            prefix={<SearchOutlined className="text-slate-400" />}
             onChange={(e) =>
               setPageProps({ ...pageProps, address: e.target.value })
             }
@@ -199,12 +212,12 @@ export default function Page() {
         </div>
       </div>
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         loading={loading}
         rowKey={"nopen"}
-        bordered
         scroll={{ x: "max-content", y: "60vh" }}
         pagination={{
           current: pageProps.page,
@@ -221,13 +234,14 @@ export default function Page() {
         }}
         expandable={{
           expandedRowRender: (record) => (
-            <div style={{ marginLeft: 10 }}>
+            <div className="ml-2 rounded-2xl bg-slate-50/90 p-3">
               <Table
-                bordered
+                className="app-master-table"
                 pagination={false}
                 rowKey={"id"}
                 columns={columnDapem}
                 dataSource={record.Dapem}
+                size="middle"
               />
             </div>
           ),
@@ -250,14 +264,19 @@ const columnDapem: TableProps<IDapem>["columns"] = [
     key: "permohonan",
     render(value, record, index) {
       return (
-        <div>
-          <p>
-            <DollarCircleOutlined />{" "}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-800">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+              <DollarCircleOutlined />
+            </span>
             <Tag color={"blue"}>{IDRFormat(record.plafond)}</Tag>
-          </p>
-          <p>
-            <HistoryOutlined /> <Tag color={"blue"}>{record.tenor} Bulan</Tag>
-          </p>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-slate-700">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+              <HistoryOutlined />
+            </span>
+            <Tag color={"blue"}>{record.tenor} Bulan</Tag>
+          </div>
         </div>
       );
     },

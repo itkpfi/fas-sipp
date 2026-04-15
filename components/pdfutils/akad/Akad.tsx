@@ -79,7 +79,7 @@ const generateContractHtml = (record: IDapem) => {
 
       <div class="page text-justify" style="font-size: 12px;">
         ${record.ProdukPembiayaan.Sumdan.code === "BPR HMJB" ? PKDHMJB(record) : record.ProdukPembiayaan.Sumdan.code === "BPR DASSA" ? PKDassa(record) : ""}
-        ${["BPR HMJB", "BPR DASSA"].includes(record.ProdukPembiayaan.Sumdan.code) ? PerjanjianKredit(record) : ""}
+        ${!["BPR HMJB", "BPR DASSA"].includes(record.ProdukPembiayaan.Sumdan.code) ? PerjanjianKredit(record) : ""}
       </div>
 
       <div class="page text-justify" style="font-size: 11px;">

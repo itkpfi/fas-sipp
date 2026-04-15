@@ -33,6 +33,25 @@ export const PKDHMJB = (record: IDapem) => {
     record.c_infomation +
     record.c_provisi +
     record.c_mutasi;
+  const kotaCetak = (record.Debitur.city || "KOTA BANDUNG")
+    .toLowerCase()
+    .replace("kota", "")
+    .replace("kabupaten", "")
+    .trim()
+    .toUpperCase();
+  const totalBiayaPersetujuan = biayaTotal;
+  const pelunasanPokok = record.c_takeover;
+  const totalPotongan =
+    pelunasanPokok +
+    biayaAdm +
+    biayaAsuransi +
+    record.c_gov +
+    record.c_account +
+    record.c_stamp +
+    record.c_infomation +
+    record.c_mutasi +
+    record.c_provisi;
+  const totalDiterima = record.plafond - totalPotongan;
 
   return `
   ${Header("PERJANJIAN KREDIT", `No. ${record.no_contract}`, undefined, undefined, undefined)}
@@ -337,7 +356,7 @@ atau mengajukan tuntutan hukum terhadap Debitur melalui Pengadilan-Pengadilan Ne
   <div class="mt-15">
   <div class="flex justify-between gap-6 items-end">
     <div class="flex-1 text-center">
-        <p >${(record.Debitur.city || "KOTA BANDUNG").toLowerCase().replace("kota", "").replace("kabupaten", "").toUpperCase()}, ${moment(record.date_contract).format("DD-MM-YYYY")}</p>
+        <p >${kotaCetak}, ${moment(record.date_contract).format("DD-MM-YYYY")}</p>
         <p class="font-bold">${record.ProdukPembiayaan.Sumdan.name}</p>
         <div class="h-28">
         </div>
@@ -364,6 +383,305 @@ atau mengajukan tuntutan hukum terhadap Debitur melalui Pengadilan-Pengadilan Ne
           <p class="w-full border-b">${record.aw_name}</p>
           <p>SUAMI/ISTRI/AHLI WARIS</p>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="page-break-before: always;"></div>
+
+  <div>
+    <div class="flex justify-between items-start mb-8">
+      <div>
+        <p>Nomor : ${record.no_contract}</p>
+      </div>
+      <div>
+        <p>${kotaCetak}, ${moment(record.date_contract).format("DD MMMM YYYY")}</p>
+      </div>
+    </div>
+
+    <div class="mb-5">
+      <p>Kepada Yth.</p>
+      <p>Sdr. ${record.Debitur.fullname}</p>
+    </div>
+
+    <div class="mb-5">
+      <p><strong>Perihal : Surat Persetujuan Pemberian Kredit</strong></p>
+    </div>
+
+    <div class="mb-5">
+      <p>Menunjuk surat permohonan kredit saudara kepada ${record.ProdukPembiayaan.Sumdan.name}, pada prinsipnya kredit saudara dapat kami setujui dengan ketentuan berikut :</p>
+    </div>
+
+    <div class="ml-4 mb-6">
+      ${ListNonStyle([
+        {
+          key: "1. Nominal Kredit",
+          value: IDRFormat(record.plafond),
+          currency: true,
+        },
+        { key: "2. Jangka Waktu Kredit", value: `${record.tenor} Bulan` },
+        {
+          key: "3. Suku Bunga",
+          value: `${(record.c_margin + record.c_margin_sumdan).toFixed(2)}% p.a`,
+        },
+        {
+          key: "4. Angsuran Kredit",
+          value: IDRFormat(angsuran),
+          currency: true,
+        },
+        { key: "5. Sistem Pembayaran", value: "LAINNYA" },
+        { key: "6. Jaminan Utama", value: "SKEP Pensiun" },
+      ])}
+
+      <div class="mt-3">
+        <p>7. Jaminan Tambahan :</p>
+        <table class="w-full mt-2 border-collapse" style="border: 1px solid #000;">
+          <thead>
+            <tr>
+              <th class="text-left p-2" style="border: 1px solid #000;">DOKUMEN / NOMOR</th>
+              <th class="text-left p-2" style="border: 1px solid #000; width: 160px;">KEADAAN</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="p-2" style="border: 1px solid #000;">SKEP PENSIUN NOMOR ${record.Debitur.no_skep || "-"}</td>
+              <td class="p-2" style="border: 1px solid #000;">Asli</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <p>Kredit saudara dapat dicairkan bilamana telah membayar biaya-biaya sebagai berikut :</p>
+    </div>
+
+    <div class="ml-4 mb-8">
+      ${ListNonStyle([
+        {
+          key: "1. Biaya Provisi Kredit",
+          value: IDRFormat(record.c_provisi),
+          currency: true,
+        },
+        {
+          key: "2. Biaya Administrasi Kredit",
+          value: IDRFormat(biayaAdm),
+          currency: true,
+        },
+        {
+          key: "3. Premi Asuransi",
+          value: IDRFormat(biayaAsuransi),
+          currency: true,
+        },
+        {
+          key: "4. Biaya Tatalaksana",
+          value: IDRFormat(record.c_gov),
+          currency: true,
+        },
+        {
+          key: "5. Biaya Buka Rekening",
+          value: IDRFormat(record.c_account),
+          currency: true,
+        },
+        {
+          key: "6. Biaya Materai",
+          value: IDRFormat(record.c_stamp),
+          currency: true,
+        },
+        {
+          key: "7. Biaya Data Informasi",
+          value: IDRFormat(record.c_infomation),
+          currency: true,
+        },
+        {
+          key: "8. Biaya Mutasi",
+          value: IDRFormat(record.c_mutasi),
+          currency: true,
+        },
+        { key: "9. Biaya Notaris", value: IDRFormat(0), currency: true },
+        { key: "10. Biaya Agency", value: IDRFormat(0), currency: true },
+        {
+          key: "Total",
+          value: IDRFormat(totalBiayaPersetujuan),
+          classStyle: "font-bold border-t border-dashed mt-2",
+          currency: true,
+        },
+      ])}
+    </div>
+
+    <div class="mb-12">
+      <p>Demikian dari kami, bilamana saudara menyetujui syarat tersebut di atas harap menandatangani Surat Persetujuan Pemberian Kredit ini. Sekian dan Terimakasih.</p>
+    </div>
+
+    <div class="mt-24 flex justify-between gap-12 text-center items-end">
+      <div class="flex-1">
+        <p>Hormat Kami,</p>
+        <p>${record.ProdukPembiayaan.Sumdan.name}</p>
+        <div class="h-28"></div>
+        <p class="font-bold border-b border-black">${record.ProdukPembiayaan.Sumdan.pic1 || ""}</p>
+        <p>Direktur Utama</p>
+      </div>
+      <div class="flex-1">
+        <p>Setuju dengan syarat tersebut</p>
+        <div class="h-28"></div>
+        <p class="font-bold border-b border-black">${record.Debitur.fullname}</p>
+        <p>Debitur</p>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="mb-6 flex items-start">
+      ${record.ProdukPembiayaan.Sumdan.logo ? `<img src="${record.ProdukPembiayaan.Sumdan.logo}" alt="Logo" class="h-14" />` : ""}
+    </div>
+
+    <div class="border p-4" style="border: 1px solid #000;">
+      <div class="text-center mb-4 pb-3" style="border-bottom: 1px solid #000;">
+        <p class="text-xl font-bold">BUKTI PEMBERIAN KREDIT</p>
+      </div>
+
+      <div class="pb-3 mb-3" style="border-bottom: 1px solid #000;">
+        <p>Telah diterima dari Bank Perekonomian Rakyat Hasamitra Jawa Barat sejumlah uang untuk pembayaran pemberian kredit sesuai perjanjian nomor : ${record.no_contract} dengan rincian sebagai berikut :</p>
+      </div>
+
+      <div class="flex gap-2">
+        <p class="w-24">Nama</p>
+        <p class="w-4">:</p>
+        <p class="flex-1">${record.Debitur.fullname}</p>
+      </div>
+      <div class="flex gap-2 mb-3">
+        <p class="w-24">Alamat</p>
+        <p class="w-4">:</p>
+        <p class="flex-1">${record.Debitur.address} KELURAHAN ${record.Debitur.ward} KECAMATAN ${record.Debitur.district} ${record.Debitur.city} ${record.Debitur.province} ${record.Debitur.pos_code}</p>
+      </div>
+
+      <div class="ml-24 mb-4">
+        ${ListNonStyle([
+          { key: "Plafond", value: IDRFormat(record.plafond), currency: true },
+          {
+            key: "Pelunasan Pokok",
+            value: IDRFormat(pelunasanPokok),
+            currency: true,
+          },
+          {
+            key: "Sisa Plafond",
+            value: IDRFormat(record.plafond - pelunasanPokok),
+            currency: true,
+          },
+          {
+            key: "Provisi",
+            value: IDRFormat(record.c_provisi),
+            currency: true,
+          },
+          { key: "Administrasi", value: IDRFormat(biayaAdm), currency: true },
+          { key: "Asuransi Jiwa", value: IDRFormat(0), currency: true },
+          {
+            key: "Asuransi Kredit",
+            value: IDRFormat(biayaAsuransi),
+            currency: true,
+          },
+          { key: "Agensi", value: IDRFormat(0), currency: true },
+          { key: "Notaris", value: IDRFormat(0), currency: true },
+          {
+            key: "Biaya Tatalaksana",
+            value: IDRFormat(record.c_gov),
+            currency: true,
+          },
+          {
+            key: "Biaya Buka Rekening",
+            value: IDRFormat(record.c_account),
+            currency: true,
+          },
+          {
+            key: "Biaya Materai",
+            value: IDRFormat(record.c_stamp),
+            currency: true,
+          },
+          {
+            key: "Biaya Data Informasi",
+            value: IDRFormat(record.c_infomation),
+            currency: true,
+          },
+          {
+            key: "Biaya Mutasi",
+            value: IDRFormat(record.c_mutasi),
+            currency: true,
+          },
+          { key: "Bunga Berjalan", value: IDRFormat(0), currency: true },
+          {
+            key: "Total Potongan",
+            value: IDRFormat(totalPotongan),
+            classStyle: "font-bold",
+            currency: true,
+          },
+          {
+            key: "Tabungan Wajib Si Mitra",
+            value: IDRFormat(0),
+            currency: true,
+          },
+          { key: "Angsuran Pertama", value: IDRFormat(0), currency: true },
+          {
+            key: "Total Yang Diterima",
+            value: IDRFormat(totalDiterima),
+            classStyle: "font-bold",
+            currency: true,
+          },
+        ])}
+      </div>
+
+      <div>
+        <p>Catatan :</p>
+      </div>
+    </div>
+
+    <div class="mt-3 mb-3">
+      <p>${kotaCetak}, ${moment(record.date_contract).format("MMMM YYYY")}</p>
+    </div>
+
+    <table class="w-full border-collapse" style="border: 1px solid #000; table-layout: fixed;">
+      <thead>
+        <tr>
+          <th class="p-2" style="border: 1px solid #000;">Dibuat Oleh</th>
+          <th class="p-2" style="border: 1px solid #000;">Disetujui Oleh</th>
+          <th class="p-2" style="border: 1px solid #000;">Penerima Kredit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="border: 1px solid #000; height: 180px; vertical-align: bottom;" class="text-center pb-2">Admin Kredit</td>
+          <td style="border: 1px solid #000; height: 180px; vertical-align: bottom;" class="text-center pb-2">Pejabat Bank</td>
+          <td style="border: 1px solid #000; height: 180px; vertical-align: bottom;" class="text-center pb-2">
+            <p class="font-bold">${record.Debitur.fullname}</p>
+            <p>Debitur</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="mt-6 flex gap-10">
+      <div class="flex-1">
+        ${ListNonStyle([
+          { key: "CIF", value: "" },
+          { key: "No. Loan", value: "" },
+          { key: "Rek. Tab.", value: "" },
+          { key: "Rek. Bend.", value: "" },
+          { key: "Instansi", value: "" },
+          { key: "Ref.", value: "" },
+          { key: "Jenis Penggunaan", value: "" },
+          { key: "Sektor Ekonomi", value: "" },
+        ])}
+      </div>
+      <div class="flex-1">
+        ${ListStyle(
+          [
+            "Limit",
+            "Pendaftaran Fasilitas",
+            "Blokiran",
+            "Agunan",
+            "Fund Transfer & Agunan",
+          ],
+          "number",
+        )}
       </div>
     </div>
   </div>

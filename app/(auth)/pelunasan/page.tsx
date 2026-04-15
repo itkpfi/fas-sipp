@@ -28,6 +28,7 @@ import {
   MoneyCollectOutlined,
   PlusCircleOutlined,
   PrinterOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import {
   EDocStatus,
@@ -181,13 +182,17 @@ export default function Page() {
       key: "pembiayaan",
       render(value, record, index) {
         return (
-          <div>
-            <div>
-              <DollarCircleOutlined />{" "}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm font-medium text-slate-800">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                <DollarCircleOutlined />
+              </span>
               <Tag color={"blue"}>{IDRFormat(record.Dapem.plafond)}</Tag>
             </div>
-            <div>
-              <HistoryOutlined />{" "}
+            <div className="flex items-center gap-2 text-sm text-slate-700">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+                <HistoryOutlined />
+              </span>
               <Tag color={"blue"}>{record.Dapem.tenor} Bulan</Tag>
             </div>
           </div>
@@ -371,8 +376,9 @@ export default function Page() {
       key: "berkas",
       render(value, record, index) {
         return (
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button
+              className="app-table-action-btn"
               size="small"
               type="primary"
               icon={<PrinterOutlined />}
@@ -380,7 +386,9 @@ export default function Page() {
             ></Button>
             <Tooltip title={"Berkas Pelunasan"}>
               <Button
+                className="app-table-action-btn"
                 size="small"
+                type="primary"
                 icon={<FileFilled />}
                 onClick={() =>
                   setViews({
@@ -404,9 +412,10 @@ export default function Page() {
       title: "Aksi",
       key: "action",
       render: (_, record) => (
-        <div className="flex gap-2">
+        <div className="flex gap-1 flex-wrap justify-center">
           {hasAccess("update") && (
             <Button
+              className="app-table-action-btn"
               size="small"
               type="primary"
               icon={<EditOutlined />}
@@ -417,6 +426,7 @@ export default function Page() {
           )}
           {hasAccess("proses") && (
             <Button
+              className="app-table-action-btn"
               size="small"
               type="primary"
               icon={<FormOutlined />}
@@ -427,8 +437,10 @@ export default function Page() {
           )}
           {hasAccess("delete") && (
             <Button
+              className="app-table-action-btn"
               size="small"
               danger
+              type="primary"
               icon={<DeleteOutlined />}
               disabled={record.status_paid === "APPROVED"}
               onClick={() =>
@@ -444,19 +456,20 @@ export default function Page() {
   return (
     <Card
       title={
-        <div className="flex gap-2 font-bold text-xl">
+        <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
           <MoneyCollectOutlined /> Pelunasan Debitur
         </div>
       }
-      styles={{ body: { padding: 5 } }}
+      className="app-master-card"
     >
-      <div className="flex justify-between my-1 gap-2 overflow-auto">
-        <div className="flex gap-2">
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-wrap gap-2">
           {hasAccess("write") && (
             <Button
-              size="small"
+              size="middle"
               icon={<PlusCircleOutlined />}
               type="primary"
+              className="app-master-action"
               onClick={() => setAction({ ...action, upsert: true })}
             >
               Add New
@@ -569,22 +582,26 @@ export default function Page() {
             }
           />
         </div>
-        <Input.Search
-          size="small"
-          style={{ width: 170 }}
-          placeholder="Cari nama..."
-          onChange={(e) =>
-            setPageProps({ ...pageProps, search: e.target.value })
-          }
-        />
+        <div className="app-master-toolbar-search">
+          <Input.Search
+            size="middle"
+            className="app-master-search"
+            style={{ width: 170 }}
+            placeholder="Cari nama..."
+            prefix={<SearchOutlined className="text-slate-400" />}
+            onChange={(e) =>
+              setPageProps({ ...pageProps, search: e.target.value })
+            }
+          />
+        </div>
       </div>
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         loading={loading}
         rowKey={"id"}
-        bordered
         scroll={{ x: "max-content", y: "60vh" }}
         pagination={{
           current: pageProps.page,
