@@ -18,6 +18,7 @@ import {
   FileFilled,
   FormOutlined,
   PrinterOutlined,
+  SearchOutlined,
   TransactionOutlined,
 } from "@ant-design/icons";
 import { Sumdan } from "@prisma/client";
@@ -64,6 +65,16 @@ export default function Page() {
   });
   const { hasAccess } = useAccess("/pencairan/dropping");
   const { modal } = App.useApp();
+
+  const handleResetFilters = () => {
+    setPageProps((prev) => ({
+      ...prev,
+      page: 1,
+      sumdanId: "",
+      backdate: "",
+      status: "",
+    }));
+  };
 
   const getData = async () => {
     setLoading(true);
@@ -223,6 +234,7 @@ export default function Page() {
                 icon={<PrinterOutlined />}
                 size="small"
                 type="primary"
+                className="app-table-action-btn"
                 onClick={() => printSIStandar(record)}
               ></Button>
             </Tooltip>
@@ -230,6 +242,8 @@ export default function Page() {
               <Button
                 icon={<FileFilled />}
                 size="small"
+                type="primary"
+                className="app-table-action-btn"
                 onClick={() =>
                   setViews({
                     open: true,
@@ -261,6 +275,7 @@ export default function Page() {
                 icon={<EditOutlined />}
                 type="primary"
                 size="small"
+                className="app-table-action-btn"
                 onClick={() =>
                   setAction({ ...action, upsert: true, selected: record })
                 }
@@ -271,6 +286,7 @@ export default function Page() {
                 icon={<FormOutlined />}
                 type="primary"
                 size="small"
+                className="app-table-action-btn"
                 onClick={() =>
                   setAction({ ...action, proses: true, selected: record })
                 }
@@ -280,7 +296,9 @@ export default function Page() {
               <Button
                 icon={<DeleteOutlined />}
                 danger
+                type="primary"
                 size="small"
+                className="app-table-action-btn"
                 onClick={() =>
                   setAction({ ...action, delete: true, selected: record })
                 }
@@ -295,78 +313,119 @@ export default function Page() {
   return (
     <Card
       title={
-        <div className="flex gap-2 font-bold text-xl">
+        <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
           <TransactionOutlined /> Permohonan Dropping
         </div>
       }
-      styles={{ body: { padding: 5 } }}
+      className="app-master-card"
     >
-      <div className="flex justify-between items-center my-1 gap-2 flex-wrap">
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between">
         <div className="flex gap-2 flex-wrap">
           <FilterData
+            buttonSize="middle"
+            buttonClassName="app-master-action"
+            title="Filter Dropping"
+            bodyClassName="space-y-4"
             children={
               <>
-                <div className="my-2">
-                  <p>Periode : </p>
-                  <RangePicker
-                    size="small"
-                    onChange={(date, dateStr) =>
-                      setPageProps({ ...pageProps, backdate: dateStr })
-                    }
-                    style={{ width: "100%" }}
-                  />
-                </div>
-                <div className="my-2">
-                  <p>Status Dropping</p>
-                  <Select
-                    size="small"
-                    placeholder="Pilih Status..."
-                    options={[
-                      { label: "PENDING", value: "false" },
-                      { label: "PAID", value: "true" },
-                    ]}
-                    style={{ width: "100%" }}
-                    onChange={(e) => setPageProps({ ...pageProps, status: e })}
-                    allowClear
-                  />
-                </div>
-                {hasAccess("update") && (
-                  <div className="my-2">
-                    <p>Mitra Pembiayaan : </p>
-                    <Select
-                      size="small"
-                      onChange={(e: string) =>
-                        setPageProps({ ...pageProps, sumdanId: e })
-                      }
-                      allowClear
-                      placeholder="Pilih Sumdan..."
-                      options={sumdans.map((s) => ({
-                        label: s.code,
-                        value: s.id,
-                      }))}
-                      style={{ width: "100%" }}
-                    />
+                <div className="app-report-panel space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        Filter utama
+                      </p>
+                    </div>
+                    <Button size="small" onClick={handleResetFilters}>
+                      Reset
+                    </Button>
                   </div>
-                )}
+                  <div className="grid gap-3">
+                    <div className="app-filter-field">
+                      <p>Periode</p>
+                      <RangePicker
+                        size="middle"
+                        className="app-master-picker"
+                        onChange={(date, dateStr) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            backdate: dateStr,
+                          })
+                        }
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div className="app-filter-field">
+                      <p>Status dropping</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Pilih Status..."
+                        options={[
+                          { label: "PENDING", value: "false" },
+                          { label: "PAID", value: "true" },
+                        ]}
+                        value={pageProps.status || undefined}
+                        style={{ width: "100%" }}
+                        onChange={(e) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            status: e || "",
+                          })
+                        }
+                        allowClear
+                      />
+                    </div>
+                    {hasAccess("update") && (
+                      <div className="app-filter-field">
+                        <p>Mitra pembiayaan</p>
+                        <Select
+                          size="middle"
+                          className="app-master-select"
+                          onChange={(e: string) =>
+                            setPageProps({
+                              ...pageProps,
+                              page: 1,
+                              sumdanId: e || "",
+                            })
+                          }
+                          value={pageProps.sumdanId || undefined}
+                          allowClear
+                          placeholder="Pilih Sumdan..."
+                          options={sumdans.map((s) => ({
+                            label: s.code,
+                            value: s.id,
+                          }))}
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
               </>
             }
           />
         </div>
-        <Input.Search
-          size="small"
-          style={{ width: 170 }}
-          placeholder="Cari nama..."
-          onChange={(e) =>
-            setPageProps({ ...pageProps, search: e.target.value })
-          }
-        />
+        <div className="app-master-toolbar-search md:max-w-xs">
+          <Input
+            size="middle"
+            className="app-master-search"
+            prefix={<SearchOutlined className="text-slate-400" />}
+            placeholder="Cari nama..."
+            allowClear
+            onChange={(e) =>
+              setPageProps({ ...pageProps, search: e.target.value })
+            }
+          />
+        </div>
       </div>
       <Table
+        className="app-master-table"
         columns={columnDropping}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         rowKey={"id"}
-        bordered
         scroll={{ x: "max-content", y: "60vh" }}
         pagination={{
           current: pageProps.page,
@@ -599,17 +658,23 @@ const ProsesDropping = ({
 
   const handleSubmit = async () => {
     setLoading(true);
-    if (record.status !== data.status) {
-      data.Dapem = data.Dapem.map((d) => ({
-        ...d,
-        dropping_status: data.status ? "APPROVED" : "PROCCESS",
-      }));
-    }
-    if (!record.status && data.status) data.process_at = new Date();
+    const nextStatus = true;
+    const nextData: IDropping = {
+      ...data,
+      status: nextStatus,
+      Dapem:
+        record.status === nextStatus
+          ? data.Dapem
+          : data.Dapem.map((d) => ({
+              ...d,
+              dropping_status: "APPROVED",
+            })),
+      process_at: !record.status ? new Date() : data.process_at,
+    };
 
     await fetch("/api/dropping", {
       method: "PUT",
-      body: JSON.stringify(data),
+      body: JSON.stringify(nextData),
     })
       .then((res) => res.json())
       .then(async (res) => {
@@ -645,20 +710,6 @@ const ProsesDropping = ({
             required: true,
             value: data.Dapem.flatMap((d) => d.Debitur.fullname).join(" | "),
             disabled: true,
-          }}
-        />
-        <FormInput
-          data={{
-            label: "Status Proses",
-            type: "select",
-            required: true,
-            disabled: record.status,
-            options: [
-              { label: "PAID", value: true },
-              { label: "PENDING", value: false },
-            ],
-            value: data.status,
-            onChange: (e: boolean) => setData({ ...data, status: e }),
           }}
         />
         <FormInput
@@ -815,6 +866,8 @@ const TableDapem = ({ data }: { data: IDapem[] }) => {
             <Button
               icon={<FileFilled />}
               size="small"
+              type="primary"
+              className="app-table-action-btn"
               disabled={!record.file_contract}
               onClick={() =>
                 setViews({
@@ -834,8 +887,9 @@ const TableDapem = ({ data }: { data: IDapem[] }) => {
   return (
     <div style={{ marginLeft: 10 }}>
       <Table
-        bordered
+        className="app-master-table"
         pagination={false}
+        size="middle"
         rowKey={"id"}
         columns={columnDapem}
         dataSource={data}

@@ -1,6 +1,11 @@
 "use client";
 
-import { ApartmentOutlined, DownOutlined, RightOutlined, TeamOutlined } from "@ant-design/icons";
+import {
+  ApartmentOutlined,
+  DownOutlined,
+  RightOutlined,
+  TeamOutlined,
+} from "@ant-design/icons";
 import { IDRFormat } from "@/components/utils/PembiayaanUtil";
 import { IPageProps } from "@/libs/IInterfaces";
 import {
@@ -34,7 +39,9 @@ interface ISumdan extends Sumdan {
 }
 
 const getProdukDapem = (produk: IProduk[] = []) =>
-  produk.flatMap((item) => item.Dapem ?? []).filter((item): item is Dapem => Boolean(item));
+  produk
+    .flatMap((item) => item.Dapem ?? [])
+    .filter((item): item is Dapem => Boolean(item));
 
 export default function Page() {
   const [loading, setLoading] = useState(false);
@@ -49,9 +56,13 @@ export default function Page() {
   });
   const [summaryAreas, setSummaryAreas] = useState<IArea[]>([]);
   const [sumdan, setSumdan] = useState<ISumdan[]>([]);
-  const [areaOptions, setAreaOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [areaOptions, setAreaOptions] = useState<
+    Array<{ label: string; value: string }>
+  >([]);
   const [expandedAreaId, setExpandedAreaId] = useState<string | null>(null);
-  const [expandedCabangIdByArea, setExpandedCabangIdByArea] = useState<Record<string, string | null>>({});
+  const [expandedCabangIdByArea, setExpandedCabangIdByArea] = useState<
+    Record<string, string | null>
+  >({});
 
   const getData = async () => {
     setLoading(true);
@@ -73,7 +84,8 @@ export default function Page() {
     summaryParams.append("ao", "ao");
     summaryParams.append("include", "true");
     summaryParams.append("limit", "1000");
-    if (pageProps.backdate) summaryParams.append("backdate", pageProps.backdate);
+    if (pageProps.backdate)
+      summaryParams.append("backdate", pageProps.backdate);
     if (pageProps.areaId) summaryParams.append("areaId", pageProps.areaId);
 
     const res = await fetch(`/api/area?${areaParams.toString()}`);
@@ -139,9 +151,11 @@ export default function Page() {
 
   const totalAo = summaryAreas
     .flatMap((area) => area.Cabang)
-    .flatMap((cabang) => cabang.User).length;
+    .flatMap((cabang) => cabang.User)
+    .filter((user) => !user.sumdanId).length;
 
-  const overallProgress = totalTarget > 0 ? (totalPlafond / totalTarget) * 100 : 0;
+  const overallProgress =
+    totalTarget > 0 ? (totalPlafond / totalTarget) * 100 : 0;
 
   const getCabangSummary = (cabang: ICabang) => {
     const noa = cabang.User.flatMap((user) => user.AODapem);
@@ -155,7 +169,10 @@ export default function Page() {
   const getAreaSummary = (area: IArea) => {
     const noa = area.Cabang.flatMap((cabang) => getCabangSummary(cabang).noa);
     const pencapaian = noa.reduce((acc, curr) => acc + curr.plafond, 0);
-    const target = area.Cabang.flatMap((cabang) => cabang.User).reduce((acc, curr) => acc + curr.target, 0);
+    const target = area.Cabang.flatMap((cabang) => cabang.User).reduce(
+      (acc, curr) => acc + curr.target,
+      0,
+    );
     const progress = target > 0 ? (pencapaian / target) * 100 : 0;
 
     return { noa, pencapaian, target, progress };
@@ -205,8 +222,14 @@ export default function Page() {
       dataIndex: "limit",
       key: "limit",
       sorter: (a, b) =>
-        getProdukDapem(a.ProdukPembiayaan).reduce((acc, curr) => acc + curr.plafond, 0) -
-        getProdukDapem(b.ProdukPembiayaan).reduce((acc, curr) => acc + curr.plafond, 0),
+        getProdukDapem(a.ProdukPembiayaan).reduce(
+          (acc, curr) => acc + curr.plafond,
+          0,
+        ) -
+        getProdukDapem(b.ProdukPembiayaan).reduce(
+          (acc, curr) => acc + curr.plafond,
+          0,
+        ),
       render(value, record, index) {
         const total = getProdukDapem(record.ProdukPembiayaan).reduce(
           (acc, curr) => acc + curr.plafond,
@@ -218,8 +241,8 @@ export default function Page() {
         const percentage = all > 0 ? (total / all) * 100 : 0;
         return (
           <div>
-            {IDRFormat(total)} (
-            {getProdukDapem(record.ProdukPembiayaan).length} NOA)
+            {IDRFormat(total)} ({getProdukDapem(record.ProdukPembiayaan).length}{" "}
+            NOA)
             <span className="italic opacity-70">
               ({percentage.toFixed(2)}%)
             </span>
@@ -240,31 +263,55 @@ export default function Page() {
           </div>
 
           <div className="relative z-10 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <HeroMetric label="Total pencapaian" value={`Rp. ${IDRFormat(totalPlafond)}`} />
-            <HeroMetric label="Total target" value={`Rp. ${IDRFormat(totalTarget)}`} />
+            <HeroMetric
+              label="Total pencapaian"
+              value={`Rp. ${IDRFormat(totalPlafond)}`}
+            />
+            <HeroMetric
+              label="Total target"
+              value={`Rp. ${IDRFormat(totalTarget)}`}
+            />
             <HeroMetric label="Total NOA" value={`${totalNoa}`} />
-            <HeroMetric label="Progress" value={`${overallProgress.toFixed(2)}%`} />
+            <HeroMetric
+              label="Progress"
+              value={`${overallProgress.toFixed(2)}%`}
+            />
           </div>
         </section>
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="app-stat-tile">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Area aktif</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">{pageProps.total}</div>
-          </div>
-          <div className="app-stat-tile">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">AO terpantau</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">{totalAo}</div>
-          </div>
-          <div className="app-stat-tile">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Rata-rata area</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              Area aktif
+            </div>
             <div className="mt-2 text-3xl font-bold text-slate-900">
-               Rp. {IDRFormat(pageProps.total ? totalPlafond / pageProps.total : 0)}
-             </div>
-           </div>
+              {pageProps.total}
+            </div>
+          </div>
           <div className="app-stat-tile">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Mitra aktif</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">{sumdan.length}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              AO terpantau
+            </div>
+            <div className="mt-2 text-3xl font-bold text-slate-900">
+              {totalAo}
+            </div>
+          </div>
+          <div className="app-stat-tile">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              Rata-rata area
+            </div>
+            <div className="mt-2 text-3xl font-bold text-slate-900">
+              Rp.{" "}
+              {IDRFormat(pageProps.total ? totalPlafond / pageProps.total : 0)}
+            </div>
+          </div>
+          <div className="app-stat-tile">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              Mitra aktif
+            </div>
+            <div className="mt-2 text-3xl font-bold text-slate-900">
+              {sumdan.length}
+            </div>
           </div>
         </section>
 
@@ -274,7 +321,9 @@ export default function Page() {
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
                 Filter data
               </p>
-              <h2 className="text-xl font-semibold text-slate-900">Data pencapaian by area</h2>
+              <h2 className="text-xl font-semibold text-slate-900">
+                Data pencapaian by area
+              </h2>
             </div>
             <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50/90 p-2 sm:flex-row">
               <Select
@@ -336,7 +385,9 @@ export default function Page() {
                           {IDRFormat(areaSummary.pencapaian)}
                         </h3>
                         <p className="mt-1 text-sm text-slate-600">
-                          Target {IDRFormat(areaSummary.target)} · {areaSummary.noa.length} NOA · {area.Cabang.length} cabang
+                          Target {IDRFormat(areaSummary.target)} ·{" "}
+                          {areaSummary.noa.length} NOA · {area.Cabang.length}{" "}
+                          cabang
                         </p>
                       </div>
                     </div>
@@ -344,16 +395,26 @@ export default function Page() {
                     <div className="rounded-[24px] border border-slate-200 bg-slate-50/90 p-4 lg:min-w-[220px] xl:min-w-[240px]">
                       <div className="flex items-center justify-between text-sm font-medium text-slate-600">
                         <span>Progress area</span>
-                        <span className={areaSummary.progress >= 100 ? "text-emerald-600" : "text-amber-600"}>
+                        <span
+                          className={
+                            areaSummary.progress >= 100
+                              ? "text-emerald-600"
+                              : "text-amber-600"
+                          }
+                        >
                           {areaSummary.progress.toFixed(2)}%
                         </span>
                       </div>
                       <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-200">
                         <div
                           className={`h-full rounded-full ${
-                            areaSummary.progress >= 100 ? "bg-emerald-500" : "bg-sky-500"
+                            areaSummary.progress >= 100
+                              ? "bg-emerald-500"
+                              : "bg-sky-500"
                           }`}
-                          style={{ width: `${Math.min(areaSummary.progress, 100)}%` }}
+                          style={{
+                            width: `${Math.min(areaSummary.progress, 100)}%`,
+                          }}
                         />
                       </div>
                     </div>
@@ -375,7 +436,8 @@ export default function Page() {
                       <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
                         {area.Cabang.map((cabang) => {
                           const cabangSummary = getCabangSummary(cabang);
-                          const isCabangExpanded = expandedCabangId === cabang.id;
+                          const isCabangExpanded =
+                            expandedCabangId === cabang.id;
 
                           return (
                             <div
@@ -389,17 +451,32 @@ export default function Page() {
                               >
                                 <div>
                                   <div className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-                                    {isCabangExpanded ? <DownOutlined className="text-sm" /> : <RightOutlined className="text-sm" />}
+                                    {isCabangExpanded ? (
+                                      <DownOutlined className="text-sm" />
+                                    ) : (
+                                      <RightOutlined className="text-sm" />
+                                    )}
                                     <span>{cabang.name}</span>
                                   </div>
                                   <p className="mt-1 text-sm text-slate-600">
-                                    {cabang.User.length} AO · {cabangSummary.noa.length} NOA
+                                    {cabang.User.length} AO ·{" "}
+                                    {cabangSummary.noa.length} NOA
                                   </p>
                                 </div>
                                 <div className="text-sm text-slate-600 sm:text-right">
-                                  <div className="font-semibold text-slate-900">{IDRFormat(cabangSummary.pencapaian)}</div>
-                                  <div>Target {IDRFormat(cabangSummary.target)}</div>
-                                  <div className={cabangSummary.progress >= 100 ? "text-emerald-600" : "text-amber-600"}>
+                                  <div className="font-semibold text-slate-900">
+                                    {IDRFormat(cabangSummary.pencapaian)}
+                                  </div>
+                                  <div>
+                                    Target {IDRFormat(cabangSummary.target)}
+                                  </div>
+                                  <div
+                                    className={
+                                      cabangSummary.progress >= 100
+                                        ? "text-emerald-600"
+                                        : "text-amber-600"
+                                    }
+                                  >
                                     {cabangSummary.progress.toFixed(2)}%
                                   </div>
                                 </div>
@@ -419,8 +496,14 @@ export default function Page() {
                                   ) : null}
 
                                   {cabang.User.map((user) => {
-                                    const userPencapaian = user.AODapem.reduce((acc, curr) => acc + curr.plafond, 0);
-                                    const userProgress = user.target > 0 ? (userPencapaian / user.target) * 100 : 0;
+                                    const userPencapaian = user.AODapem.reduce(
+                                      (acc, curr) => acc + curr.plafond,
+                                      0,
+                                    );
+                                    const userProgress =
+                                      user.target > 0
+                                        ? (userPencapaian / user.target) * 100
+                                        : 0;
 
                                     return (
                                       <div
@@ -430,15 +513,27 @@ export default function Page() {
                                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                           <div>
                                             <div className="font-medium text-slate-900">
-                                              {user.fullname} <span className="text-slate-500">({user.position})</span>
+                                              {user.fullname}{" "}
+                                              <span className="text-slate-500">
+                                                ({user.position})
+                                              </span>
                                             </div>
                                             <div className="mt-1 text-sm text-slate-600">
-                                              {user.AODapem.length} NOA · Target {IDRFormat(user.target)}
+                                              {user.AODapem.length} NOA · Target{" "}
+                                              {IDRFormat(user.target)}
                                             </div>
                                           </div>
                                           <div className="text-sm sm:text-right">
-                                            <div className="font-semibold text-slate-900">{IDRFormat(userPencapaian)}</div>
-                                            <div className={userProgress >= 100 ? "text-emerald-600" : "text-rose-600"}>
+                                            <div className="font-semibold text-slate-900">
+                                              {IDRFormat(userPencapaian)}
+                                            </div>
+                                            <div
+                                              className={
+                                                userProgress >= 100
+                                                  ? "text-emerald-600"
+                                                  : "text-rose-600"
+                                              }
+                                            >
                                               {userProgress.toFixed(2)}%
                                             </div>
                                           </div>
@@ -446,9 +541,13 @@ export default function Page() {
                                         <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
                                           <div
                                             className={`h-full rounded-full ${
-                                              userProgress >= 100 ? "bg-emerald-500" : "bg-rose-400"
+                                              userProgress >= 100
+                                                ? "bg-emerald-500"
+                                                : "bg-rose-400"
                                             }`}
-                                            style={{ width: `${Math.min(userProgress, 100)}%` }}
+                                            style={{
+                                              width: `${Math.min(userProgress, 100)}%`,
+                                            }}
                                           />
                                         </div>
                                       </div>
@@ -459,27 +558,20 @@ export default function Page() {
                                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                                       <span>TOTAL CABANG</span>
                                       <span>
-                                        {IDRFormat(cabangSummary.pencapaian)} · {cabangSummary.noa.length} NOA ·{" "}
+                                        {IDRFormat(cabangSummary.pencapaian)} ·{" "}
+                                        {cabangSummary.noa.length} NOA ·{" "}
                                         {cabangSummary.progress.toFixed(2)}%
                                       </span>
                                     </div>
                                   </div>
                                 </div>
-                              ) : (
-                                <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                                  Klik cabang ini untuk menampilkan AO yang ada di dalamnya.
-                                </div>
-                              )}
+                              ) : null}
                             </div>
                           );
                         })}
                       </div>
                     </div>
-                  ) : (
-                    <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50/75 px-4 py-4 text-sm text-slate-600">
-                      Klik area ini untuk menampilkan daftar cabang, lalu pilih cabang untuk melihat AO.
-                    </div>
-                  )}
+                  ) : null}
                 </article>
               );
             })}
@@ -512,7 +604,9 @@ export default function Page() {
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
                 Distribusi mitra
               </p>
-              <h2 className="mt-1 text-xl font-semibold text-slate-900">Pencapaian berdasarkan mitra</h2>
+              <h2 className="mt-1 text-xl font-semibold text-slate-900">
+                Pencapaian berdasarkan mitra
+              </h2>
             </div>
           </div>
           <div className="app-table-modern">
@@ -535,7 +629,9 @@ export default function Page() {
 function HeroMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[24px] border border-white/12 bg-white/10 p-4 backdrop-blur xl:min-h-[112px]">
-      <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-100/82">{label}</div>
+      <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-100/82">
+        {label}
+      </div>
       <div className="mt-2 text-2xl font-semibold text-white">{value}</div>
     </div>
   );

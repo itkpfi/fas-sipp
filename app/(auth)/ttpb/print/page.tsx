@@ -102,17 +102,18 @@ export default function Page() {
     <div>
       <Card
         title={
-          <div>
+          <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
             <FolderAddOutlined /> Cetak Sending Document
           </div>
         }
-        styles={{ body: { padding: 5 } }}
+        className="app-master-card"
       >
-        <div className="my-1">
+        <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between">
           <Button
-            size="small"
+            size="middle"
             icon={<PrinterOutlined />}
             type="primary"
+            className="app-master-action"
             onClick={() => setOpen(true)}
             disabled={selecteds.length === 0}
           >
@@ -120,11 +121,11 @@ export default function Page() {
           </Button>
         </div>
         <Table
+          className="app-master-table"
           columns={columnSumdan}
           dataSource={pageProps.data}
-          size="small"
+          size="middle"
           rowKey={"id"}
-          bordered
           scroll={{ x: "max-content", y: "60vh" }}
           pagination={{
             current: pageProps.page,
@@ -254,8 +255,9 @@ const TableDapem = ({
   };
   return (
     <Table
-      bordered
+      className="app-master-table"
       pagination={false}
+      size="middle"
       rowKey={"id"}
       columns={columnDapem}
       dataSource={data}

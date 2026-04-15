@@ -92,6 +92,22 @@ export default function Page() {
     data: [],
   });
 
+  const handleResetFilters = () => {
+    setPageProps((prev) => ({
+      ...prev,
+      page: 1,
+      sumdanId: "",
+      jenisPembiayaanId: "",
+      takeover_status: "",
+      mutasi_status: "",
+      flagging_status: "",
+      cash_status: "",
+      document_status: "",
+      guarantee_status: "",
+      backdate: "",
+    }));
+  };
+
   const getData = async () => {
     setLoading(true);
     const params = new URLSearchParams();
@@ -811,160 +827,230 @@ export default function Page() {
       <div className="flex justify-between my-1 gap-2 overflow-auto">
         <div className="flex gap-2">
           <FilterData
+            buttonSize="middle"
+            buttonClassName="app-master-action"
+            title="Filter Nominatif"
+            bodyClassName="space-y-4"
             children={
               <>
-                <div className="my-2">
-                  <p>Periode :</p>
-                  <RangePicker
-                    size="small"
-                    onChange={(date, dateStr) =>
-                      setPageProps({ ...pageProps, backdate: dateStr })
-                    }
-                    style={{ width: "100%" }}
-                  />
-                </div>
-                {user && !user.sumdanId && (
-                  <div className="my-2">
-                    <p>Mitra pembiayaan :</p>
-                    <Select
-                      size="small"
-                      placeholder="Pilih Mitra..."
-                      options={sumdans.map((s) => ({
-                        label: s.code,
-                        value: s.id,
-                      }))}
-                      onChange={(e) =>
-                        setPageProps({ ...pageProps, sumdanId: e })
-                      }
-                      allowClear
-                      style={{ width: "100%" }}
-                    />
+                <div className="app-report-panel space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        Filter utama
+                      </p>
+                    </div>
+                    <Button size="small" onClick={handleResetFilters}>
+                      Reset
+                    </Button>
                   </div>
-                )}
-                <div className="my-2">
-                  <p>Jenis Pembiayaan :</p>
-                  <Select
-                    size="small"
-                    placeholder="Pilih Jenis..."
-                    options={jeniss.map((s) => ({
-                      label: s.name,
-                      value: s.id,
-                    }))}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, jenisPembiayaanId: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
-                </div>
-                <div className="my-2">
-                  <p>Status Takeover :</p>
-                  <Select
-                    size="small"
-                    placeholder="Status Takeover..."
-                    options={[
-                      { label: "DRAFT", value: "DRAFT" },
-                      { label: "PENDING", value: "PENDING" },
-                      { label: "PROCCESS", value: "PROCCESS" },
-                      { label: "APPROVED", value: "APPROVED" },
-                    ]}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, takeover_status: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
-                </div>
-                <div className="my-2">
-                  <p>Status Mutasi :</p>
-                  <Select
-                    size="small"
-                    placeholder="Status Mutasi..."
-                    options={[
-                      { label: "DRAFT", value: "DRAFT" },
-                      { label: "PENDING", value: "PENDING" },
-                      { label: "PROCCESS", value: "PROCCESS" },
-                      { label: "APPROVED", value: "APPROVED" },
-                    ]}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, mutasi_status: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
-                </div>
-                <div className="my-2">
-                  <p>Status Flagging : </p>
-                  <Select
-                    size="small"
-                    placeholder="Status Flagging..."
-                    options={[
-                      { label: "DRAFT", value: "DRAFT" },
-                      { label: "PENDING", value: "PENDING" },
-                      { label: "PROCCESS", value: "PROCCESS" },
-                      { label: "APPROVED", value: "APPROVED" },
-                    ]}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, flagging_status: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
-                </div>
-                <div className="my-2">
-                  <p>Status Terima Bersih : </p>
-                  <Select
-                    size="small"
-                    placeholder="Status TB..."
-                    options={[
-                      { label: "DRAFT", value: "DRAFT" },
-                      { label: "PENDING", value: "PENDING" },
-                      { label: "PROCCESS", value: "PROCCESS" },
-                      { label: "APPROVED", value: "APPROVED" },
-                    ]}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, cash_status: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
-                </div>
-                <div className="my-2">
-                  <p>Status Penyerahan Berkas : </p>
-                  <Select
-                    size="small"
-                    placeholder="Status Berkas..."
-                    options={[
-                      { label: "UNIT", value: "UNIT" },
-                      { label: "PUSAT", value: "PUSAT" },
-                      { label: "DELIVERY", value: "DELIVERY" },
-                      { label: "MITRA", value: "MITRA" },
-                    ]}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, document_status: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
-                </div>
-
-                <div className="my-2">
-                  <p>Status Penyerahan Jaminan : </p>
-                  <Select
-                    size="small"
-                    placeholder="Status Jaminan..."
-                    options={[
-                      { label: "UNIT", value: "UNIT" },
-                      { label: "PUSAT", value: "PUSAT" },
-                      { label: "DELIVERY", value: "DELIVERY" },
-                      { label: "MITRA", value: "MITRA" },
-                    ]}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, guarantee_status: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
+                  <div className="grid gap-3">
+                    <div className="app-filter-field">
+                      <p>Periode</p>
+                      <RangePicker
+                        size="middle"
+                        className="app-master-picker"
+                        onChange={(date, dateStr) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            backdate: dateStr,
+                          })
+                        }
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    {user && !user.sumdanId && (
+                      <div className="app-filter-field">
+                        <p>Mitra pembiayaan</p>
+                        <Select
+                          size="middle"
+                          className="app-master-select"
+                          placeholder="Pilih Mitra..."
+                          options={sumdans.map((s) => ({
+                            label: s.code,
+                            value: s.id,
+                          }))}
+                          value={pageProps.sumdanId || undefined}
+                          onChange={(e) =>
+                            setPageProps({
+                              ...pageProps,
+                              page: 1,
+                              sumdanId: e || "",
+                            })
+                          }
+                          allowClear
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                    )}
+                    <div className="app-filter-field">
+                      <p>Jenis pembiayaan</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Pilih Jenis..."
+                        options={jeniss.map((s) => ({
+                          label: s.name,
+                          value: s.id,
+                        }))}
+                        value={pageProps.jenisPembiayaanId || undefined}
+                        onChange={(e) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            jenisPembiayaanId: e || "",
+                          })
+                        }
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div className="app-filter-field">
+                      <p>Status takeover</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Status Takeover..."
+                        options={[
+                          { label: "DRAFT", value: "DRAFT" },
+                          { label: "PENDING", value: "PENDING" },
+                          { label: "PROCCESS", value: "PROCCESS" },
+                          { label: "APPROVED", value: "APPROVED" },
+                        ]}
+                        value={pageProps.takeover_status || undefined}
+                        onChange={(e) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            takeover_status: e || "",
+                          })
+                        }
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div className="app-filter-field">
+                      <p>Status mutasi</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Status Mutasi..."
+                        options={[
+                          { label: "DRAFT", value: "DRAFT" },
+                          { label: "PENDING", value: "PENDING" },
+                          { label: "PROCCESS", value: "PROCCESS" },
+                          { label: "APPROVED", value: "APPROVED" },
+                        ]}
+                        value={pageProps.mutasi_status || undefined}
+                        onChange={(e) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            mutasi_status: e || "",
+                          })
+                        }
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div className="app-filter-field">
+                      <p>Status flagging</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Status Flagging..."
+                        options={[
+                          { label: "DRAFT", value: "DRAFT" },
+                          { label: "PENDING", value: "PENDING" },
+                          { label: "PROCCESS", value: "PROCCESS" },
+                          { label: "APPROVED", value: "APPROVED" },
+                        ]}
+                        value={pageProps.flagging_status || undefined}
+                        onChange={(e) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            flagging_status: e || "",
+                          })
+                        }
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div className="app-filter-field">
+                      <p>Status terima bersih</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Status TB..."
+                        options={[
+                          { label: "DRAFT", value: "DRAFT" },
+                          { label: "PENDING", value: "PENDING" },
+                          { label: "PROCCESS", value: "PROCCESS" },
+                          { label: "APPROVED", value: "APPROVED" },
+                        ]}
+                        value={pageProps.cash_status || undefined}
+                        onChange={(e) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            cash_status: e || "",
+                          })
+                        }
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div className="app-filter-field">
+                      <p>Status penyerahan berkas</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Status Berkas..."
+                        options={[
+                          { label: "UNIT", value: "UNIT" },
+                          { label: "PUSAT", value: "PUSAT" },
+                          { label: "DELIVERY", value: "DELIVERY" },
+                          { label: "MITRA", value: "MITRA" },
+                        ]}
+                        value={pageProps.document_status || undefined}
+                        onChange={(e) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            document_status: e || "",
+                          })
+                        }
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div className="app-filter-field">
+                      <p>Status penyerahan jaminan</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Status Jaminan..."
+                        options={[
+                          { label: "UNIT", value: "UNIT" },
+                          { label: "PUSAT", value: "PUSAT" },
+                          { label: "DELIVERY", value: "DELIVERY" },
+                          { label: "MITRA", value: "MITRA" },
+                        ]}
+                        value={pageProps.guarantee_status || undefined}
+                        onChange={(e) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            guarantee_status: e || "",
+                          })
+                        }
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </>
             }

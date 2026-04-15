@@ -82,6 +82,16 @@ export default function Page() {
   const { hasAccess } = useAccess("/tagihan");
   const user = useUser();
   const [selecteds, setSelecteds] = useState<IDapem[]>([]);
+
+  const handleResetFilters = () => {
+    setPageProps((prev) => ({
+      ...prev,
+      page: 1,
+      sumdanId: "",
+      paid_status: "",
+      backdate: "",
+    }));
+  };
   const rowSelection: TableProps<IDapem>["rowSelection"] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: IDapem[]) => {
       if (selectedRows.length !== 0) {
@@ -425,55 +435,68 @@ export default function Page() {
           <FilterData
             buttonSize="middle"
             buttonClassName="app-master-action"
+            title="Filter Tagihan"
+            bodyClassName="space-y-4"
             children={
               <>
-                <div className="my-2">
-                  <p>Periode :</p>
-                  <DatePicker
-                    size="middle"
-                    className="app-master-picker"
-                    picker="month"
-                    onChange={(date, dateStr) =>
-                      setPageProps({ ...pageProps, backdate: dateStr })
-                    }
-                    style={{ width: "100%" }}
-                  />
-                </div>
-                {user && !user.sumdanId && (
-                  <div className="my-2">
-                    <p>Mitra Pembiayaan : </p>
-                    <Select
-                      size="middle"
-                      className="app-master-select"
-                      placeholder="Pilih Mitra..."
-                      options={sumdans.map((s) => ({
-                        label: s.code,
-                        value: s.id,
-                      }))}
-                      onChange={(e) =>
-                        setPageProps({ ...pageProps, sumdanId: e })
-                      }
-                      allowClear
-                      style={{ width: "100%" }}
-                    />
+                <div className="app-report-panel space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">Filter utama</p>
+                    </div>
+                    <Button size="small" onClick={handleResetFilters}>
+                      Reset
+                    </Button>
                   </div>
-                )}
-                <div>
-                  <p>Status Tagihan :</p>
-                  <Select
-                    size="middle"
-                    className="app-master-select"
-                    placeholder="Pilih Status..."
-                    options={[
-                      { label: "Tertagih", value: "paid" },
-                      { label: "Tidak Tertagih", value: "unpaid" },
-                    ]}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, paid_status: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
+                  <div className="grid gap-3">
+                    <div className="app-filter-field">
+                      <p>Periode</p>
+                      <DatePicker
+                        size="middle"
+                        className="app-master-picker"
+                        picker="month"
+                        onChange={(date, dateStr) =>
+                          setPageProps({ ...pageProps, page: 1, backdate: dateStr })
+                        }
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    {user && !user.sumdanId && (
+                      <div className="app-filter-field">
+                        <p>Mitra pembiayaan</p>
+                        <Select
+                          size="middle"
+                          className="app-master-select"
+                          placeholder="Pilih Mitra..."
+                          options={sumdans.map((s) => ({ label: s.code, value: s.id }))}
+                          value={pageProps.sumdanId || undefined}
+                          onChange={(e) =>
+                            setPageProps({ ...pageProps, page: 1, sumdanId: e || "" })
+                          }
+                          allowClear
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                    )}
+                    <div className="app-filter-field">
+                      <p>Status tagihan</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Pilih Status..."
+                        options={[
+                          { label: "Tertagih", value: "paid" },
+                          { label: "Tidak Tertagih", value: "unpaid" },
+                        ]}
+                        value={pageProps.paid_status || undefined}
+                        onChange={(e) =>
+                          setPageProps({ ...pageProps, page: 1, paid_status: e || "" })
+                        }
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </>
             }

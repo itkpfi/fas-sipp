@@ -106,6 +106,17 @@ export default function Page() {
     data: [],
   });
 
+  const handleResetFilters = () => {
+    setPageProps((prev) => ({
+      ...prev,
+      page: 1,
+      sumdanId: "",
+      jenisPembiayaanId: "",
+      dropping_status: "",
+      backdate: "",
+    }));
+  };
+
   const getData = async () => {
     setLoading(true);
     const params = new URLSearchParams();
@@ -272,10 +283,10 @@ export default function Page() {
       width: 250,
       onHeaderCell: () => ({
         style: {
-          background: 'linear-gradient(135deg, #16a34a, #22c55e)' as string,
-          color: '#ffffff',
-          borderBottom: '2px solid #15803d',
-          textShadow: '0 1px 2px rgba(0,0,0,0.15)',
+          background: "linear-gradient(135deg, #16a34a, #22c55e)" as string,
+          color: "#ffffff",
+          borderBottom: "2px solid #15803d",
+          textShadow: "0 1px 2px rgba(0,0,0,0.15)",
         } as React.CSSProperties,
       }),
       render: (_, record, i) => {
@@ -310,10 +321,10 @@ export default function Page() {
       width: 250,
       onHeaderCell: () => ({
         style: {
-          background: 'linear-gradient(135deg, #0284c7, #0ea5e9)' as string,
-          color: '#ffffff',
-          borderBottom: '2px solid #0369a1',
-          textShadow: '0 1px 2px rgba(0,0,0,0.15)',
+          background: "linear-gradient(135deg, #0284c7, #0ea5e9)" as string,
+          color: "#ffffff",
+          borderBottom: "2px solid #0369a1",
+          textShadow: "0 1px 2px rgba(0,0,0,0.15)",
         } as React.CSSProperties,
       }),
       render: (_, record, i) => {
@@ -348,10 +359,10 @@ export default function Page() {
       width: 250,
       onHeaderCell: () => ({
         style: {
-          background: 'linear-gradient(135deg, #475569, #64748b)' as string,
-          color: '#ffffff',
-          borderBottom: '2px solid #334155',
-          textShadow: '0 1px 2px rgba(0,0,0,0.15)',
+          background: "linear-gradient(135deg, #475569, #64748b)" as string,
+          color: "#ffffff",
+          borderBottom: "2px solid #334155",
+          textShadow: "0 1px 2px rgba(0,0,0,0.15)",
         } as React.CSSProperties,
       }),
       render: (_, record, i) => {
@@ -386,10 +397,10 @@ export default function Page() {
       width: 180,
       onHeaderCell: () => ({
         style: {
-          background: 'linear-gradient(135deg, #db2777, #ec4899)' as string,
-          color: '#ffffff',
-          borderBottom: '2px solid #be185d',
-          textShadow: '0 1px 2px rgba(0,0,0,0.15)',
+          background: "linear-gradient(135deg, #db2777, #ec4899)" as string,
+          color: "#ffffff",
+          borderBottom: "2px solid #be185d",
+          textShadow: "0 1px 2px rgba(0,0,0,0.15)",
         } as React.CSSProperties,
       }),
       render: (_, record, i) => {
@@ -397,11 +408,15 @@ export default function Page() {
         return (
           <div className="flex gap-1">
             {GetDroppingStatusTag(effectiveDroppingStatus)}
-            {effectiveDroppingStatus !== "PENDING" && record.Dropping && record.Dropping.process_at && (
-              <div className="text-xs">
-                {moment(record.Dropping.process_at).format("DD/MM/YYYY HH:mm")}
-              </div>
-            )}
+            {effectiveDroppingStatus !== "PENDING" &&
+              record.Dropping &&
+              record.Dropping.process_at && (
+                <div className="text-xs">
+                  {moment(record.Dropping.process_at).format(
+                    "DD/MM/YYYY HH:mm",
+                  )}
+                </div>
+              )}
           </div>
         );
       },
@@ -578,14 +593,19 @@ export default function Page() {
     },
   ];
 
-  const totalPlafond = pageProps.data.reduce((acc, item) => acc + item.plafond, 0);
+  const totalPlafond = pageProps.data.reduce(
+    (acc, item) => acc + item.plafond,
+    0,
+  );
   const totalQueue = pageProps.data.filter((item) =>
     ["DRAFT", "PENDING"].includes(getEffectiveDroppingStatus(item)),
   ).length;
   const totalFinal = pageProps.data.filter(
     (item) =>
       item.approv_status === "APPROVED" &&
-      ["PROCCESS", "APPROVED", "PAID_OFF"].includes(getEffectiveDroppingStatus(item)),
+      ["PROCCESS", "APPROVED", "PAID_OFF"].includes(
+        getEffectiveDroppingStatus(item),
+      ),
   ).length;
 
   return (
@@ -599,24 +619,40 @@ export default function Page() {
 
         <div className="relative z-10 grid gap-3 self-end sm:grid-cols-2">
           <div className="rounded-[24px] border border-white/16 bg-white/12 p-4 backdrop-blur">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">Total plafon</div>
-            <div className="mt-2 text-2xl font-bold text-white">Rp. {IDRFormat(totalPlafond)}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">
+              Total plafon
+            </div>
+            <div className="mt-2 text-2xl font-bold text-white">
+              Rp. {IDRFormat(totalPlafond)}
+            </div>
           </div>
           <div className="rounded-[24px] border border-white/16 bg-white/12 p-4 backdrop-blur">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">Hasil filter</div>
-            <div className="mt-2 text-2xl font-bold text-white">{pageProps.total || pageProps.data.length} data</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">
+              Hasil filter
+            </div>
+            <div className="mt-2 text-2xl font-bold text-white">
+              {pageProps.total || pageProps.data.length} data
+            </div>
           </div>
         </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
         <div className="app-stat-tile">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Total Antrian</div>
-          <div className="mt-2 text-3xl font-bold text-slate-900">{totalQueue}</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+            Total Antrian
+          </div>
+          <div className="mt-2 text-3xl font-bold text-slate-900">
+            {totalQueue}
+          </div>
         </div>
         <div className="app-stat-tile">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Total Final</div>
-          <div className="mt-2 text-3xl font-bold text-slate-900">{totalFinal}</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+            Total Final
+          </div>
+          <div className="mt-2 text-3xl font-bold text-slate-900">
+            {totalFinal}
+          </div>
         </div>
       </section>
 
@@ -625,74 +661,125 @@ export default function Page() {
           <div className="flex flex-wrap gap-3">
             {hasAccess("write") && (
               <Link href={"/monitoring/upsert"}>
-                <Button icon={<PlusCircleOutlined />} type="primary" className="!rounded-2xl !px-5">
+                <Button
+                  icon={<PlusCircleOutlined />}
+                  type="primary"
+                  className="!rounded-2xl !px-5"
+                >
                   Add New
                 </Button>
               </Link>
             )}
             <FilterData
               buttonSize="large"
-              buttonClassName="!rounded-2xl !px-5"
+              buttonClassName="app-master-action"
+              title="Filter Monitoring"
+              bodyClassName="space-y-4"
               children={
-                <div className="space-y-3 p-1">
-                  <div>
-                    <p className="mb-2 text-sm font-semibold text-slate-700">Periode</p>
-                    <RangePicker
-                      size="middle"
-                      onChange={(date, dateStr) => setPageProps({ ...pageProps, backdate: dateStr })}
-                      style={{ width: "100%" }}
-                    />
-                  </div>
-                  {user && !user.sumdanId && (
+                <>
+                  <div className="app-report-panel space-y-3">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="mb-2 text-sm font-semibold text-slate-700">Mitra pembiayaan</p>
-                      <Select
-                        size="middle"
-                        placeholder="Pilih Mitra..."
-                        options={sumdans.map((s) => ({
-                          label: s.code,
-                          value: s.id,
-                        }))}
-                        onChange={(e) => setPageProps({ ...pageProps, sumdanId: e })}
-                        allowClear
-                        style={{ width: "100%" }}
-                      />
+                      <p className="text-sm font-semibold text-slate-900">
+                        Filter utama
+                      </p>
                     </div>
-                  )}
-                  <div>
-                    <p className="mb-2 text-sm font-semibold text-slate-700">Jenis pembiayaan</p>
-                    <Select
-                      size="middle"
-                      placeholder="Pilih Jenis..."
-                      options={jeniss.map((s) => ({
-                        label: s.name,
-                        value: s.id,
-                      }))}
-                      onChange={(e) => setPageProps({ ...pageProps, jenisPembiayaanId: e })}
-                      allowClear
-                      style={{ width: "100%" }}
-                    />
+                    <Button size="small" onClick={handleResetFilters}>
+                      Reset
+                    </Button>
                   </div>
-                  <div>
-                    <p className="mb-2 text-sm font-semibold text-slate-700">Status pembiayaan</p>
-                    <Select
-                      size="middle"
-                      placeholder="Pilih Status..."
-                      options={[
-                        { label: "Saved", value: "DRAFT" },
-                        { label: "Antri", value: "PENDING" },
-                        { label: "Proses", value: "PROCCESS" },
-                        { label: "Dropping", value: "APPROVED" },
-                        { label: "Batal", value: "CANCEL" },
-                        { label: "Lunas", value: "PAID_OFF" },
-                        { label: "Final", value: "final" },
-                      ]}
-                      onChange={(e) => setPageProps({ ...pageProps, dropping_status: e })}
-                      allowClear
-                      style={{ width: "100%" }}
-                    />
+                    <div className="grid gap-3">
+                      <div className="app-filter-field">
+                        <p>Periode</p>
+                        <RangePicker
+                          size="middle"
+                          className="app-master-picker"
+                          onChange={(date, dateStr) =>
+                            setPageProps({
+                              ...pageProps,
+                              page: 1,
+                              backdate: dateStr,
+                            })
+                          }
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                      {user && !user.sumdanId && (
+                        <div className="app-filter-field">
+                          <p>Mitra pembiayaan</p>
+                          <Select
+                            size="middle"
+                            className="app-master-select"
+                            placeholder="Pilih Mitra..."
+                            options={sumdans.map((s) => ({
+                              label: s.code,
+                              value: s.id,
+                            }))}
+                            value={pageProps.sumdanId || undefined}
+                            onChange={(e) =>
+                              setPageProps({
+                                ...pageProps,
+                                page: 1,
+                                sumdanId: e || "",
+                              })
+                            }
+                            allowClear
+                            style={{ width: "100%" }}
+                          />
+                        </div>
+                      )}
+                      <div className="app-filter-field">
+                        <p>Jenis pembiayaan</p>
+                        <Select
+                          size="middle"
+                          className="app-master-select"
+                          placeholder="Pilih Jenis..."
+                          options={jeniss.map((s) => ({
+                            label: s.name,
+                            value: s.id,
+                          }))}
+                          value={pageProps.jenisPembiayaanId || undefined}
+                          onChange={(e) =>
+                            setPageProps({
+                              ...pageProps,
+                              page: 1,
+                              jenisPembiayaanId: e || "",
+                            })
+                          }
+                          allowClear
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                      <div className="app-filter-field">
+                        <p>Status pembiayaan</p>
+                        <Select
+                          size="middle"
+                          className="app-master-select"
+                          placeholder="Pilih Status..."
+                          options={[
+                            { label: "Saved", value: "DRAFT" },
+                            { label: "Antri", value: "PENDING" },
+                            { label: "Proses", value: "PROCCESS" },
+                            { label: "Dropping", value: "APPROVED" },
+                            { label: "Batal", value: "CANCEL" },
+                            { label: "Lunas", value: "PAID_OFF" },
+                            { label: "Final", value: "final" },
+                          ]}
+                          value={pageProps.dropping_status || undefined}
+                          onChange={(e) =>
+                            setPageProps({
+                              ...pageProps,
+                              page: 1,
+                              dropping_status: e || "",
+                            })
+                          }
+                          allowClear
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </>
               }
             />
             <Button
@@ -707,7 +794,11 @@ export default function Page() {
                     {
                       sheetname: "antri",
                       data: MappingToExcelDapem(
-                        pageProps.data.filter((d) => ["DRAFT", "PENDING"].includes(getEffectiveDroppingStatus(d))),
+                        pageProps.data.filter((d) =>
+                          ["DRAFT", "PENDING"].includes(
+                            getEffectiveDroppingStatus(d),
+                          ),
+                        ),
                       ),
                     },
                     {
@@ -716,7 +807,9 @@ export default function Page() {
                         pageProps.data.filter(
                           (d) =>
                             d.approv_status === "APPROVED" &&
-                            ["PROCCESS", "APPROVED", "PAID_OFF"].includes(getEffectiveDroppingStatus(d)),
+                            ["PROCCESS", "APPROVED", "PAID_OFF"].includes(
+                              getEffectiveDroppingStatus(d),
+                            ),
                         ),
                       ),
                     },
@@ -724,7 +817,9 @@ export default function Page() {
                       sheetname: "dropping",
                       data: MappingToExcelDapem(
                         pageProps.data.filter(
-                          (d) => d.approv_status === "APPROVED" && getEffectiveDroppingStatus(d) === "APPROVED",
+                          (d) =>
+                            d.approv_status === "APPROVED" &&
+                            getEffectiveDroppingStatus(d) === "APPROVED",
                         ),
                       ),
                     },
@@ -738,13 +833,19 @@ export default function Page() {
             </Button>
             <Button
               icon={<PrinterOutlined />}
-              onClick={() => printMonitoring(pageProps.data, sumdans, pageProps.backdate)}
+              onClick={() =>
+                printMonitoring(pageProps.data, sumdans, pageProps.backdate)
+              }
               className="!rounded-2xl"
             >
               PDF
             </Button>
             {hasAccess("write") && (
-              <Button icon={<PrinterOutlined />} onClick={() => printForm()} className="!rounded-2xl">
+              <Button
+                icon={<PrinterOutlined />}
+                onClick={() => printForm()}
+                className="!rounded-2xl"
+              >
                 Form
               </Button>
             )}
@@ -755,91 +856,102 @@ export default function Page() {
               size="large"
               className="md:w-[260px]"
               placeholder="Cari nama..."
-              onChange={(e) => setPageProps({ ...pageProps, search: e.target.value })}
+              onChange={(e) =>
+                setPageProps({ ...pageProps, search: e.target.value })
+              }
             />
           </div>
         </div>
       </section>
 
       <section className="app-card p-3 md:p-4">
-          <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="app-section-title text-xl">Daftar monitoring</h2>
-            </div>
-            <div className="app-soft-pill">Periode: {pageProps.backdate ? pageProps.backdate.toString() : "bulan berjalan"}</div>
+        <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="app-section-title text-xl">Daftar monitoring</h2>
           </div>
+          <div className="app-soft-pill">
+            Periode:{" "}
+            {pageProps.backdate
+              ? pageProps.backdate.toString()
+              : "bulan berjalan"}
+          </div>
+        </div>
 
-      <Table
-        className="app-table-modern"
-        columns={columns}
-        dataSource={pageProps.data}
-        size="middle"
-        loading={loading}
-        rowKey={"id"}
-        scroll={{ x: "max-content", y: "60vh" }}
-        pagination={{
-          current: pageProps.page,
-          pageSize: pageProps.limit,
-          total: pageProps.total,
-          onChange: (page, pageSize) => {
-            setPageProps((prev) => ({
-              ...prev,
-              page,
-              limit: pageSize,
-            }));
-          },
-          pageSizeOptions: [50, 100, 500, 1000],
-        }}
-        summary={(pageData) => {
-          const angsuran = pageData.reduce(
-            (acc, item) =>
-              acc +
-              GetAngsuran(
-                item.plafond,
-                item.tenor,
-                item.c_margin + item.c_margin_sumdan,
-                item.margin_type,
-                item.rounded,
-              ).angsuran,
-            0,
-          );
-          const angssudan = pageData.reduce(
-            (acc, item) =>
-              acc +
-              GetAngsuran(
-                item.plafond,
-                item.tenor,
-                item.c_margin_sumdan,
-                item.margin_type,
-                item.rounded_sumdan,
-              ).angsuran,
-            0,
-          );
+        <Table
+          className="app-table-modern"
+          columns={columns}
+          dataSource={pageProps.data}
+          size="middle"
+          loading={loading}
+          rowKey={"id"}
+          scroll={{ x: "max-content", y: "60vh" }}
+          pagination={{
+            current: pageProps.page,
+            pageSize: pageProps.limit,
+            total: pageProps.total,
+            onChange: (page, pageSize) => {
+              setPageProps((prev) => ({
+                ...prev,
+                page,
+                limit: pageSize,
+              }));
+            },
+            pageSizeOptions: [50, 100, 500, 1000],
+          }}
+          summary={(pageData) => {
+            const angsuran = pageData.reduce(
+              (acc, item) =>
+                acc +
+                GetAngsuran(
+                  item.plafond,
+                  item.tenor,
+                  item.c_margin + item.c_margin_sumdan,
+                  item.margin_type,
+                  item.rounded,
+                ).angsuran,
+              0,
+            );
+            const angssudan = pageData.reduce(
+              (acc, item) =>
+                acc +
+                GetAngsuran(
+                  item.plafond,
+                  item.tenor,
+                  item.c_margin_sumdan,
+                  item.margin_type,
+                  item.rounded_sumdan,
+                ).angsuran,
+              0,
+            );
 
-          return (
-            <Table.Summary.Row className="bg-slate-100 text-xs">
-              <Table.Summary.Cell index={0} colSpan={2} className="text-center">
-                <b>SUMMARY</b>
-              </Table.Summary.Cell>
-              <Table.Summary.Cell index={3} className="text-center">
-                <b>
-                  {IDRFormat(
-                    pageData.reduce((acc, item) => acc + item.plafond, 0),
-                  )}{" "}
-                </b>
-              </Table.Summary.Cell>
-              <Table.Summary.Cell index={4} className="text-center font-bold">
-                <div>
-                  {IDRFormat(angsuran)} - {IDRFormat(angssudan)}
-                </div>
-                <div className="border-t border-gray-500">
-                  {IDRFormat(angsuran - angssudan)}
-                </div>
-              </Table.Summary.Cell>
-            </Table.Summary.Row>
-          );
-        }}
-      />
+            return (
+              <Table.Summary.Row className="bg-slate-100 text-xs">
+                <Table.Summary.Cell
+                  index={0}
+                  colSpan={2}
+                  className="text-center"
+                >
+                  <b>SUMMARY</b>
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={3} className="text-center">
+                  <b>
+                    {IDRFormat(
+                      pageData.reduce((acc, item) => acc + item.plafond, 0),
+                    )}{" "}
+                  </b>
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={4} className="text-center font-bold">
+                  <div>
+                    {IDRFormat(angsuran)} - {IDRFormat(angssudan)}
+                  </div>
+                  <div className="border-t border-gray-500">
+                    {IDRFormat(angsuran - angssudan)}
+                  </div>
+                </Table.Summary.Cell>
+              </Table.Summary.Row>
+            );
+          }}
+        />
       </section>
 
       {selected.selected && selected.proses && (

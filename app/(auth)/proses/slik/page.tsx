@@ -67,6 +67,17 @@ export default function Page() {
   const { hasAccess } = useAccess("/proses/slik");
   const user = useUser();
 
+  const handleResetFilters = () => {
+    setPageProps((prev) => ({
+      ...prev,
+      page: 1,
+      sumdanId: "",
+      jenisPembiayaanId: "",
+      slik_status: "",
+      backdate: "",
+    }));
+  };
+
   const getData = async () => {
     setLoading(true);
     const params = new URLSearchParams();
@@ -381,72 +392,107 @@ export default function Page() {
           <FilterData
             buttonSize="middle"
             buttonClassName="app-master-action"
+            title="Filter SLIK"
+            bodyClassName="space-y-4"
             children={
               <>
-                <div className="my-2">
-                  <p>Periode :</p>
-                  <RangePicker
-                    size="middle"
-                    className="app-master-picker"
-                    onChange={(date, dateStr) =>
-                      setPageProps({ ...pageProps, backdate: dateStr })
-                    }
-                    style={{ width: "100%" }}
-                  />
-                </div>
-                {user && !user.sumdanId && (
-                  <div className="my-2">
-                    <p>Mitra pembiayaan :</p>
-                    <Select
-                      size="middle"
-                      className="app-master-select"
-                      placeholder="Pilih Mitra..."
-                      options={sumdans.map((s) => ({
-                        label: s.code,
-                        value: s.id,
-                      }))}
-                      onChange={(e) =>
-                        setPageProps({ ...pageProps, sumdanId: e })
-                      }
-                      allowClear
-                      style={{ width: "100%" }}
-                    />
+                <div className="app-report-panel space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        Filter utama
+                      </p>
+                    </div>
+                    <Button size="small" onClick={handleResetFilters}>
+                      Reset
+                    </Button>
                   </div>
-                )}
-                <div className="my-2">
-                  <p>Jenis pembiayaan :</p>
-                  <Select
-                    size="middle"
-                    className="app-master-select"
-                    placeholder="Pilih Jenis..."
-                    options={jeniss.map((s) => ({
-                      label: s.name,
-                      value: s.id,
-                    }))}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, jenisPembiayaanId: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
-                </div>
-                <div className="my-2">
-                  <p>Status pembiayaan</p>
-                  <Select
-                    size="middle"
-                    className="app-master-select"
-                    placeholder="Pilih Status..."
-                    options={[
-                      { label: "PENDING", value: "PENDING" },
-                      { label: "APPROVED", value: "APPROVED" },
-                      { label: "REJECTED", value: "REJECTED" },
-                    ]}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, slik_status: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
+                  <div className="grid gap-3">
+                    <div className="app-filter-field">
+                      <p>Periode</p>
+                      <RangePicker
+                        size="middle"
+                        className="app-master-picker"
+                        onChange={(date, dateStr) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            backdate: dateStr,
+                          })
+                        }
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    {user && !user.sumdanId && (
+                      <div className="app-filter-field">
+                        <p>Mitra pembiayaan</p>
+                        <Select
+                          size="middle"
+                          className="app-master-select"
+                          placeholder="Pilih Mitra..."
+                          options={sumdans.map((s) => ({
+                            label: s.code,
+                            value: s.id,
+                          }))}
+                          value={pageProps.sumdanId || undefined}
+                          onChange={(e) =>
+                            setPageProps({
+                              ...pageProps,
+                              page: 1,
+                              sumdanId: e || "",
+                            })
+                          }
+                          allowClear
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                    )}
+                    <div className="app-filter-field">
+                      <p>Jenis pembiayaan</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Pilih Jenis..."
+                        options={jeniss.map((s) => ({
+                          label: s.name,
+                          value: s.id,
+                        }))}
+                        value={pageProps.jenisPembiayaanId || undefined}
+                        onChange={(e) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            jenisPembiayaanId: e || "",
+                          })
+                        }
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div className="app-filter-field">
+                      <p>Status pembiayaan</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Pilih Status..."
+                        options={[
+                          { label: "PENDING", value: "PENDING" },
+                          { label: "APPROVED", value: "APPROVED" },
+                          { label: "REJECTED", value: "REJECTED" },
+                        ]}
+                        value={pageProps.slik_status || undefined}
+                        onChange={(e) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            slik_status: e || "",
+                          })
+                        }
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </>
             }
@@ -558,17 +604,27 @@ export default function Page() {
 
           return (
             <Table.Summary.Row className="bg-slate-50 text-xs text-slate-700">
-              <Table.Summary.Cell index={0} colSpan={2} className="text-center font-semibold">
+              <Table.Summary.Cell
+                index={0}
+                colSpan={2}
+                className="text-center font-semibold"
+              >
                 <b>SUMMARY</b>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={3} className="text-center font-semibold text-slate-900">
+              <Table.Summary.Cell
+                index={3}
+                className="text-center font-semibold text-slate-900"
+              >
                 <b>
                   {IDRFormat(
                     pageData.reduce((acc, item) => acc + item.plafond, 0),
                   )}{" "}
                 </b>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={4} className="text-center font-bold text-slate-900">
+              <Table.Summary.Cell
+                index={4}
+                className="text-center font-bold text-slate-900"
+              >
                 <div>
                   {IDRFormat(angsuran)} - {IDRFormat(angssudan)}
                 </div>

@@ -537,6 +537,89 @@ h6 {
   background: rgba(37, 99, 235, 0.24);
 }
 
+.app-filter-drawer .ant-drawer-content {
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(255, 255, 255, 0.98));
+}
+
+.app-filter-drawer .ant-drawer-header {
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  background: transparent;
+}
+
+.app-filter-drawer .ant-drawer-body {
+  padding-top: 1rem !important;
+}
+
+.app-filter-drawer-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.app-filter-drawer-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.app-filter-drawer-body > .my-2,
+.app-filter-drawer-body > div.my-2,
+.app-filter-drawer-body .app-filter-field {
+  border-radius: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.9rem 0.95rem;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
+}
+
+.app-filter-drawer-body > .my-2 > p,
+.app-filter-drawer-body > div.my-2 > p,
+.app-filter-field > p {
+  margin-bottom: 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.app-filter-drawer-body .ant-select .ant-select-selector,
+.app-filter-drawer-body .ant-picker,
+.app-filter-drawer-body .ant-input,
+.app-filter-drawer-body .ant-input-affix-wrapper {
+  min-height: 2.6rem !important;
+  border-radius: 16px !important;
+  border-color: rgba(203, 213, 225, 0.95) !important;
+  background: #fff !important;
+}
+
+.app-filter-drawer-body .ant-select .ant-select-selection-item,
+.app-filter-drawer-body .ant-select .ant-select-selection-placeholder {
+  line-height: 2.38rem !important;
+}
+
+.app-filter-drawer-body .ant-input-affix-wrapper,
+.app-filter-drawer-body .ant-picker {
+  padding-inline: 0.85rem;
+}
+
+.app-filter-drawer-body .ant-select:hover .ant-select-selector,
+.app-filter-drawer-body .ant-picker:hover,
+.app-filter-drawer-body .ant-input:hover,
+.app-filter-drawer-body .ant-input-affix-wrapper:hover {
+  border-color: rgba(148, 163, 184, 0.95) !important;
+}
+
+.app-filter-drawer-body .ant-select-focused .ant-select-selector,
+.app-filter-drawer-body .ant-picker-focused,
+.app-filter-drawer-body .ant-input-affix-wrapper-focused,
+.app-filter-drawer-body .ant-input:focus,
+.app-filter-drawer-body .ant-input-affix-wrapper:focus {
+  border-color: rgba(37, 99, 235, 0.5) !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08) !important;
+}
+
 @media (max-width: 767px) {
   .app-page-hero,
   .app-auth-shell {

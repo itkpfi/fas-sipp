@@ -14,6 +14,7 @@ export const GET = async (request: NextRequest) => {
   const roleId = request.nextUrl.searchParams.get("roleId") || "";
   const pkwt_status = request.nextUrl.searchParams.get("pkwt_status") || "";
   const position = request.nextUrl.searchParams.get("position") || "";
+  const sumdanId = request.nextUrl.searchParams.get("sumdanId") || "";
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
   const session = await getSession();
@@ -38,7 +39,11 @@ export const GET = async (request: NextRequest) => {
         ],
       }),
       ...(roleId && { roleId: roleId }),
-      ...(user.sumdanId && { sumdanId: user.sumdanId }),
+      ...(user.sumdanId
+        ? { sumdanId: user.sumdanId }
+        : sumdanId
+          ? { sumdanId: sumdanId }
+          : {}),
       ...(pkwt_status && { pkwt_status: pkwt_status }),
       ...(position && { position: position }),
       status: true,
@@ -72,7 +77,11 @@ export const GET = async (request: NextRequest) => {
         ],
       }),
       ...(roleId && { roleId: roleId }),
-      ...(user.sumdanId && { sumdanId: user.sumdanId }),
+      ...(user.sumdanId
+        ? { sumdanId: user.sumdanId }
+        : sumdanId
+          ? { sumdanId: sumdanId }
+          : {}),
       ...(pkwt_status && { pkwt_status: pkwt_status }),
       ...(position && { position: position }),
       status: true,

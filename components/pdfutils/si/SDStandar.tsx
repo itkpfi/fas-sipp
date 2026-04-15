@@ -1,6 +1,6 @@
 import moment from "moment";
 import { IDocument } from "@/libs/IInterfaces";
-import { Header } from "../utils";
+import { Header, PrintTableStyles } from "../utils";
 import { IDRFormat } from "@/components/utils/PembiayaanUtil";
 
 moment.locale("id");
@@ -53,6 +53,8 @@ const generateSD = (record: IDocument) => {
               border-bottom: 1px solid #ccc;
             }
           }
+
+          ${PrintTableStyles}
       </style>
     </head>
     <body class="bg-white text-gray-800 leading-relaxed p-4 max-w-200">
@@ -87,50 +89,49 @@ const generateSD = (record: IDocument) => {
         <p>Sehubungan dengan telah diterimanya dana dropping pembiayaan pensiun dari ${record.Sumdan.name} ke rekening Koperasi, maka dari itu sebagai bagian dari administrasi dan realisasi pembiayaan, bersama surat ini kami kirimkan dokumen permohonan pembiayaan pensiun atas debitur sebagai berikut :</p>
         
         <div class="mt-10">
-          <table class="w-full border-collapse border border-gray-400 border-dashed text-sm mb-4">
+          <div class="print-table-wrap">
+          <table class="print-table">
             <thead>
-              <tr class="bg-gray-200">
-                <th class="border border-gray-400 border-dashed p-1">NO</th>
-                <th class="border border-gray-400 border-dashed p-1">Debitur</th>
-                <th class="border border-gray-400 border-dashed p-1">Nomor SKEP</th>
-                <th class="border border-gray-400 border-dashed p-1">Nomor PK</th>
-                <th class="border border-gray-400 border-dashed p-1">Plafond</th>
+              <tr>
+                <th class="text-center">NO</th>
+                <th>Debitur</th>
+                <th>Nomor SKEP</th>
+                <th>Nomor PK</th>
+                <th class="text-right">Plafond</th>
               </tr>
             </thead>
             <tbody>
               ${record.Dapem.map(
                 (r, i) => `
                 <tr>
-                  <td class="border border-gray-400 border-dashed p-1 text-center">${i + 1}</td>
-                  <td class="border border-gray-400 border-dashed p-1">
+                  <td class="text-center">${i + 1}</td>
+                  <td>
                     <div>
                       ${r.Debitur.fullname}
                     </div>
-                    <div class="text-xs opacity-70">
+                    <div class="text-muted">
                       ${r.Debitur.nopen}
                     </div>
                   </td>
-                  <td class="border border-gray-400 border-dashed p-1 ">${r.Debitur.no_skep}</td>
-                  <td class="border border-gray-400 border-dashed p-1 ">${r.no_contract}</td>
-                  <td class="border border-gray-400 border-dashed p-1 text-right">${IDRFormat(r.plafond)}</td>
+                  <td>${r.Debitur.no_skep}</td>
+                  <td>${r.no_contract}</td>
+                  <td class="text-right">${IDRFormat(r.plafond)}</td>
                 </tr>
               `,
               ).join("")}
             </tbody>
             <tfoot>
-              <tr class="bg-gray-100 font-semibold italic">
-                <td
-                  colspan="4"
-                  class="border border-gray-400 p-2 text-center border-dashed"
-                >
+              <tr>
+                <td colspan="4" class="text-center">
                   JUMLAH
                 </td>
-                <td class="border border-gray-400 p-2 text-right border-dashed">
+                <td class="text-right">
                   ${IDRFormat(record.Dapem.reduce((acc, curr) => acc + curr.plafond, 0))}
                 </td>
               </tr>
             </tfoot>
           </table>
+          </div>
         </div>
 
         <p>Demikian surat ini kami sampaikan sebagai bukti konfirmasi penerimaan dana dan kelengkapan administrasi realisasi pembiayaan. Atas kerja sama yang baik, kami ucapkan terima kasih.</p>

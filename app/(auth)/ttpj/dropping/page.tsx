@@ -18,9 +18,10 @@ import {
   FolderOpenOutlined,
   FormOutlined,
   PrinterOutlined,
+  SearchOutlined,
   SecurityScanOutlined,
 } from "@ant-design/icons";
-import { EDocStatus, Sumdan } from "@prisma/client";
+import { Sumdan } from "@prisma/client";
 import {
   App,
   Button,
@@ -207,6 +208,7 @@ export default function Page() {
                 icon={<PrinterOutlined />}
                 size="small"
                 type="primary"
+                className="app-table-action-btn"
                 onClick={() => printSJStandar(record)}
               ></Button>
             </Tooltip>
@@ -214,6 +216,8 @@ export default function Page() {
               <Button
                 icon={<FileFilled />}
                 size="small"
+                type="primary"
+                className="app-table-action-btn"
                 onClick={() =>
                   setViews({
                     open: true,
@@ -245,6 +249,7 @@ export default function Page() {
                 icon={<EditOutlined />}
                 type="primary"
                 size="small"
+                className="app-table-action-btn"
                 onClick={() =>
                   setAction({ ...action, upsert: true, selected: record })
                 }
@@ -255,6 +260,7 @@ export default function Page() {
                 icon={<FormOutlined />}
                 type="primary"
                 size="small"
+                className="app-table-action-btn"
                 onClick={() =>
                   setAction({ ...action, proses: true, selected: record })
                 }
@@ -264,7 +270,9 @@ export default function Page() {
               <Button
                 icon={<DeleteOutlined />}
                 danger
+                type="primary"
                 size="small"
+                className="app-table-action-btn"
                 onClick={() =>
                   setAction({ ...action, delete: true, selected: record })
                 }
@@ -279,23 +287,25 @@ export default function Page() {
   return (
     <Card
       title={
-        <div className="flex gap-2 font-bold text-xl">
+        <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
           <SecurityScanOutlined /> Penyerahan Jaminan
         </div>
       }
-      styles={{ body: { padding: 5 } }}
+      className="app-master-card"
     >
-      <div className="flex justify-between items-center my-1 gap-2 flex-wrap">
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between">
         <div className="flex gap-2 flex-wrap">
           <RangePicker
-            size="small"
+            size="middle"
+            className="app-master-picker"
             onChange={(date, dateStr) =>
               setPageProps({ ...pageProps, backdate: dateStr })
             }
             style={{ width: 170 }}
           />
           <Select
-            size="small"
+            size="middle"
+            className="app-master-select"
             placeholder="Pilih Status..."
             options={[
               { label: "PUSAT", value: "PUSAT" },
@@ -308,7 +318,8 @@ export default function Page() {
           />
           {hasAccess("update") && (
             <Select
-              size="small"
+              size="middle"
+              className="app-master-select"
               onChange={(e: string) =>
                 setPageProps({ ...pageProps, sumdanId: e })
               }
@@ -319,21 +330,25 @@ export default function Page() {
             />
           )}
         </div>
-        <Input.Search
-          size="small"
-          style={{ width: 170 }}
-          placeholder="Cari nama..."
-          onChange={(e) =>
-            setPageProps({ ...pageProps, search: e.target.value })
-          }
-        />
+        <div className="app-master-toolbar-search md:max-w-xs">
+          <Input
+            size="middle"
+            className="app-master-search"
+            prefix={<SearchOutlined className="text-slate-400" />}
+            placeholder="Cari nama..."
+            allowClear
+            onChange={(e) =>
+              setPageProps({ ...pageProps, search: e.target.value })
+            }
+          />
+        </div>
       </div>
       <Table
+        className="app-master-table"
         columns={columnDropping}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         rowKey={"id"}
-        bordered
         scroll={{ x: "max-content", y: "60vh" }}
         pagination={{
           current: pageProps.page,
@@ -509,17 +524,23 @@ const ProsesDropping = ({
 
   const handleSubmit = async () => {
     setLoading(true);
-    if (record.status !== data.status) {
-      data.Dapem = data.Dapem.map((d) => ({
+    const nextStatus = "MITRA";
+    const nextData: IDocument = {
+      ...data,
+      status: nextStatus,
+      Dapem:
+        record.status === nextStatus
+          ? data.Dapem
+          : data.Dapem.map((d) => ({
         ...d,
-        guarantee_status: data.status,
-      }));
-    }
-    if (record.status !== data.status) data.process_at = new Date();
+        guarantee_status: nextStatus,
+      })),
+      process_at: record.status !== nextStatus ? new Date() : data.process_at,
+    };
 
     await fetch("/api/ttpj", {
       method: "PUT",
-      body: JSON.stringify(data),
+      body: JSON.stringify(nextData),
     })
       .then((res) => res.json())
       .then(async (res) => {
@@ -555,22 +576,6 @@ const ProsesDropping = ({
             required: true,
             value: data.Dapem.flatMap((d) => d.Debitur.fullname).join(" | "),
             disabled: true,
-          }}
-        />
-        <FormInput
-          data={{
-            label: "Status Proses",
-            type: "select",
-            required: true,
-            disabled: record.status === "MITRA",
-            options: [
-              { label: "PUSAT", value: "PUSAT" },
-              { label: "DELIVERY", value: "DELIVERY" },
-              { label: "MITRA", value: "MITRA" },
-            ],
-            value: data.status,
-            onChange: (e: string) =>
-              setData({ ...data, status: e as EDocStatus }),
           }}
         />
         <FormInput
@@ -731,6 +736,8 @@ const TableDapem = ({ data }: { data: IDapem[] }) => {
             <Button
               icon={<FileFilled />}
               size="small"
+              type="primary"
+              className="app-table-action-btn"
               disabled={!record.file_contract}
               onClick={() =>
                 setViews({
@@ -750,8 +757,9 @@ const TableDapem = ({ data }: { data: IDapem[] }) => {
   return (
     <div style={{ marginLeft: 10 }}>
       <Table
-        bordered
+        className="app-master-table"
         pagination={false}
+        size="middle"
         rowKey={"id"}
         columns={columnDapem}
         dataSource={data}

@@ -52,6 +52,7 @@ export default function Page() {
     roleId: "",
     pkwt_status: "",
     position: "",
+    sumdanId: "",
   });
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -71,6 +72,7 @@ export default function Page() {
     if (pageProps.pkwt_status)
       params.append("pkwt_status", pageProps.pkwt_status);
     if (pageProps.position) params.append("position", pageProps.position);
+    if (pageProps.sumdanId) params.append("sumdanId", pageProps.sumdanId);
 
     const res = await fetch(`/api/user?${params.toString()}`);
     const json = await res.json();
@@ -94,7 +96,19 @@ export default function Page() {
     pageProps.roleId,
     pageProps.pkwt_status,
     pageProps.position,
+    pageProps.sumdanId,
   ]);
+
+  const handleResetFilters = () => {
+    setPageProps((prev) => ({
+      ...prev,
+      page: 1,
+      roleId: "",
+      pkwt_status: "",
+      position: "",
+      sumdanId: "",
+    }));
+  };
 
   useEffect(() => {
     (async () => {
@@ -291,78 +305,158 @@ export default function Page() {
           <FilterData
             buttonSize="middle"
             buttonClassName="app-master-action"
+            bodyClassName="space-y-4"
             children={
               <>
-                <div className="my-2">
-                  <p>Role User :</p>
-                  <Select
-                    style={{ width: "100%" }}
-                    options={roles.map((r) => ({ label: r.name, value: r.id }))}
-                    onChange={(e) => setPageProps({ ...pageProps, roleId: e })}
-                    placeholder="role..."
-                    size="small"
-                    allowClear
-                  />
-                </div>
-                <div className="my-2">
-                  <p>Status PKWT :</p>
-                  <Select
-                    style={{ width: "100%" }}
-                    options={[
-                      { label: "TIERING", value: "TIERING" },
-                      { label: "BARU", value: "BARU" },
-                      { label: "LANJUT", value: "LANJUT" },
-                      { label: "TETAP", value: "TETAP" },
-                    ]}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, pkwt_status: e })
-                    }
-                    placeholder="status pkwt..."
-                    size="small"
-                    allowClear
-                  />
-                </div>
-                <div className="my-2">
-                  <p>Posisi :</p>
+                <div className="app-report-panel space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        Filter utama
+                      </p>
+                    </div>
+                    <Button size="small" onClick={handleResetFilters}>
+                      Reset
+                    </Button>
+                  </div>
 
-                  <Select
-                    style={{ width: "100%" }}
-                    options={[
-                      { label: "MOC", value: "MOC" },
-                      { label: "SPV", value: "SPV" },
-                      { label: "KORWIL", value: "KORWIL" },
-                      { label: "ADMIN", value: "ADMIN" },
-                      {
-                        label: "KEPALA OPERASIONAL",
-                        value: "KEPALA OPERASIONAL",
-                      },
-                      {
-                        label: "STAFF OPERASIONAL",
-                        value: "STAFF OPERASIONAL",
-                      },
-                      { label: "KEPALA BISNIS", value: "KEPALA BISNIS" },
-                      { label: "STAFF BISNIS", value: "STAFF BISNIS" },
-                      { label: "MANAJER KEUANGAN", value: "MANAJER KEUANGAN" },
-                      { label: "STAFF KEUANGAN", value: "STAFF KEUANGAN" },
-                      {
-                        label: "KEPALA VERIFIKASI",
-                        value: "KEPALA VERIFIKASI",
-                      },
-                      { label: "STAFF VERIFIKASI", value: "STAFF VERIFIKASI" },
-                      { label: "KEPALA DOKUMEN", value: "KEPALA DOKUMEN" },
-                      { label: "STAFF DOKUMEN", value: "STAFF DOKUMEN" },
-                      { label: "KEPALA IT", value: "KEPALA IT" },
-                      { label: "STAFF IT", value: "STAFF IT" },
-                      { label: "FUNDING", value: "FUNDING" },
-                      { label: "GENERAL AFFAIRS", value: "GENERAL AFFAIRS" },
-                    ]}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, position: e })
-                    }
-                    placeholder="status jabatan..."
-                    size="small"
-                    allowClear
-                  />
+                  <div className="grid gap-3">
+                    <div className="rounded-2xl border border-slate-200/90 bg-white/90 p-3 shadow-sm">
+                      <p className="mb-2 text-sm font-semibold text-slate-700">
+                        Role User
+                      </p>
+                      <Select
+                        className="app-master-select"
+                        style={{ width: "100%" }}
+                        options={roles.map((r) => ({
+                          label: r.name,
+                          value: r.id,
+                        }))}
+                        value={pageProps.roleId || undefined}
+                        onChange={(e) =>
+                          setPageProps((prev) => ({
+                            ...prev,
+                            page: 1,
+                            roleId: e || "",
+                          }))
+                        }
+                        placeholder="Pilih role user"
+                        size="middle"
+                        allowClear
+                      />
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200/90 bg-white/90 p-3 shadow-sm">
+                      <p className="mb-2 text-sm font-semibold text-slate-700">
+                        Status PKWT
+                      </p>
+                      <Select
+                        className="app-master-select"
+                        style={{ width: "100%" }}
+                        options={[
+                          { label: "TIERING", value: "TIERING" },
+                          { label: "BARU", value: "BARU" },
+                          { label: "LANJUT", value: "LANJUT" },
+                          { label: "TETAP", value: "TETAP" },
+                        ]}
+                        value={pageProps.pkwt_status || undefined}
+                        onChange={(e) =>
+                          setPageProps((prev) => ({
+                            ...prev,
+                            page: 1,
+                            pkwt_status: e || "",
+                          }))
+                        }
+                        placeholder="Pilih status PKWT"
+                        size="middle"
+                        allowClear
+                      />
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200/90 bg-white/90 p-3 shadow-sm">
+                      <p className="mb-2 text-sm font-semibold text-slate-700">
+                        Posisi
+                      </p>
+                      <Select
+                        className="app-master-select"
+                        style={{ width: "100%" }}
+                        options={[
+                          { label: "MOC", value: "MOC" },
+                          { label: "SPV", value: "SPV" },
+                          { label: "KORWIL", value: "KORWIL" },
+                          { label: "ADMIN", value: "ADMIN" },
+                          {
+                            label: "KEPALA OPERASIONAL",
+                            value: "KEPALA OPERASIONAL",
+                          },
+                          {
+                            label: "STAFF OPERASIONAL",
+                            value: "STAFF OPERASIONAL",
+                          },
+                          { label: "KEPALA BISNIS", value: "KEPALA BISNIS" },
+                          { label: "STAFF BISNIS", value: "STAFF BISNIS" },
+                          {
+                            label: "MANAJER KEUANGAN",
+                            value: "MANAJER KEUANGAN",
+                          },
+                          { label: "STAFF KEUANGAN", value: "STAFF KEUANGAN" },
+                          {
+                            label: "KEPALA VERIFIKASI",
+                            value: "KEPALA VERIFIKASI",
+                          },
+                          {
+                            label: "STAFF VERIFIKASI",
+                            value: "STAFF VERIFIKASI",
+                          },
+                          { label: "KEPALA DOKUMEN", value: "KEPALA DOKUMEN" },
+                          { label: "STAFF DOKUMEN", value: "STAFF DOKUMEN" },
+                          { label: "KEPALA IT", value: "KEPALA IT" },
+                          { label: "STAFF IT", value: "STAFF IT" },
+                          { label: "FUNDING", value: "FUNDING" },
+                          {
+                            label: "GENERAL AFFAIRS",
+                            value: "GENERAL AFFAIRS",
+                          },
+                        ]}
+                        value={pageProps.position || undefined}
+                        onChange={(e) =>
+                          setPageProps((prev) => ({
+                            ...prev,
+                            page: 1,
+                            position: e || "",
+                          }))
+                        }
+                        placeholder="Pilih posisi user"
+                        size="middle"
+                        allowClear
+                      />
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200/90 bg-white/90 p-3 shadow-sm">
+                      <p className="mb-2 text-sm font-semibold text-slate-700">
+                        Mitra
+                      </p>
+                      <Select
+                        className="app-master-select"
+                        style={{ width: "100%" }}
+                        options={sumdans.map((s) => ({
+                          label: `${s.code} - ${s.name}`,
+                          value: s.id,
+                        }))}
+                        value={pageProps.sumdanId || undefined}
+                        onChange={(e) =>
+                          setPageProps((prev) => ({
+                            ...prev,
+                            page: 1,
+                            sumdanId: e || "",
+                          }))
+                        }
+                        placeholder="Pilih mitra pembiayaan"
+                        size="middle"
+                        allowClear
+                      />
+                    </div>
+                  </div>
                 </div>
               </>
             }

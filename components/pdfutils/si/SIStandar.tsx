@@ -1,6 +1,6 @@
 import moment from "moment";
 import { IDropping } from "@/libs/IInterfaces";
-import { Header } from "../utils";
+import { Header, PrintTableStyles } from "../utils";
 import { IDRFormat } from "@/components/utils/PembiayaanUtil";
 
 moment.locale("id");
@@ -53,6 +53,8 @@ const generateSI = (record: IDropping) => {
               border-bottom: 1px solid #ccc;
             }
           }
+
+          ${PrintTableStyles}
       </style>
     </head>
     <body class="bg-white text-gray-800 leading-relaxed p-4 max-w-200">
@@ -141,61 +143,60 @@ const generateSI = (record: IDropping) => {
 
 
       <div class="mt-20">
-        <table class="w-full border-collapse border border-gray-400 border-dashed text-sm mb-4">
+        <div class="print-table-wrap">
+        <table class="print-table">
           <thead>
-            <tr class="bg-gray-200">
-              <th class="border border-gray-400 border-dashed p-1">NO</th>
-              <th class="border border-gray-400 border-dashed p-1">Debitur</th>
-              <th class="border border-gray-400 border-dashed p-1">Plafond</th>
-              <th class="border border-gray-400 border-dashed p-1">Adm Bank</th>
-              <th class="border border-gray-400 border-dashed p-1">Buka Tabungan</th>
-              <th class="border border-gray-400 border-dashed p-1">Dropping</th>
+            <tr>
+              <th class="text-center">NO</th>
+              <th>Debitur</th>
+              <th class="text-right">Plafond</th>
+              <th class="text-right">Adm Bank</th>
+              <th class="text-right">Buka Tabungan</th>
+              <th class="text-right">Dropping</th>
             </tr>
           </thead>
           <tbody>
             ${record.Dapem.map(
               (r, i) => `
               <tr>
-                <td class="border border-gray-400 border-dashed p-1 text-center">${i + 1}</td>
-                <td class="border border-gray-400 border-dashed p-1">
+                <td class="text-center">${i + 1}</td>
+                <td>
                   <div>
                     ${r.Debitur.fullname}
                   </div>
-                  <div class="text-xs opacity-70">
+                  <div class="text-muted">
                     ${r.Debitur.nopen}
                   </div>
                 </td>
-                <td class="border border-gray-400 border-dashed p-1 text-right">${IDRFormat(r.plafond)}</td>
-                <td class="border border-gray-400 border-dashed p-1 text-right">${IDRFormat(r.plafond * (r.c_adm_sumdan / 100))}</td>
-                <td class="border border-gray-400 border-dashed p-1 text-right">${IDRFormat(r.c_account)}</td>
-                <td class="border border-gray-400 border-dashed p-1 text-right">${IDRFormat(r.plafond - (r.plafond * (r.c_adm_sumdan / 100) + r.c_account))}</td>
+                <td class="text-right">${IDRFormat(r.plafond)}</td>
+                <td class="text-right">${IDRFormat(r.plafond * (r.c_adm_sumdan / 100))}</td>
+                <td class="text-right">${IDRFormat(r.c_account)}</td>
+                <td class="text-right">${IDRFormat(r.plafond - (r.plafond * (r.c_adm_sumdan / 100) + r.c_account))}</td>
               </tr>
             `,
             ).join("")}
           </tbody>
           <tfoot>
-            <tr class="bg-gray-100 font-semibold italic">
-              <td
-                colspan="2"
-                class="border border-gray-400 p-2 text-center border-dashed"
-              >
+            <tr>
+              <td colspan="2" class="text-center">
                 JUMLAH
               </td>
-              <td class="border border-gray-400 p-2 text-right border-dashed">
+              <td class="text-right">
                 ${IDRFormat(record.Dapem.reduce((acc, curr) => acc + curr.plafond, 0))}
               </td>
-              <td class="border border-gray-400 p-2 text-right border-dashed">
+              <td class="text-right">
                 ${IDRFormat(record.Dapem.reduce((acc, curr) => acc + curr.plafond * (curr.c_adm_sumdan / 100), 0))}
               </td>
-              <td class="border border-gray-400 p-2 text-right border-dashed">
+              <td class="text-right">
                 ${IDRFormat(record.Dapem.reduce((acc, curr) => acc + curr.c_account, 0))}
               </td>
-              <td class="border border-gray-400 p-2 text-right border-dashed">
+              <td class="text-right">
                 ${IDRFormat(record.Dapem.reduce((acc, curr) => acc + (curr.plafond - (curr.plafond * (curr.c_adm_sumdan / 100) + curr.c_account)), 0))}
               </td>
             </tr>
           </tfoot>
         </table>
+        </div>
       </div>
 
       <div class="mt-20 flex justify-end">

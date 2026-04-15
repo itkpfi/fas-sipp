@@ -316,12 +316,19 @@ export const FilterData = ({
   children,
   buttonClassName = "",
   buttonSize = "small",
+  title = "FILTER DATA",
+  triggerLabel = "Filter",
+  bodyClassName = "",
 }: {
   children: React.ReactNode;
   buttonClassName?: string;
   buttonSize?: "small" | "middle" | "large";
+  title?: string;
+  triggerLabel?: string;
+  bodyClassName?: string;
 }) => {
   const [open, setOpen] = useState(false);
+  const drawerWidth = typeof window !== "undefined" && window.innerWidth > 768 ? 460 : 360;
 
   return (
     <div>
@@ -332,16 +339,27 @@ export const FilterData = ({
         type="primary"
         className={buttonClassName}
       >
-        Filter
+        {triggerLabel}
       </Button>
       <Drawer
         open={open}
         onClose={() => setOpen(!open)}
-        title="FILTER DATA"
+        title={<div className="app-filter-drawer-title">{title}</div>}
         placement="right"
-        size={window && window.innerWidth > 600 ? "30%" : "60%"}
+        width={drawerWidth}
+        className="app-filter-drawer"
+        styles={{
+          body: {
+            padding: "1rem",
+          },
+          header: {
+            padding: "1rem 1.1rem 0.9rem",
+          },
+        }}
       >
-        {children}
+        <div className={["app-filter-drawer-body", bodyClassName].filter(Boolean).join(" ")}>
+          {children}
+        </div>
       </Drawer>
     </div>
   );

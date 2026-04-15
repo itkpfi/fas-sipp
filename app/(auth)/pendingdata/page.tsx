@@ -38,6 +38,7 @@ import {
   PrinterOutlined,
   ReadOutlined,
   RobotOutlined,
+  SearchOutlined,
   SwapOutlined,
 } from "@ant-design/icons";
 import { JenisPembiayaan, Sumdan } from "@prisma/client";
@@ -91,6 +92,15 @@ export default function Page() {
     open: false,
     data: [],
   });
+
+  const handleResetFilters = () => {
+    setPageProps((prev) => ({
+      ...prev,
+      page: 1,
+      sumdanId: "",
+      jenisPembiayaanId: "",
+    }));
+  };
 
   const getData = async () => {
     setLoading(true);
@@ -529,60 +539,91 @@ export default function Page() {
   return (
     <Card
       title={
-        <div className="flex gap-2 font-bold text-xl">
+        <div className="flex items-center gap-2 text-xl font-bold text-slate-900">
           <ReadOutlined /> Monitoring Pembiayaan
         </div>
       }
-      styles={{ body: { padding: 5 } }}
+      className="app-master-card"
     >
-      <div className="flex justify-between my-1 gap-2 overflow-auto">
-        <div className="flex gap-2">
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-wrap gap-2">
           <FilterData
+            buttonSize="middle"
+            buttonClassName="app-master-action"
+            title="Filter Pending Data"
+            bodyClassName="space-y-4"
             children={
               <>
-                {user && !user.sumdanId && (
-                  <div className="my-2">
-                    <p>Mitra pembiayaan :</p>
-                    <Select
-                      size="small"
-                      placeholder="Pilih Mitra..."
-                      options={sumdans.map((s) => ({
-                        label: s.code,
-                        value: s.id,
-                      }))}
-                      onChange={(e) =>
-                        setPageProps({ ...pageProps, sumdanId: e })
-                      }
-                      allowClear
-                      style={{ width: "100%" }}
-                    />
+                <div className="app-report-panel space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        Filter utama
+                      </p>
+                    </div>
+                    <Button size="small" onClick={handleResetFilters}>
+                      Reset
+                    </Button>
                   </div>
-                )}
-                <div className="my-2">
-                  <p>Jenis pembiayaan :</p>
-                  <Select
-                    size="small"
-                    placeholder="Pilih Jenis..."
-                    options={jeniss.map((s) => ({
-                      label: s.name,
-                      value: s.id,
-                    }))}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, jenisPembiayaanId: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
+                  <div className="grid gap-3">
+                    {user && !user.sumdanId && (
+                      <div className="app-filter-field">
+                        <p>Mitra pembiayaan</p>
+                        <Select
+                          className="app-master-select"
+                          size="middle"
+                          placeholder="Pilih Mitra..."
+                          options={sumdans.map((s) => ({
+                            label: s.code,
+                            value: s.id,
+                          }))}
+                          onChange={(e) =>
+                            setPageProps({
+                              ...pageProps,
+                              page: 1,
+                              sumdanId: e || "",
+                            })
+                          }
+                          value={pageProps.sumdanId || undefined}
+                          allowClear
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                    )}
+                    <div className="app-filter-field">
+                      <p>Jenis pembiayaan</p>
+                      <Select
+                        className="app-master-select"
+                        size="middle"
+                        placeholder="Pilih Jenis..."
+                        options={jeniss.map((s) => ({
+                          label: s.name,
+                          value: s.id,
+                        }))}
+                        onChange={(e) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            jenisPembiayaanId: e || "",
+                          })
+                        }
+                        value={pageProps.jenisPembiayaanId || undefined}
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </>
             }
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <Button
             icon={<PrinterOutlined />}
-            size="small"
+            size="middle"
             type="primary"
+            className="app-master-action"
             onClick={() =>
               ExportToExcel(
                 [
@@ -599,8 +640,9 @@ export default function Page() {
           </Button>
           <Button
             icon={<PrinterOutlined />}
-            size="small"
+            size="middle"
             type="primary"
+            className="app-master-action"
             onClick={() =>
               printMonitoring(pageProps.data, sumdans, pageProps.backdate)
             }
@@ -611,30 +653,36 @@ export default function Page() {
             <Button
               icon={<PrinterOutlined />}
               type="primary"
-              size="small"
+              size="middle"
+              className="app-master-action"
               onClick={() => printForm()}
             >
               Form
             </Button>
           )}
-          <Input.Search
-            size="small"
-            style={{ width: 170 }}
-            placeholder="Cari nama..."
-            onChange={(e) =>
-              setPageProps({ ...pageProps, search: e.target.value })
-            }
-          />
+          <div className="app-master-toolbar-search md:max-w-xs">
+            <Input
+              size="middle"
+              className="app-master-search"
+              style={{ width: "100%" }}
+              placeholder="Cari nama..."
+              prefix={<SearchOutlined className="text-slate-400" />}
+              allowClear
+              onChange={(e) =>
+                setPageProps({ ...pageProps, page: 1, search: e.target.value })
+              }
+            />
+          </div>
         </div>
       </div>
 
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         loading={loading}
         rowKey={"id"}
-        bordered
         scroll={{ x: "max-content", y: "60vh" }}
         pagination={{
           current: pageProps.page,

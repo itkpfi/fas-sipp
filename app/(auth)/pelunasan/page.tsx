@@ -77,6 +77,17 @@ export default function Page() {
     open: false,
     data: [],
   });
+
+  const handleResetFilters = () => {
+    setPageProps((prev) => ({
+      ...prev,
+      page: 1,
+      sumdanId: "",
+      status_paid: "",
+      type: "",
+      backdate: "",
+    }));
+  };
   const [loading, setLoading] = useState(false);
 
   const [sumdans, setSumdans] = useState<Sumdan[]>([]);
@@ -452,68 +463,107 @@ export default function Page() {
             </Button>
           )}
           <FilterData
+            buttonSize="middle"
+            buttonClassName="app-master-action"
+            title="Filter Pelunasan"
+            bodyClassName="space-y-4"
             children={
               <>
-                <div className="my-2">
-                  <p>Periode : </p>
-                  <RangePicker
-                    size="small"
-                    onChange={(date, dateStr) =>
-                      setPageProps({ ...pageProps, backdate: dateStr })
-                    }
-                    style={{ width: "100%" }}
-                  />
-                </div>
-                {user && !user.sumdanId && (
-                  <div className="my-2">
-                    <p>Mitra Pembiayaan :</p>
-                    <Select
-                      size="small"
-                      placeholder="Pilih Mitra..."
-                      options={sumdans.map((s) => ({
-                        label: s.code,
-                        value: s.id,
-                      }))}
-                      onChange={(e) =>
-                        setPageProps({ ...pageProps, sumdanId: e })
-                      }
-                      allowClear
-                      style={{ width: "100%" }}
-                    />
+                <div className="app-report-panel space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        Filter utama
+                      </p>
+                    </div>
+                    <Button size="small" onClick={handleResetFilters}>
+                      Reset
+                    </Button>
                   </div>
-                )}
-                <div className="my-2">
-                  <p>Tipe Pelunasan : </p>
-                  <Select
-                    size="small"
-                    placeholder="Pilih tipe..."
-                    options={[
-                      { label: "JATUH TEMPO", value: "JATUHTEMPO" },
-                      { label: "MENINGGAL", value: "MENINGGAL" },
-                      { label: "TOPUP", value: "TOPUP" },
-                      { label: "LEPAS", value: "LEPAS" },
-                    ]}
-                    onChange={(e) => setPageProps({ ...pageProps, type: e })}
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
-                </div>
-                <div className="my-2">
-                  <p>Status Pelunasan : </p>
-                  <Select
-                    size="small"
-                    placeholder="Pilih Status..."
-                    options={[
-                      { label: "Antri (PENDING)", value: "PENDING" },
-                      { label: "Disetujui (APPROVED)", value: "APPROVED" },
-                      { label: "Ditolak (REJECTED)", value: "REJECTED" },
-                    ]}
-                    onChange={(e) =>
-                      setPageProps({ ...pageProps, status_paid: e })
-                    }
-                    allowClear
-                    style={{ width: "100%" }}
-                  />
+                  <div className="grid gap-3">
+                    <div className="app-filter-field">
+                      <p>Periode</p>
+                      <RangePicker
+                        size="middle"
+                        className="app-master-picker"
+                        onChange={(date, dateStr) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            backdate: dateStr,
+                          })
+                        }
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    {user && !user.sumdanId && (
+                      <div className="app-filter-field">
+                        <p>Mitra pembiayaan</p>
+                        <Select
+                          size="middle"
+                          className="app-master-select"
+                          placeholder="Pilih Mitra..."
+                          options={sumdans.map((s) => ({
+                            label: s.code,
+                            value: s.id,
+                          }))}
+                          value={pageProps.sumdanId || undefined}
+                          onChange={(e) =>
+                            setPageProps({
+                              ...pageProps,
+                              page: 1,
+                              sumdanId: e || "",
+                            })
+                          }
+                          allowClear
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                    )}
+                    <div className="app-filter-field">
+                      <p>Tipe pelunasan</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Pilih tipe..."
+                        options={[
+                          { label: "JATUH TEMPO", value: "JATUHTEMPO" },
+                          { label: "MENINGGAL", value: "MENINGGAL" },
+                          { label: "TOPUP", value: "TOPUP" },
+                          { label: "LEPAS", value: "LEPAS" },
+                        ]}
+                        value={pageProps.type || undefined}
+                        onChange={(e) =>
+                          setPageProps({ ...pageProps, page: 1, type: e || "" })
+                        }
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div className="app-filter-field">
+                      <p>Status pelunasan</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Pilih Status..."
+                        options={[
+                          { label: "Antri (PENDING)", value: "PENDING" },
+                          { label: "Disetujui (APPROVED)", value: "APPROVED" },
+                          { label: "Ditolak (REJECTED)", value: "REJECTED" },
+                        ]}
+                        value={pageProps.status_paid || undefined}
+                        onChange={(e) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            status_paid: e || "",
+                          })
+                        }
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </>
             }

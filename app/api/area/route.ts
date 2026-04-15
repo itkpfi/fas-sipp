@@ -46,7 +46,7 @@ export const GET = async (request: NextRequest) => {
         ...(ao && {
           include: {
             User: {
-              where: { status: true },
+              where: { status: true, sumdanId: null },
               include: {
                 AODapem: {
                   where: {

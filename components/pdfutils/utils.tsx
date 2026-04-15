@@ -75,6 +75,63 @@ export const Header = (
     ${rightlogo ? `<img src="${rightlogo}" alt="Logo" class="h-16 mr-4" />` : '<div class="h-16 mr-4"></div>'}
   </div>`;
 
+export const PrintTableStyles = `
+  .print-table-wrap {
+    margin-top: 2rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  .print-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12px;
+    margin: 0;
+  }
+
+  .print-table thead th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 10px 8px;
+    border-bottom: 1px solid #cbd5e1;
+  }
+
+  .print-table tbody td {
+    padding: 9px 8px;
+    vertical-align: top;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .print-table tfoot td {
+    padding: 10px 8px;
+    font-weight: 700;
+    background: #f8fafc;
+    border-top: 1px solid #cbd5e1;
+  }
+
+  .print-table th + th,
+  .print-table td + td {
+    border-left: 1px solid #e2e8f0;
+  }
+
+  .print-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .print-table .text-muted {
+    margin-top: 2px;
+    font-size: 10px;
+    color: #64748b;
+  }
+`;
+
 export const ListStyle = (
   list: string[],
   type: "number" | "bullet" | "lower" | "number-alpha" | "lower-alpha",
