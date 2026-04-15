@@ -1,7 +1,9 @@
 import { GetAngsuran, IDRFormat } from "@/components/utils/PembiayaanUtil";
 import { IDapem } from "@/libs/IInterfaces";
 import moment from "moment";
-import { Header, ListStyle, NumberToWordsID } from "../../utils";
+import { Header, ListNonStyle, ListStyle, NumberToWordsID } from "../../utils";
+
+moment.locale("id");
 
 export const PKDassa = (record: IDapem) => {
   const angsuran = GetAngsuran(
@@ -11,18 +13,10 @@ export const PKDassa = (record: IDapem) => {
     record.margin_type,
     record.rounded,
   ).angsuran;
-  const angsuranSumdan = GetAngsuran(
-    record.plafond,
-    record.tenor,
-    record.c_margin_sumdan,
-    record.margin_type,
-    record.rounded_sumdan,
-  ).angsuran;
 
   const biayaAdm =
     record.plafond * ((record.c_adm + record.c_adm_sumdan) / 100);
   const biayaAsuransi = record.plafond * (record.c_insurance / 100);
-
   const biayaTotal =
     biayaAdm +
     biayaAsuransi +
@@ -32,85 +26,46 @@ export const PKDassa = (record: IDapem) => {
     record.c_infomation +
     record.c_provisi +
     record.c_mutasi;
+  const jumlahTransfer = record.plafond - biayaTotal;
+
+  const tanggalAkad = record.date_contract
+    ? moment(record.date_contract).format("DD MMMM YYYY")
+    : "";
+  const tanggalAkadAngka = record.date_contract
+    ? moment(record.date_contract).format("DD-MM-YYYY")
+    : "";
+  const tanggalBerakhir = record.date_contract
+    ? moment(record.date_contract)
+        .add(record.tenor, "month")
+        .format("DD-MM-YYYY")
+    : "";
+  const hariAkad = record.date_contract
+    ? moment(record.date_contract).format("dddd")
+    : "";
+  const tenorTerbilang = NumberToWordsID(record.tenor);
+  const tempatLahir = record.Debitur.birthplace || "";
+  const tanggalLahir = record.Debitur.birthdate
+    ? moment(record.Debitur.birthdate).format("DD-MM-YYYY")
+    : "";
 
   return `
-  ${Header("PERJANJIAN KREDIT", record.no_contract, undefined, process.env.NEXT_PUBLIC_APP_LOGO, record.ProdukPembiayaan.Sumdan.logo)}
-  
-  <p>Yang bertanda tangan dibawah ini :</p>
-  <div class="my-2 ml-2 flex gap-2">
-    <div class="w-5">I.</div>
-    <div>
-      <div class="flex gap-2">
-        <div class="w-44">Nama</div>
-        <div class="w-4">:</div>
-        <div class="flex-1">${process.env.NEXT_PUBLIC_APP_AKAD_NAME}</div>
-      </div>
-      <div class="flex gap-2">
-        <div class="w-44">Jabatan</div>
-        <div class="w-4">:</div>
-        <div class="flex-1">${process.env.NEXT_PUBLIC_APP_AKAD_POSITION}</div>
-      </div>
-      <p>Berkedudukan di ${process.env.NEXT_PUBLIC_APP_COMPANY_ADDRESS_SK} Dalam hal ini bertindak untuk dan atas nama Pemberi Kuasa ${record.ProdukPembiayaan.Sumdan.name}, berdasarkan Surat Kuasa No ${record.ProdukPembiayaan.Sumdan.sk_no} tertanggal ${moment(record.ProdukPembiayaan.Sumdan.sk_date).format("DD MMMM YYYY")}, oleh karenanya berhak dan sah mewakilkan ${record.ProdukPembiayaan.Sumdan.name} yang berkedudukan di ${record.ProdukPembiayaan.Sumdan.address}, yang selanjutnya disebut <span class="font-bold">“BANK”</span></p>
-    </div>
-  </div>
-  <div class="my-2 ml-2 flex gap-2">
-    <div class="w-5">II.</div>
-    <div>
-      <div class="flex gap-2">
-        <div class="w-44">Nama</div>
-        <div class="w-4">:</div>
-        <div class="flex-1">${record.Debitur.fullname}</div>
-      </div>
-      <div class="flex gap-2">
-        <div class="w-44">NIK</div>
-        <div class="w-4">:</div>
-        <div class="flex-1">${record.Debitur.nik}</div>
-      </div>
-      <div class="flex gap-2">
-        <div class="w-44">Tempat Tanggal Lahir</div>
-        <div class="w-4">:</div>
-        <div class="flex-1">${record.Debitur.birthplace}, ${moment(record.Debitur.birthdate).format("DD-MM-YYYY")}</div>
-      </div>
-      <div class="flex gap-2">
-        <div class="w-44">Pekerjaan</div>
-        <div class="w-4">:</div>
-        <div class="flex-1">${record.job}</div>
-      </div>
-      <div class="flex gap-2">
-        <div class="w-44">Alamat</div>
-        <div class="w-4">:</div>
-        <div class="flex-1">${record.Debitur.address} KELURAHAN ${record.Debitur.ward} KECAMATAN ${record.Debitur.district} ${record.Debitur.city} ${record.Debitur.province} ${record.Debitur.pos_code}</div>
-      </div>
-      <p>Dan untuk tindakan hukum ini telah mendapat persetujuan suami/isteri/ahli warisnya :</p>
-      <div class="flex gap-2">
-        <div class="w-44">Nama</div>
-        <div class="w-4">:</div>
-        <div class="flex-1">${record.aw_name}</div>
-      </div>
-      <div class="flex gap-2">
-        <div class="w-44">NIK</div>
-        <div class="w-4">:</div>
-        <div class="flex-1">${record.aw_nik}</div>
-      </div>
-      <div class="flex gap-2">
-        <div class="w-44">Tempat Tanggal Lahir</div>
-        <div class="w-4">:</div>
-        <div class="flex-1">${record.aw_birthplace}, ${moment(record.aw_birthdate).format("DD-MM-YYYY")}</div>
-      </div>
-      <div class="flex gap-2">
-        <div class="w-44">Pekerjaan</div>
-        <div class="w-4">:</div>
-        <div class="flex-1">${record.aw_job}</div>
-      </div>
-      <div class="flex gap-2">
-        <div class="w-44">Alamat</div>
-        <div class="w-4">:</div>
-        <div class="flex-1">${record.aw_address}</div>
-      </div>
-      <div>
-        selanjutnya disebut <span class="font-bold">"DEBITUR”</span>. Selanjutnya BANK dan DEBITUR terlebih dahulu menerangkan dengan ini telah sepakat untuk mengadakan Perjanjian Kredit (selanjutnya disebut <span class="font-bold">“Perjanjian”</span>) dengan syarat-syarat dan ketentuan-ketentuan sebagai berikut:
-      </div>
-    </div>
+  ${Header("PERJANJIAN KREDIT", `No. `, undefined, undefined, undefined)}
+
+  <div class="space-y-4">
+    <p>Perjanjian Kredit ini (selanjutnya disebut "Perjanjian") dibuat dan ditandatangani pada hari ${hariAkad}, tanggal ${tanggalAkad} (${tanggalAkadAngka}), oleh dan antara :</p>
+
+    <ul style="list-style-type: disc; padding-left: 30px;">
+      <li style="padding-left: 8px; margin-bottom: 8px;">PT Bank Perekonomian Rakyat Dassa suatu perseroan terbatas yang didirikan menurut Undang-undang Negara Republik Indonesia berkedudukan di Kabupaten Tangerang dan beralamat di North Point Commercial, Nava Park Number 8 BSD City, Jalan BSD Boulevard Utara, dalam hal ini diwakili oleh <strong>Pahala David</strong> dan <strong>Ferry</strong> masing-masing bertindak selaku Direktur Utama dan Direktur Bisnis, sehingga sah bertindak untuk dan atas nama PT Bank Perekonomian Rakyat Dassa.</li>
+    </ul>
+    <p>Selanjutnya disebut Kreditur.</p>
+
+    <ul style="list-style-type: disc; padding-left: 30px;">
+      <li style="padding-left: 8px; margin-bottom: 8px;"><strong>${record.Debitur.fullname}</strong> lahir di ${tempatLahir.toUpperCase()} pada tanggal ${tanggalLahir} ${record.job || ""} bertempat tinggal di ${record.Debitur.address} Kecamatan ${record.Debitur.district} Kelurahan ${record.Debitur.ward} ${record.Debitur.city?.toUpperCase()} Provinsi ${record.Debitur.province?.toUpperCase()}, Pemegang Kartu Tanda Penduduk, berwenang melakukan tindakan hukum dalam Perjanjian ini serta dalam hal ini tidak memerlukan persetujuan dari pihak manapun untuk menandatangani Perjanjian.</li>
+    </ul>
+    <p>Selanjutnya disebut Debitur.</p>
+
+    <p>Debitur dan Kreditur selanjutnya secara bersama-sama disebut <strong>“PARA PIHAK”</strong>.</p>
+    <p>Para Pihak telah sepakat untuk membuat Perjanjian dengan syarat dan ketentuan sebagai berikut :</p>
   </div>
 
   <div class="my-7">
@@ -119,425 +74,230 @@ export const PKDassa = (record: IDapem) => {
       <p>FASILITAS KREDIT</p>
     </div>
 
-    <p>BANK dengan ini menyetujui memberikan suatu kredit kepada DEBITUR dan DEBITUR menyetujui untuk menerima fasilitas kredit yang disebut Kredit dengan Plafond Kredit sebesar Rp ${IDRFormat(record.plafond)};- (${NumberToWordsID(record.plafond)} Rupiah)</p>
-
+    <p>Atas permintaan Debitur, Kreditur setuju memberikan fasilitas kredit kepada Debitur dengan ketentuan :</p>
+    <div class="ml-6 mt-2">
+      ${ListNonStyle([
+        {
+          key: "Plafon Pembiayaan",
+          value: IDRFormat(record.plafond),
+          currency: true,
+        },
+        {
+          key: "Bunga",
+          value: `${(record.c_margin + record.c_margin_sumdan).toFixed(2)} % effektif pertahun`,
+        },
+        {
+          key: "Jenis Fasilitas",
+          value: record.ProdukPembiayaan.name || "Kredit Pensiun",
+        },
+        {
+          key: "Adm",
+          value: `${(record.c_adm + record.c_adm_sumdan).toFixed(1)}% (${NumberToWordsID(Math.round((record.c_adm + record.c_adm_sumdan) * 10))} persepuluh persen)`,
+        },
+      ])}
+    </div>
+    <p class="mt-3">Dalam hal terjadi perubahan suku bunga yang menambah biaya Debitur sebagaimana dimaksud pada pasal 1.1 diatas, maka perubahan tersebut akan disampaikan secara tertulis oleh Kreditur kepada Debitur.</p>
+    <p class="mt-3">Dilakukan blokir sebanyak ${record.c_blokir} (${NumberToWordsID(record.c_blokir)}) kali angsuran yang disimpan pada rekening tabungan Debitur di Kreditur, untuk proses take over.</p>
   </div>
 
   <div class="my-7">
     <div class="my-3 text-center font-bold">
       <p>PASAL 2</p>
-      <p>TUJUAN PENGGUNAAN DAN JANGKA WAKTU</p>
+      <p>Jangka Waktu dan Jadwal</p>
+      <p>Angsuran</p>
     </div>
 
-    <div class="flex gap-2">
-      <p class="w-4">1.</p>
-      <p class="w-44">Jangka Waktu</p>
-      <p class="w-4">:</p>
-      <p class="flex-1">${record.tenor} bulan, terhitung sejak tanggal ${moment(record.date_contract).format("DD-MM-YYYY")} sampai dengan ${moment(record.date_contract).add(record.tenor, "month").format("DD-MM-YYYY")}</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">2.</p>
-      <p class="w-44">Angsuran Perbulan</p>
-      <p class="w-4">:</p>
-      <p class="flex-1">Rp. ${IDRFormat(angsuranSumdan)}</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">3.</p>
-      <p class="w-44">Fee Collection</p>
-      <p class="w-4">:</p>
-      <p class="flex-1">Rp. ${IDRFormat(angsuran - angsuranSumdan)}</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">4.</p>
-      <p class="w-44">Total Angsuran</p>
-      <p class="w-4">:</p>
-      <p class="flex-1">Rp. ${IDRFormat(angsuran)}</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">5.</p>
-      <p class="w-44">Tanggal Pembayaran</p>
-      <p class="w-4">:</p>
-      <p class="flex-1">25</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">5.</p>
-      <p class="w-44">Suku Bunga Anuitas</p>
-      <p class="w-4">:</p>
-      <p class="flex-1">${(record.c_margin + record.c_margin_sumdan).toFixed(2)}% /tahun</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">7.</p>
-      <p class="w-44">Tujuan Penggunaan</p>
-      <p class="w-4">:</p>
-      <p class="flex-1">${record.used_for}</p>
-    </div>
-
+    ${ListStyle(
+      [
+        `Jangka waktu fasilitas ${record.tenor} (${tenorTerbilang}) bulan terhitung sejak tanggal ${tanggalAkadAngka} dan akan berakhir pada tanggal ${tanggalBerakhir}.`,
+        `Angsuran bulanan sesuai dengan jadwal angsuran yang telah disepakati Para Pihak serta menjadi lampiran dari Perjanjian.`,
+        `Pembayaran angsuran dilakukan dalam ${record.tenor} kali angsuran yang harus dibayar setiap bulan sesuai dengan jadwal angsuran dan harus sudah lunas selambat-lambatnya tanggal 25.`,
+        `Debitur sewaktu-waktu dapat melunasi fasilitas kredit tersebut di atas dalam masa jangka waktu fasilitas yang telah ditetapkan dengan membayar denda pinalti disesuaikan dengan ketentuan yang berlaku.`,
+        `Apabila pembayaran kewajiban yang harus dilakukan Debitur kepada Kreditur jatuh tempo bukan pada hari kerja, maka pembayaran harus dilakukan pada 1 (satu) hari kerja sebelumnya.`,
+      ],
+      "bullet",
+    )}
   </div>
 
   <div class="my-7">
     <div class="my-3 text-center font-bold">
       <p>PASAL 3</p>
-      <p>BIAYA - BIAYA</p>
+      <p>Penarikan Fasilitas Kredit dan Pengakuan Hutang</p>
     </div>
 
-    <div class="flex gap-2">
-      <p class="w-4">1.</p>
-      <p class="flex-1">Untuk pembebanan angsuran, bunga, provisi, biaya-biaya, denda dan segala biaya lainnya yang terhutang berkenaan dengan pemberian kredit ini, DEBITUR memberi kuasa kepada BANK untuk mendebet rekening DEBITUR yang ada pada BANK.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">2.</p>
-      <div class="flex-1">
-        <p>DEBITUR berjanji dan dengan ini mengikat diri untuk menanggung seluruh biaya yang diperlukan berkenaan dengan pelaksanaan Akad ini sepanjang hal ini diberitahukan BANK kepada DEBITUR sebelum ditandatangani Akad ini dan DEBITUR menyatakan persetujuannya. Adapun biaya-biaya tersebut adalah sebagai berikut :</p>
-        <div class="flex gap-2 ml-10">
-          <p class="w-4">a.</p>
-          <p class="w-44">Administrasi</p>
-          <p class="w-4">:</p>
-          <div class="w-28 flex justify-between gap-2">
-            <p class="w-4">Rp. </p>
-            <p class="flex-1 text-right">${IDRFormat(biayaAdm)}</p>
-          </div>
-        </div>
-        <div class="flex gap-2 ml-10">
-          <p class="w-4">b.</p>
-          <p class="w-44">Asuransi</p>
-          <p class="w-4">:</p>
-          <div class="w-28 flex justify-between gap-2">
-            <p class="w-4">Rp. </p>
-            <p class="flex-1 text-right">${IDRFormat(biayaAsuransi)}</p>
-          </div>
-        </div>
-        <div class="flex gap-2 ml-10">
-          <p class="w-4">c.</p>
-          <p class="w-44">Pembukaan Tabungan</p>
-          <p class="w-4">:</p>
-          <div class="w-28 flex justify-between gap-2">
-            <p class="w-4">Rp. </p>
-            <p class="flex-1 text-right">${IDRFormat(record.c_account)}</p>
-          </div>
-        </div>
-        <div class="flex gap-2 ml-10">
-          <p class="w-4">d.</p>
-          <p class="w-44">Materai</p>
-          <p class="w-4">:</p>
-          <div class="w-28 flex justify-between gap-2">
-            <p class="w-4">Rp. </p>
-            <p class="flex-1 text-right">${IDRFormat(record.c_stamp)}</p>
-          </div>
-        </div>
-        <div class="flex gap-2 ml-10">
-          <p class="w-4">d.</p>
-          <p class="w-44">Data Informasi</p>
-          <p class="w-4">:</p>
-          <div class="w-28 flex justify-between gap-2">
-            <p class="w-4">Rp. </p>
-            <p class="flex-1 text-right">${IDRFormat(record.c_infomation)}</p>
-          </div>
-        </div>
-        <div class="flex gap-2 ml-10">
-          <p class="w-4">e.</p>
-          <p class="w-44">Biaya Lain-lain</p>
-          <p class="w-4">:</p>
-          <div class="w-28 flex justify-between gap-2">
-            <p class="w-4">Rp. </p>
-            <p class="flex-1 text-right">${IDRFormat(record.c_gov + record.c_mutasi + record.c_provisi)}</p>
-          </div>
-        </div>
-        <div class="flex gap-2 ml-10 font-bold">
-          <p class="w-4"></p>
-          <p class="w-44">Total Biaya</p>
-          <p class="w-4">:</p>
-          <div class="w-28 border-t border-dashed flex justify-between gap-2">
-            <p class="w-4">Rp. </p>
-            <p class="flex-1 text-right">${IDRFormat(biayaTotal)}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <p>Segala biaya yang timbul sehubungan dengan Akad ini merupakan tanggung jawab dan wajib dibayar oleh DEBITUR.</p>
+    ${ListStyle(
+      [
+        `Penarikan fasilitas Kredit yang diberikan Kreditur kepada Debitur dicairkan sekaligus yaitu sebesar Rp. ${IDRFormat(record.plafond)} (${NumberToWordsID(record.plafond)} Rupiah), jumlah tersebut sebelum dikurangi dengan biaya-biaya yang terkait dengan pemberian fasilitas kredit ini.`,
+        `Debitur memberikan kuasa kepada Kreditur untuk melakukan penarikan fasilitas kredit pada rekening sebagai berikut :
+          <div class="ml-6 mt-2">${ListNonStyle([
+            { key: "Nama Bank", value: "" },
+            { key: "Nomor Rekening", value: "" },
+            { key: "Atas Nama", value: "" },
+          ])}</div>`,
+        `Atas penarikan fasilitas kredit setelah dikurangi biaya-biaya, harap di transfer pada rekening sebagai berikut :
+          <div class="ml-6 mt-2">${ListNonStyle([
+            { key: "Nama Bank", value: "BANK RAKYAT INDONESIA" },
+            { key: "Nomor Rekening", value: "013201001538308" },
+            { key: "Atas Nama", value: "KOPERASI PEMASARAN FADILLAH" },
+            {
+              key: "Jumlah yang ditransfer",
+              value: IDRFormat(jumlahTransfer),
+              currency: true,
+            },
+          ])}</div>`,
+      ],
+      "bullet",
+    )}
+  </div>
 
+  <div style="page-break-before: always;"></div>
+
+  <div class="space-y-5">
+    ${ListStyle(
+      [
+        `Penandatanganan Perjanjian ini merupakan tanda penerimaan yang sah atas seluruh jumlah hutang pokok sebagaimana dimaksud pasal 1.1 Perjanjian dan Debitur dengan ini mengaku benar-benar secara sah telah berhutang kepada Kreditur atas jumlah hutang pokok tersebut demikian berikut bunga, denda dan biaya-biaya lain serta lain-lain jumlah yang wajib dibayar oleh Debitur kepada Kreditur berdasarkan Perjanjian ini.`,
+        `Debitur menyetujui bahwa jumlah yang terutang oleh Debitur kepada Kreditur berdasarkan Perjanjian ini pada waktu-waktu tertentu akan terbukti dari : ${ListStyle(
+          [
+            "Rekening Debitur yang dipegang dan dipelihara oleh Kreditur dan/atau",
+            "Surat-surat dan Dokumen-dokumen lain yang dikeluarkan oleh Kreditur.",
+          ],
+          "bullet",
+        )}`,
+      ],
+      "bullet",
+    )}
   </div>
 
   <div class="my-7">
     <div class="my-3 text-center font-bold">
       <p>PASAL 4</p>
-      <p>JAMINAN</p>
+      <p>Peristiwa Cidera Janji</p>
     </div>
-
-    <div class="flex gap-2">
-      <p class="w-4">1.</p>
-      <div class="flex-1">
-        <p>Bahwa guna menjamin lebih lanjut pembayaran kembali kewajiban DEBITUR kepada BANK seperti yang disebut pada perjanjian ini, perubahan dan/atau novasi atau Perjanjian Kredit yang dibuat dikemudian hari atau sebab apapun juga, maka DEBITUR menyerahkan jaminan kepada BANK berupa :</p>
-        <p class="ml-10 font-bold">Surat Keputusan Pensiun nomor : ${record.Debitur.no_skep} yang selanjutnya disebut sebagai JAMINAN</p>
-      </div>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">2.</p>
-      <div class="flex-1">
-        <p>DEBITUR wajib menyerahkan dokumen jaminan yang akan disimpan oleh BANK berupa :</p>
-          <div class="ml-10">
-            ${ListStyle(
-              [
-                "Asli surat keputusan pensiun;",
-                "Salinan Kartu Registrasi Induk Pensiun (KARIP) jika ada;",
-              ],
-              "lower-alpha",
-            )}
-          </div>
-        </div>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">3.</p>
-      <p class="flex-1">DEBITUR memberi kuasa kepada BANK untuk melakukan tindakan dan perbuatan hukum yang dianggap wajar dan perlu oleh BANK yang berkaitan dengan pemberian jaminan tersebut diatas.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">4.</p>
-      <p class="flex-1">DEBITUR dengan ini menyatakan dan menjamin bahwa JAMINAN tersebut diatas adalah benar dan milik DEBITUR, dan hanya DEBITUR sajalah yang berhak untuk menyerahkannya sebagai Jaminan, tidak sedang diberikan sebagai Jaminan untuk sesuatu hutang pada pihak lain dengan jalan bagaimanapun juga, tidak dalam keadaan sengketa serta bebas dari sitaan, serta belum dijual atau dijanjikan untuk dijual atau dialihkan kepada pihak lain dengan cara apapun juga.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">5.</p>
-      <p class="flex-1">DEBITUR menjamin bahwa mengenai hal – hal tersebut pada pasal 4 ayat 1 diatas, baik sekarang maupun dikemudian hari, BANK tidak akan mendapat tuntutan atau gugatan dari pihak manapun juga yang menyatakan mempunyai hak terlebih dahulu atau turut mempunyai hak atas JAMINAN tersebut diatas.</p>
-    </div>
-
+    <p>Dengan tetap memperhatikan ketentuan Pasal 2 ayat 1 Perjanjian ini, Kreditur berhak untuk sewaktu-waktu dengan mengesampingkan ketentuan Pasal 1266 Kitab Undang-Undang Hukum Perdata, Khususnya ketentuan yang mengatur keharusan untuk mengajukan permohonan pembatalan Perjanjian melalui pengadilan sehingga tidak diperlukan suatu pemberitahuan (somasi) atau surat lain yang serupa dengan itu serta surat peringatan dari juru sita, menagih hutang Debitur berdasarkan Perjanjian ini atau sisanya, berikut bunga-bunga, denda-denda dan biaya yang lain yang timbul berdasarkan Perjanjian dan wajib dibayar oleh Debitur dengan seketika dan sekaligus lunas, apabila terjadi salah satu atau lebih kejadian-kejadian tersebut dibawah ini :</p>
+    ${ListStyle(
+      [
+        "Debitur tidak atau lalai membayar lunas pada waktunya kepada Kreditur baik angsuran pokok, bunga-bunga, denda-denda dan biaya lain yang sudah jatuh tempo berdasarkan Perjanjian.",
+        "Debitur meninggal dunia atau berada dibawah pengampuan.",
+        "Debitur dinyatakan pailit, diberikan penundaan membayar hutang-hutang (surseance van betaling) atau bilamana Debitur dan/atau orang/pihak lain mengajukan permohonan kepada instansi yang berwenang agar Debitur dinyatakan dalam keadaan pailit.",
+        "Kekayaan Debitur baik sebagian maupun seluruhnya disita atau dinyatakan dalam sitaan oleh instansi yang berwenang.",
+        "Debitur lalai atau tidak memenuhi syarat-syarat dan ketentuan/kewajiban dalam Perjanjian ini dan setiap perubahannya.",
+        "Debitur lalai atau tidak memenuhi kewajibannya kepada pihak lain berdasarkan Perjanjian dengan pihak lain sehingga Debitur dinyatakan cidera janji.",
+        "Debitur tersangkut dalam suatu perkara hukum yang dapat menghalangi Debitur memenuhi kewajiban berdasarkan Perjanjian ini sebagaimana mestinya.",
+        "Apabila ternyata suatu pernyataan-pernyataan atau dokumen-dokumen atau keterangan-keterangan yang diberikan Debitur kepada Kreditur ternyata tidak benar atau tidak sesuai dengan kenyataan.",
+      ],
+      "bullet",
+    )}
   </div>
-  
+
   <div class="my-7">
     <div class="my-3 text-center font-bold">
       <p>PASAL 5</p>
-      <p>KEWAJIBAN DEBITUR</p>
+      <p>Jaminan</p>
     </div>
-
-    <p>Untuk lebih menjamin pelaksanaan Perjanjian ini oleh DEBITUR, maka DEBITUR berkewajiban untuk :</p>
-    <div class="flex gap-2">
-      <p class="w-4">1.</p>
-      <p class="flex-1">Mempergunakan kredit tersebut semata-mata hanya sebagaimana yang tertera dalam pasal 1 Perjanjian ini.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">2.</p>
-      <p class="flex-1">DEBITUR menyetujui dan wajib mengikat diri untuk menyerahkan semua surat dan dokumen apapun, yang asli serta sah dan membuktikan pemilikan atas segala benda yang dijadikan jaminan termasuk dalam Pasal 4 ayat 1 tersebut di atas kepada BANK guna dipergunakan untuk pelaksanaan pengikatan benda tersebut sebagai jaminan kredit, dan selanjutnya dikuasai oleh BANK sampai dilunasi seluruh jumlah hutangnya.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">3.</p>
-      <p class="flex-1">DEBITUR Wajib mengikuti Asuransi Jiwa dan atau Asuransi Kredit.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">4.</p>
-      <p class="flex-1">DEBITUR wajib memperpanjang masa pertanggungan termasuk bilamana masa berakhir, sampai lunasnya fasilitas kredit dibayar kembali oleh DEBITUR kepada BANK, apabila DEBITUR dengan alasan apapun tidak memperpanjang masa pertanggungan tersebut, maka segala resiko yang terjadi pada agunan tersebut menjadi resiko DEBITUR sendiri.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">5.</p>
-      <p class="flex-1">DEBITUR wajib membayar premi-premi dan lain-lain biaya asuransi tepat pada waktunya dan menyerahkan asli dari setiap polis atau setiap perpanjangannya dan setiap tanda-tanda pembayarannya kepada BANK. BANK dengan ini diberi kuasa oleh DEBITUR untuk menutup dan memperpanjang asuransi yang dimaksud di atas, satu dan lain atas biaya DEBITUR, yakni bilamana DEBITUR lalai menutup atau memperpanjang berlakunya asuransi tersebut.</p>
-    </div>
+    <p>Untuk menjamin pembayaran hutang pokok, bunga dan pembayaran lainnya sebagaimana tercantum dalam Perjanjian ini, Debitur setuju memberikan jaminan kepada Kreditur berupa :</p>
+    ${ListStyle(
+      [
+        `Asli Surat Kuasa Debet rekening atas nama ${record.Debitur.fullname}`,
+        `Asli Surat Keputusan Pensiun Asli Nomor : ${record.Debitur.no_skep || ""} Tanggal ${record.Debitur.date_skep ? moment(record.Debitur.date_skep).format("DD-MM-YYYY") : ""} atas nama ${record.Debitur.fullname.split(" ")[0]}`,
+      ],
+      "bullet",
+    )}
   </div>
 
   <div class="my-7">
     <div class="my-3 text-center font-bold">
       <p>PASAL 6</p>
-      <p>PEMBAYARAN KEMBALI KREDIT</p>
+      <p>Pernyataan dan Jaminan</p>
     </div>
-
-    <div class="flex gap-2">
-      <p class="w-4">1.</p>
-      <p class="flex-1">Pembayaran kembali kredit/pinjaman uang tersebut dilakukan secara angsuran bulanan, yang terdiri dari angsuran pokok kredit dan bunga dalam jumlah tetap. Jumlah-jumlah uang yang terutang oleh DEBITUR kepada BANK berdasarkan/sesuai dengan catatan-catatan dan/atau pembukuan BANK merupakan bukti yang mengikat bagi DEBITUR mengenai utang DEBITUR dibayar lunas, untuk itu DEBITUR tidak akan menyangkal dan/atau mengajukan keberatan-keberatan akan jumlah-jumlah uang yang terhutang oleh DEBITUR.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">2.</p>
-      <p class="flex-1">Demikian pula apabila jangka waktu fasilitas kredit telah berakhir atau diakhiri sebelum jangka waktu berakhir dan ternyata masih terdapat sisa utang sebagai akibat perubahan tingkat suku bunga, maka DEBITUR wajib menandatangani perpanjangan Perjanjian Kredit.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">3.</p>
-      <p class="flex-1">Setiap perubahan besarnya pembayaran bunga pinjaman selalu akan diberitahukan secara tertulis oleh BANK kepada DEBITUR. Dan surat pemberitahuan perubahan suku bunga tersebut, dan/atau jadwal angsuran pinjaman pokok dan bunga pinjaman, merupakan satu kesatuan dan tidak terpisahkan dari perjanjian ini, serta DEBITUR tidak akan menyangkal dalam bentuk apapun juga atas perubahan suku bunga tersebutnga, maka DEBITUR wajib menandatangani perpanjangan Perjanjian Kredit.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">4.</p>
-      <p class="flex-1">DEBITUR membayar angsuran pokok dan bunga pinjaman melalui pemotongan gaji yang dilakukan oleh KANTOR POS berdasarkan surat kuasa pemotongan gaji sampai seluruh kewajibanya dinyatakan lunas oleh BANK.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">5.</p>
-      <p class="flex-1">Semua pembayaran pada BANK harus dilakukan di tempat kedudukan BANK melalui rekening DEBITUR atau rekening lain yang ditentukan oleh BANK.</p>
-    </div>
+    <p>Debitur dengan ini menyatakan dan menjamin Kreditur hal-hal sebagai berikut :</p>
+    ${ListStyle(
+      [
+        "Debitur mempunyai wewenang untuk menandatangani Perjanjian ini.",
+        "Debitur dengan ini menyatakan dan menjamin bahwa Perjanjian ini tidak bertentangan dengan perjanjian apapun yang dibuat oleh Debitur dengan pihak ketiga.",
+        "Debitur dengan ini menyatakan dan menjamin bahwa pada waktu ini tidak ada sesuatu hal atau peristiwa yang merupakan suatu kejadian kelalaian/pelanggaran sebagaimana dimaksudkan dalam pasal 4 Perjanjian ini.",
+        "Debitur dengan ini menyatakan dan menjamin akan mengganti segala kerugian yang diderita Kreditur sehubungan dengan adanya tuntutan atau gugatan dari pihak ketiga yang diakibatkan oleh karena adanya keterangan/pernyataan yang tidak benar yang disampaikan Debitur kepada Kreditur.",
+        "Debitur dengan ini menyatakan dan menjamin bahwa apa yang dijaminkan dalam Perjanjian ini adalah benar merupakan hak Debitur sendiri dan tidak sedang terikat sebagai jaminan dan tidak akan dialihkan haknya pada pihak lain sampai dengan seluruh hutang Debitur dinyatakan lunas oleh Kreditur.",
+      ],
+      "bullet",
+    )}
   </div>
+
+  <div style="page-break-before: always;"></div>
 
   <div class="my-7">
     <div class="my-3 text-center font-bold">
       <p>PASAL 7</p>
-      <p>DENDA KETERLAMBATAN DAN PINALTY</p>
+      <p>Pemberian Kuasa</p>
     </div>
-
-    <div class="flex gap-2">
-      <p class="w-4">1.</p>
-      <p class="flex-1">Bahwa atas setiap keterlambatan pembayaran cicilan/angsuran oleh DEBITUR kepada BANK, maka DEBITUR dikenakan denda menurut ketentuan BANK yang berlaku pada saat ditandatanganinya Perjanjian ini, yaitu sebesar 0,33%,- (nol koma tiga puluh tiga persen) perhari.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">2.</p>
-      <p class="flex-1">Pelunasan sebagian atau seluruh pinjaman sebelum jatuh tempo dapat dilakukan DEBITUR dengan ketentuan bahwa setiap pelunasan baik sebagian atau seluruh pinjaman tersebut DEBITUR dikenakan penalty sebesar 1% (satu perseratus) yang dihitung dari sisa Pokok Pinjaman DEBITUR yang tertera pada pembukuan pihak BANK.</p>
-    </div>
+    ${ListStyle(
+      [
+        "Debitur dengan ini memberikan kuasa kepada Kreditur untuk mendebet dan menggunakan dana yang tersimpan pada Kreditur baik dari rekening tabungan/deposito milik Debitur guna pembayaran angsuran pokok maupun bunga, denda, premi asuransi, biaya-biaya lainnya yang mungkin timbul sehubungan dengan pemberian fasilitas kredit ini dan segala yang terhutang berkenaan dengan pemberian fasilitas kredit berdasarkan perjanjian ini.",
+        "Kreditur diberi kuasa oleh Debitur untuk menutup asuransi jiwa dan biaya premi menjadi beban Debitur, apabila Debitur meninggal dunia maka uang klaim asuransi untuk menjamin pelunasan seluruh kewajiban Debitur.",
+        "Kuasa-kuasa yang diberikan Debitur kepada Kreditur berdasarkan Perjanjian ini kata demi kata harus telah dianggap telah termaktub dalam Perjanjian ini dan merupakan satu kesatuan serta bagian yang tidak terpisahkan dengan Perjanjian ini yang tidak dibuat tanpa adanya kuasa tersebut dan oleh karenanya kuasa-kuasa tersebut tidak akan dicabut dan tidak akan berakhir oleh karena sebab apapun juga, termasuk oleh sebab-sebab berakhirnya kuasa sebagaimana dimaksud dalam Pasal 1813, 1814 dan 1816 kitab Undang-Undang Hukum Perdata. Namun demikian, apabila ternyata terdapat suatu ketentuan hukum yang mengharuskan adanya suatu surat kuasa khusus untuk melaksanakan hak Kreditur berdasarkan Perjanjian, maka Debitur atas permintaan pertama dari Kreditur wajib untuk memberikan kuasa khusus dimaksud kepada Kreditur.",
+      ],
+      "bullet",
+    )}
   </div>
 
-  <div class="my-8">
+  <div class="my-7">
     <div class="my-3 text-center font-bold">
       <p>PASAL 8</p>
-      <p>SYARAT & KETENTUAN</p>
+      <p>Lain - lain</p>
     </div>
-
-    <div class="flex gap-2">
-      <p class="w-4">1.</p>
-      <div class="flex-1">
-        <p>BANK berhak untuk sewaktu-waktu menghentikan dan memutuskan perjanjian ini dengan mengesampingkan ketentuan-ketentuan Pasal 1266 dan Pasal 1267 Kitab Undang-Undang Hukum Perdata sehingga tidak diperlukan lagi suatu surat pemberitahuan (Somasi) atau surat peringatan dari juru sita atau surat lain yang serupa itu, dalam hal demikian seluruh hutang DEBITUR kepada BANK harus dibayar seketika dan sekaligus, yaitu dalam hal terjadi salah satu kejadian dibawah ini :</p>
-        ${ListStyle(
-          [
-            "Bilamana DEBITUR menggunakan fasilitas pinjaman ini menyimpang dari tujuan penggunaan yang telah disetujui oleh BANK;",
-            "Bilamana DEBITUR lalai atau tidak memenuhi syarat-syarat atau ketentuan-ketentuan / kewajibankewajiban yang dimaksud dalam Perjanjian ini dan atau perubahan/tambahan dan atau perjanjian-perjanjian pengikatan jaminan;",
-            "Bilamana menurut pertimbangan BANK keadaan keuangan, bonafiditas dan solvabilitas DEBITUR mundur sedemikian rupa sehingga DEBITUR tidak dapat membayar hutangnya;",
-            "Bilamana DEBITUR menanggung hutang pihak ketiga tanpa persetujuan tertulis terlebih dahulu dari BANK;",
-            "Bilamana pernyataan-pernyataan, surat-surat, keterangan-keterangan yang diberikan DEBITUR kepada BANK ternyata tidak benar;",
-            "Bilamana menurut pertimbangan BANK ada hal-hal lain yang meragukan pengembalian pelunasan kredit tersebut;",
-          ],
-          "lower-alpha",
-        )}
-      </div>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">2.</p>
-      <p class="flex-1">Bahwa segala pembukuan/catatan yang dibuat oleh BANK menjadi tanda bukti yang mengikat dan sah atas jumlah hutang DEBITUR kepada BANK.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">3.</p>
-      <p class="flex-1">Apabila DEBITUR meninggal dunia, maka semua hutang dan kewajiban DEBITUR kepada BANK yang timbul berdasarkan Perjanjian ini berikut semua perubahannya dikemudian dan atau berdasarkan apapun juga tetap merupakan satu kesatuan hutang dari para ahli waris DEBITUR atau PENANGGUNG (jika ada).</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">4.</p>
-      <p class="flex-1">DEBITUR dengan ini berjanji, akan tunduk kepada segala ketentuan dan sesuai dengan ketentuan peraturan perundang-undangan termasuk ketentuan peraturan Otoritas Jasa Keuangan.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">5.</p>
-      <p class="flex-1">Perjanjian ini telah disesuaikan dengan ketentuan peraturan perundang-undangan termasuk ketentuan peraturan Otoritas Jasa Keuangan.</p>
-    </div>
+    ${ListStyle(
+      [
+        "Debitur menyetujui dan dengan ini memberi kuasa kepada Kreditur untuk sewaktu-waktu menjual, mengalihkan, menjaminkan atau dengan cara apapun memindahkan piutang/tagihan-tagihan Kreditur kepada Debitur berdasarkan Perjanjian ini kepada pihak ketiga lainnya dengan siapa Kreditur membuat perjanjian kerjasama berikut semua hak, kekuasaan-kekuasaan dan jaminan-jaminan yang ada pada Kreditur berdasarkan Perjanjian ini atau perjanjian jaminan, dengan syarat-syarat dan ketentuan-ketentuan yang dianggap baik oleh Kreditur, tanpa diperlukan surat persetujuan/kuasa tersendiri.",
+        "Debitur tidak diperkenankan untuk mengalihkan hak-hak dan kewajibannya berdasarkan Perjanjian ini kepada pihak manapun tanpa persetujuan tertulis terlebih dahulu dari Kreditur.",
+        "Selama fasilitas kredit belum lunas, Debitur tidak diperkenankan untuk menerima pinjaman dari bank/pihak ketiga lainnya tanpa persetujuan dari Kreditur.",
+        "Selama fasilitas kredit belum lunas, Debitur tidak diperkenankan untuk menunda pengambilan gajinya setiap bulan untuk memenuhi pembayaran angsuran kepada Kreditur dan mengalihkan lokasi pembayaran uang pensiun Debitur ketempat lain selain Bank Perekonomian Rakyat Dassa yang telah menerima Surat Kuasa pemotongan uang pensiun Debitur.",
+        "Debitur wajib mengizinkan Kreditur untuk melakukan pemeriksaan atas kekayaan dan/usaha Debitur serta dan memeriksa pembukuan, catatan-catatan dan administrasi Debitur dan membuat salinan-salinan atau foto copy atau catatan-catatan lainnya.",
+        "Seluruh lampiran-lampiran Perjanjian ini termasuk namun tidak terbatas pada Perjanjian kerjasama, surat kuasa pemotongan uang pensiun, merupakan suatu kesatuan dan bagian yang tidak terpisahkan dengan Perjanjian.",
+        "Debitur dengan ini menyatakan setuju, Kreditur menyampaikan informasi data Debitur kepada Bank Indonesia dan Otoritas Jasa Keuangan melalaui Sistem Informasi Debitur dan SLIK.",
+        "Perjanjian ini telah disesuaikan dengan ketentuan peraturan perundang-undangan termasuk ketentuan peraturan Otoritas Jasa Keuangan (OJK).",
+        "Perjanjian Kredit ini dibuat rangkap 1 (Satu), telah di mengerti isinya dan memiliki Kekuatan Hukum.",
+        "Hal-hal yang belum diatur dalam Perjanjian ini serta perubahan dan/atau penambahan akan ditentukan kemudian antara Para Pihak serta dituangkan secara tertulis dalam suatu Addendum yang ditandatangani bersama oleh Para Pihak serta merupakan bagian dan satu kesatuan yang tidak dapat dipisahkan dan mempunyai kekuatan hukum yang sama dengan Perjanjian ini.",
+      ],
+      "bullet",
+    )}
   </div>
 
-  <div class="my-8">
+  <div class="my-7">
     <div class="my-3 text-center font-bold">
       <p>PASAL 9</p>
-      <p>KOMUNIKASI DAN PEMBERITAHUAN</p>
+      <p>Hukum Yang Berlaku dan</p>
+      <p>Domisili Hukum</p>
     </div>
-
-    <p>Setiap pemberitahuan atau komunikasi lainnya yang berhubungan dengan Perjanjian Pembiayaan ini dapat dikirimkan ke alamat sebagai berikut:</p>
-
-    <div class="ml-4 my-3">
-      <p class="font-bold">${process.env.NEXT_PUBLIC_APP_COMPANY_NAME}</p>
-      <div class="flex gap-2">
-        <p class="w-44">Up</p>
-        <p class="w-4">:</p>
-        <p class="flex-1">${process.env.NEXT_PUBLIC_APP_PIC}</p>
-      </div>
-      <div class="flex gap-2">
-        <p class="w-44">Alamat</p>
-        <p class="w-4">:</p>
-        <p class="flex-1">${process.env.NEXT_PUBLIC_APP_COMPANY_ADDRESS_SK}</p>
-      </div>
-      <div class="flex gap-2">
-        <p class="w-44">Email</p>
-        <p class="w-4">:</p>
-        <p class="flex-1">${process.env.NEXT_PUBLIC_APP_COMPANY_EMAIL}</p>
-      </div>
-    </div>
-
-    <div class="ml-4 my-3">
-      <p class="font-bold">${record.ProdukPembiayaan.Sumdan.name}</p>
-      <div class="flex gap-2">
-        <p class="w-44">Up</p>
-        <p class="w-4">:</p>
-        <div class="flex-1">
-          <p>${record.ProdukPembiayaan.Sumdan.pic1}</p>
-          <p>${record.ProdukPembiayaan.Sumdan.pic2}</p>
-        </div>
-      </div>
-      <div class="flex gap-2">
-        <p class="w-44">Alamat</p>
-        <p class="w-4">:</p>
-        <p class="flex-1">${record.ProdukPembiayaan.Sumdan.address}</p>
-      </div>
-      <div class="flex gap-2">
-        <p class="w-44">Email</p>
-        <p class="w-4">:</p>
-        <p class="flex-1">${record.ProdukPembiayaan.Sumdan.email}</p>
-      </div>
-    </div>
-
+    ${ListStyle(
+      [
+        "Perjanjian ini tunduk pada dan karenanya harus ditafsirkan berdasarkan hukum Republik Indonesia.",
+        "Untuk pelaksanaan Perjanjian ini dan segala akibatnya Para Pihak memilih tempat tinggal yang tetap dan tidak berubah di kantor Panitera Pengadilan Negeri Kota Bandung, dengan tidak mengurangi hak Kreditur untuk memohon pelaksanaan/eksekusi dari Perjanjian ini atau mengajukan tuntutan hukum terhadap Debitur melalui Pengadilan Negeri lainnya dalam wilayah Republik Indonesia.",
+      ],
+      "bullet",
+    )}
   </div>
 
-  <div class="my-8">
-    <div class="my-3 text-center font-bold">
-      <p>PASAL 10</p>
-      <p>DOMISILI HUKUM</p>
-    </div>
+  <p>Demikian Perjanjian ini dibuat dan ditandatangani oleh Para Pihak pada hari ini dan tanggal sebagaimana disebutkan di awal Perjanjian ini.</p>
 
-    <p>Segala perselisihan dan perbedaan pendapat yang mungkin timbul di antara Para Pihak dalam melaksanakan Perjanjian ini, akan diselesaikan terlebih dahulu secara musyawarah untuk mencapai mufakat. Namun apabila tidak berhasil mencapai mufakat, maka Para Pihak sepakat akan menyelesaikan perselisihan tersebut melalui Pengadilan. Para Pihak sepakat memilih tempat kedudukan hukum yang tetap dan seumumnya di Kantor Kepaniteraan Pengadilan Negeri Tabanan, namun tidak mengurangi hak BANK untuk mengajukan tuntutan hukum kepada DEBITUR untuk mengajukan gugatan atau memohon pelaksanaan eksekusi jaminan berdasarkan Perjanjian ini melalui pengadilan lain di dalam wilayah negara Republik Indonesia.</p>
-  </div>
-
-  <div class="my-8">
-    <div class="my-3 text-center font-bold">
-      <p>PASAL 11</p>
-      <p>KEADAAN MEMAKSA (FORCE MAJEURE)</p>
-    </div>
-
-    <p>Terjadinya peristiwa yang diluar kekuasaan kemampuan ${record.ProdukPembiayaan.Sumdan.name} (Force Majeure atau Overmacht) antara lain keadaan yang diakibatkan bencana alam dan non bencana alam seperti keadaan krisis atau kemacetan likuiditas sebagai akibat dari perubahan kebijakan pemerintah dibidang moneter dan fiskal atau telah sesuai dengan unsur-unsur keadaan memaksa (Force Majeure) dan peraturan tentang keadaan memaksa (Force Majeure) yakni pasal 1244 dan pasal 1245 Kitab Undang-Undang Hukum Perdata (KUHP), dimana peraturan dimaksud tersebut terlebih dahulu harus diumumkan pemerintah (Regulator) secara resmi.</p>
-  </div>
-
-  <div class="my-8">
-    <div class="my-3 text-center font-bold">
-      <p>PASAL 12</p>
-      <p>LAIN - LAIN</p>
-    </div>
-
-    <div class="flex gap-2">
-      <p class="w-4">1.</p>
-      <p class="flex-1">Sebelum Akad ini ditandatangani oleh DEBITUR, DEBITUR mengakui dengan sebenarnya, bahwa DEBITUR telah membaca dengan cermat atau dibacakan kepada DEBITUR, sehingga oleh karena itu DEBITUR memahami sepenuhnya segala yang akan menjadi akibat hukum setelah DEBITUR menandatangani Perjanjian Pembiayaan ini.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">2.</p>
-      <p class="flex-1">Apabila ada hal-hal yang belum diatur atau belum cukup diatur dalam Perjanjian Pembiayaan ini, maka DEBITUR dan BANK akan mengaturnya Bersama secara musyawarah untuk mufakat dalam suatu Addendum.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">3.</p>
-      <p class="flex-1">Mengenai Perjanjian ini dan segala dokumen yang berhubungan dan yang timbul akibat Perjanjian ini, termasuk namun tidak terbatas pada perjanjian-perjanjian jaminan, ditafsirkan dan tunduk pada ketentuan hukum Negara Republik Indonesia.</p>
-    </div>
-    <div class="flex gap-2">
-      <p class="w-4">4.</p>
-      <p class="flex-1">Perjanjian ini dapat diubah atau diperbaharui dengan syarat adanya persetujuan dari Para Pihak terlebih dahulu dan akan dibuatkan perubahan perjanjian atau addendum yang menjadi satu kesatuan dan tidak terpisahkan dari Perjanjian ini.</p>
-    </div>
-  </div>
-
-  <div class="mt-15">
-  <div class="flex justify-between gap-6 items-end">
-    <div class="flex-1 text-center">
-        <p >${(record.Debitur.city || "KOTA BANDUNG").toLowerCase().replace("kota", "").replace("kabupaten", "").toUpperCase()}, ${moment(record.date_contract).format("DD-MM-YYYY")}</p>
-        <p class="font-bold">${record.ProdukPembiayaan.Sumdan.name}</p>
-        <div class="h-28">
+  <div class="mt-16 flex justify-between gap-10 text-center items-end">
+    <div class="flex-1">
+      <p class="font-bold">KREDITUR</p>
+      <p class="font-bold">PT BANK PEREKONOMIAN RAKYAT DASSA</p>
+      <div class="h-24"></div>
+      <div class="grid grid-cols-2 gap-6">
+        <div>
+          <p class="border-b border-black font-bold">Pahala David</p>
+          <p>Direktur Utama</p>
         </div>
         <div>
-          <p class="w-full border-b">${process.env.NEXT_PUBLIC_APP_AKAD_NAME}</p>
-          <p>${process.env.NEXT_PUBLIC_APP_AKAD_POSITION}</p>
+          <p class="border-b border-black font-bold">Ferry</p>
+          <p>Direktur Bisnis</p>
         </div>
       </div>
-      <div class="flex-1 text-center">
-        <p class="font-bold">DEBITUR</p>
-        <div class="h-28 flex items-center justify-center opacity-50">
-          <p >Materai 10.000</p>
-        </div>
-        <div>
-          <p class="w-full border-b">${record.Debitur.fullname}</p>
-          <p>PENERIMA PEMBIAYAAN</p>
-        </div>
-      </div>
-      <div class="flex-1 text-center">
-        <p class="font-bold">Menyetujui</p>
-        <div class="h-28">
-        </div>
-        <div>
-          <p class="w-full border-b">${record.aw_name}</p>
-          <p>SUAMI/ISTRI/AHLI WARIS</p>
-        </div>
-      </div>
+    </div>
+    <div class="flex-1">
+      <p class="font-bold">DEBITUR</p>
+      <div class="h-24"></div>
+      <p class="border-b border-black font-bold">${record.Debitur.fullname}</p>
     </div>
   </div>
 `;

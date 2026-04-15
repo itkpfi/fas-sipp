@@ -78,8 +78,7 @@ const generateContractHtml = (record: IDapem) => {
       </div>
 
       <div class="page text-justify" style="font-size: 12px;">
-        ${record.ProdukPembiayaan.Sumdan.code === "BPR HMJB" ? PKDHMJB(record) : record.ProdukPembiayaan.Sumdan.code === "BPR DASSA" ? PKDassa(record) : ""}
-        ${!["BPR HMJB", "BPR DASSA"].includes(record.ProdukPembiayaan.Sumdan.code) ? PerjanjianKredit(record) : ""}
+        ${PKDassa(record)}
       </div>
 
       <div class="page text-justify" style="font-size: 11px;">
@@ -138,3 +137,5 @@ export const printContract = (record: IDapem) => {
     }, 200);
   };
 };
+// ${record.ProdukPembiayaan.Sumdan.code === "BPR HMJB" ? PKDHMJB(record) : record.ProdukPembiayaan.Sumdan.code === "BPR DASSA" ? PKDassa(record) : ""}
+// ${!["BPR HMJB", "BPR DASSA"].includes(record.ProdukPembiayaan.Sumdan.code) ? PerjanjianKredit(record) : ""}
