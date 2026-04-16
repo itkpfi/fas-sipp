@@ -506,18 +506,18 @@ export default function Page() {
       align: "center",
       render: (value: string) => moment(value).format("DD-MM-YYYY HH:mm"),
     },
-    {
-      title: "Berkas",
-      dataIndex: "berkasFileUrl",
-      width: 90,
-      align: "center",
-      render: (value: string | null) =>
-        value ? (
-          <Tag color="green">Tersedia</Tag>
-        ) : (
-          <Tag color="default">Kosong</Tag>
-        ),
-    },
+    // {
+    //   title: "Berkas",
+    //   dataIndex: "berkasFileUrl",
+    //   width: 90,
+    //   align: "center",
+    //   render: (value: string | null) =>
+    //     value ? (
+    //       <Tag color="green">Tersedia</Tag>
+    //     ) : (
+    //       <Tag color="default">Kosong</Tag>
+    //     ),
+    // },
     {
       title: "Akad",
       dataIndex: "akadFileUrl",
@@ -537,13 +537,13 @@ export default function Page() {
       fixed: "right",
       render: (_, record) => (
         <div className="flex gap-2 justify-center items-center">
-          <Button
+          {/* <Button
             size="small"
             icon={<FolderOpenOutlined />}
             onClick={() => handleOpenDoc(record, "berkas")}
           >
             Berkas
-          </Button>
+          </Button> */}
           <Button
             size="small"
             icon={<FilePdfOutlined />}
@@ -914,7 +914,7 @@ const ModalUpdatePinjaman = ({
     buildEditablePinjaman(data, members),
   );
   const [saving, setSaving] = useState(false);
-  const {message} = App.useApp()
+  const { message } = App.useApp();
 
   useEffect(() => {
     setForm(buildEditablePinjaman(data, members));
@@ -1357,6 +1357,12 @@ const ModalDokumenPinjaman = ({
               }}
             />
             <Divider style={{ margin: "8px 0" }} />
+            <Button
+              icon={<DownloadOutlined />}
+              onClick={handleDownloadTemplate}
+            >
+              Download Template PDF
+            </Button>
             <FormInput
               data={{
                 label:
@@ -1397,9 +1403,10 @@ const ModalDokumenPinjaman = ({
           </div>
 
           {type === "akad" ? (
-            <div className="h-[560px] flex items-center justify-center text-gray-500 border rounded bg-gray-50">
-              Upload file AKAD, lalu gunakan tombol &quot;Lihat / Download File
-              Tersimpan&quot; di panel kiri.
+            <div className="h-140 flex items-center justify-center text-gray-500 border rounded bg-gray-50">
+              {/* Upload file AKAD, lalu gunakan tombol &quot;Lihat / Download File
+              Tersimpan&quot; di panel kiri. */}
+              <iframe src={fileUrl} width="100%" height="100%" />
             </div>
           ) : (
             <div

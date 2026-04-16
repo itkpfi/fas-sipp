@@ -65,6 +65,9 @@ export const GET = async (request: NextRequest) => {
             in: ["PAID_OFF", "APPROVED", "PROCCESS"],
           },
           status: true,
+          ...(user.sumdanId && {
+            ProdukPembiayaan: { sumdanId: user.sumdanId },
+          }),
         },
         include: {
           ProdukPembiayaan: { include: { Sumdan: true } },

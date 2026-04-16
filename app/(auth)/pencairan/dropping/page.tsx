@@ -1,7 +1,7 @@
 "use client";
 
 import { FormInput, ViewFiles } from "@/components";
-import { printSIStandar } from "@/components/pdfutils/si/SIStandar";
+import { printSIPrevVersion } from "@/components/pdfutils/si/SIPrevVersion";
 import { FilterData } from "@/components/utils/CompUtils";
 import { IDRFormat } from "@/components/utils/PembiayaanUtil";
 import {
@@ -235,7 +235,7 @@ export default function Page() {
                 size="small"
                 type="primary"
                 className="app-table-action-btn"
-                onClick={() => printSIStandar(record)}
+                onClick={() => printSIPrevVersion(record)}
               ></Button>
             </Tooltip>
             <Tooltip title="Berkas Akad & Dropping">

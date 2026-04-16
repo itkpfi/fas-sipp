@@ -683,7 +683,7 @@ function UpsertUser({
               mode: "horizontal",
               type: "password",
               required: true,
-              value: record ? null : data.password,
+              value: data.password,
               onChange: (e: string) => setData({ ...data, password: e }),
             }}
           />

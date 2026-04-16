@@ -134,7 +134,7 @@ export const PUT = async (request: NextRequest) => {
     const find = await prisma.user.findFirst({ where: { id } });
 
     if (find) {
-      if (body.password && body.password.length < 20) {
+      if (body.password && body.password !== "" && body.password.length < 20) {
         updated.password = await bcrypt.hash(body.password, 10);
       } else {
         updated.password = find.password;

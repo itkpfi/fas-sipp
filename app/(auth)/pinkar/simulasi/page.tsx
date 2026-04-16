@@ -8,7 +8,16 @@ import {
   PrinterOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Divider, Image, Modal, Table, TableProps, message } from "antd";
+import {
+  Button,
+  Card,
+  Divider,
+  Image,
+  Modal,
+  Table,
+  TableProps,
+  message,
+} from "antd";
 import moment from "moment";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toPng } from "html-to-image";
@@ -132,7 +141,7 @@ export default function Page() {
     const marginPerBulan = (plafond * (marginRate / 100)) / 12;
     const pokokPerBulan = plafond / tenor;
     const angsuranPerBulan = roundToThousand(pokokPerBulan + marginPerBulan);
-    const biayaAdmin = roundToThousand((plafond * adminRate) / 100);
+    const biayaAdmin = (plafond * adminRate) / 100;
     const terimaBersih = plafond - biayaAdmin;
     const totalMargin = roundToThousand(marginPerBulan * tenor);
     const totalBayar = angsuranPerBulan * tenor;
@@ -140,14 +149,14 @@ export default function Page() {
     // Jadwal angsuran
     const jadwal: IAngsuranRow[] = [];
     let sisaPokok = plafond;
-    const startDate = moment().add(1, "month").startOf("month");
+    const startDate = moment().startOf("month");
 
     for (let i = 1; i <= tenor; i++) {
       const tgl = startDate.clone().add(i - 1, "month");
-      const pokok = i === tenor ? sisaPokok : roundToThousand(pokokPerBulan);
-      const margin = roundToThousand(marginPerBulan);
-      const angs = pokok + margin;
-      sisaPokok = Math.max(0, sisaPokok - pokok);
+      const pokok = i === tenor ? sisaPokok : pokokPerBulan;
+      const margin = marginPerBulan;
+      const angs = angsuranPerBulan;
+      sisaPokok = sisaPokok - pokok;
 
       jadwal.push({
         no: i,
