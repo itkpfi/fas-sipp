@@ -193,6 +193,12 @@ export const listMenuUI: IMenuType[] = [
     needaccess: true,
     children: [
       {
+        label: "Dashboard Pinkar",
+        key: "/pinkar/dashboard",
+        icon: <DashboardOutlined />,
+        needaccess: true,
+      },
+      {
         label: "Simulasi Pinkar",
         key: "/pinkar/simulasi",
         icon: <CalculatorOutlined />,
@@ -377,6 +383,10 @@ export const listMenuServer: { key: string; needaccess: boolean }[] = [
   },
   {
     key: "/pelunasan",
+    needaccess: true,
+  },
+  {
+    key: "/pinkar/dashboard",
     needaccess: true,
   },
   {

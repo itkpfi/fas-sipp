@@ -221,7 +221,31 @@ const ModalDetailTagihan = ({
   open: boolean;
   setOpen: Function;
 }) => {
-  const angsuranBelumBayarList = data.angsuranList.filter((a) => !a.date_paid);
+  const getAngsuranStatus = (record: IAngsuranDetail) => {
+    if (record.date_paid) {
+      return {
+        label: "LUNAS",
+        color: "success" as const,
+        icon: <CheckCircleOutlined />,
+      };
+    }
+
+    const isOverdue = moment().startOf("day").isAfter(moment(record.date_pay).startOf("day"));
+
+    if (isOverdue) {
+      return {
+        label: "OVERDUE",
+        color: "error" as const,
+        icon: <ClockCircleOutlined />,
+      };
+    }
+
+    return {
+      label: "BELUM JATUH TEMPO",
+      color: "processing" as const,
+      icon: <CalendarOutlined />,
+    };
+  };
 
   const angsuranColumns: TableProps<IAngsuranDetail>["columns"] = [
     {
@@ -258,16 +282,15 @@ const ModalDetailTagihan = ({
       title: "Status",
       width: 120,
       align: "center",
-      render: (_, record) =>
-        record.date_paid ? (
-          <Tag icon={<CheckCircleOutlined />} color="success">
-            LUNAS
+      render: (_, record) => {
+        const status = getAngsuranStatus(record);
+
+        return (
+          <Tag icon={status.icon} color={status.color}>
+            {status.label}
           </Tag>
-        ) : (
-          <Tag icon={<ClockCircleOutlined />} color="error">
-            OVERDUE
-          </Tag>
-        ),
+        );
+      },
     },
   ];
 
@@ -394,60 +417,6 @@ const ModalDetailTagihan = ({
           </Col>
         </Row>
       </Card>
-
-      {angsuranBelumBayarList.length > 0 && (
-        <Card
-          className="app-card-muted !rounded-2xl !shadow-none"
-          title={
-            <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
-              <ClockCircleOutlined /> Tagihan yang Jatuh Tempo
-            </div>
-          }
-        >
-          <Table
-            className="app-master-table"
-            columns={angsuranColumns}
-            dataSource={angsuranBelumBayarList}
-            rowKey="id"
-            size="middle"
-            pagination={false}
-            scroll={{ x: 600 }}
-            summary={() => {
-              const totalPokok = angsuranBelumBayarList.reduce(
-                (sum, a) => sum + a.principal,
-                0,
-              );
-              const totalMargin = angsuranBelumBayarList.reduce(
-                (sum, a) => sum + a.margin,
-                0,
-              );
-              const totalAngsuran = totalPokok + totalMargin;
-
-              return (
-                <Table.Summary fixed>
-                  <Table.Summary.Row className="bg-slate-50 text-slate-700">
-                    <Table.Summary.Cell index={0} colSpan={2} align="center" className="font-semibold">
-                      <strong>TOTAL</strong>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={2} align="right" className="font-semibold text-slate-900">
-                      <strong>{IDRFormat(totalPokok)}</strong>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={3} align="right" className="font-semibold text-slate-900">
-                      <strong>{IDRFormat(totalMargin)}</strong>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={4} align="right" className="font-semibold text-rose-600">
-                      <strong>
-                        {IDRFormat(totalAngsuran)}
-                      </strong>
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell index={5} />
-                  </Table.Summary.Row>
-                </Table.Summary>
-              );
-            }}
-          />
-        </Card>
-      )}
 
       <Card
         className="app-card-muted !rounded-2xl !shadow-none"
