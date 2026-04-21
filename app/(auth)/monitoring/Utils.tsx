@@ -40,7 +40,7 @@ import {
 import { App, Button, Card, Checkbox, Divider, Input, Select } from "antd";
 import moment from "moment";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 export default function UpsertPermohonan({ record }: { record?: IDapem }) {
   const [data, setData] = useState<IDapem>(record || defaultData);
@@ -166,17 +166,29 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
     data.c_margin_sumdan,
   ]);
 
+  const plainFieldClass =
+    "!rounded-none !border-0 !bg-transparent !p-0 !shadow-none";
+  const compactCardBodyStyle = { padding: 20 };
+  const subpanelClass =
+    "rounded-2xl border border-slate-200 bg-slate-50/75 p-4";
+  const addressSplitClass =
+    "grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]";
+
   return (
-    <div>
+    <div className="space-y-4 p-1 md:p-2">
       <Card
-        title={
-          <div>
-            <UserOutlined /> Data Debitur
-          </div>
-        }
+        className="app-card overflow-hidden"
+        styles={{ body: compactCardBodyStyle }}
         loading={loading}
       >
-        <div className="flex gap-2 flex-wrap">
+        <div className="mb-4">
+          <SectionCardTitle
+            icon={<UserOutlined />}
+            title="Data Debitur"
+            tone="sky"
+          />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <FormInput
             data={{
               mode: "vertical",
@@ -238,36 +250,6 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                 setData({
                   ...data,
                   Debitur: { ...data.Debitur, birthplace: e },
-                }),
-            }}
-          />
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "Tanggal Lahir",
-              type: "date",
-              class: "flex-1",
-              required: true,
-              value: moment(data.Debitur.birthdate).format("YYYY-MM-DD"),
-              onChange: (e: string) =>
-                setData({
-                  ...data,
-                  Debitur: { ...data.Debitur, birthdate: new Date(e) },
-                }),
-            }}
-          />
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "Gaji Pensiun",
-              type: "text",
-              class: "flex-1",
-              required: true,
-              value: IDRFormat(data.Debitur.salary || 0),
-              onChange: (e: string) =>
-                setData({
-                  ...data,
-                  Debitur: { ...data.Debitur, salary: IDRToNumber(e || "0") },
                 }),
             }}
           />
@@ -367,99 +349,126 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                 }),
             }}
           />
-          <Divider titlePlacement="left">Alamat</Divider>
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "Provinsi",
-              type: "text",
-              class: "flex-1",
-              required: true,
-              value: data.Debitur.province,
-              onChange: (e: string) =>
-                setData({
-                  ...data,
-                  Debitur: { ...data.Debitur, province: e },
-                }),
-            }}
-          />
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "Kota/Kab",
-              type: "text",
-              class: "flex-1",
-              required: true,
-              value: data.Debitur.city,
-              onChange: (e: string) =>
-                setData({
-                  ...data,
-                  Debitur: { ...data.Debitur, city: e },
-                }),
-            }}
-          />
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "Kecamatan",
-              type: "text",
-              class: "flex-1",
-              required: true,
-              value: data.Debitur.district,
-              onChange: (e: string) =>
-                setData({
-                  ...data,
-                  Debitur: { ...data.Debitur, district: e },
-                }),
-            }}
-          />
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "Kelurahan",
-              type: "text",
-              class: "flex-1",
-              required: true,
-              value: data.Debitur.ward,
-              onChange: (e: string) =>
-                setData({
-                  ...data,
-                  Debitur: { ...data.Debitur, ward: e },
-                }),
-            }}
-          />
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "Alamat",
-              type: "textarea",
-              class: "flex-1",
-              required: true,
-              value: data.Debitur.address,
-              onChange: (e: string) =>
-                setData({
-                  ...data,
-                  Debitur: { ...data.Debitur, address: e },
-                }),
-            }}
-          />
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "Kode Pos",
-              type: "number",
-              class: "flex-1",
-              required: true,
-              value: data.Debitur.pos_code,
-              onChange: (e: string) =>
-                setData({
-                  ...data,
-                  Debitur: { ...data.Debitur, pos_code: e },
-                }),
-            }}
-          />
-          <Divider titlePlacement="left">Domisili</Divider>
-          <div className="w-full font-bold">
+          <div className="md:col-span-2 xl:col-span-3 space-y-3">
+            <SectionMarker title="Alamat KTP" tone="slate" />
+            <div className={subpanelClass}>
+              <div className={addressSplitClass}>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormInput
+                    data={{
+                      mode: "vertical",
+                      label: "Provinsi",
+                      type: "text",
+                      class: "flex-1",
+                      required: true,
+                      value: data.Debitur.province,
+                      onChange: (e: string) =>
+                        setData({
+                          ...data,
+                          Debitur: { ...data.Debitur, province: e },
+                        }),
+                    }}
+                  />
+                  <FormInput
+                    data={{
+                      mode: "vertical",
+                      label: "Kota/Kab",
+                      type: "text",
+                      class: "flex-1",
+                      required: true,
+                      value: data.Debitur.city,
+                      onChange: (e: string) =>
+                        setData({
+                          ...data,
+                          Debitur: { ...data.Debitur, city: e },
+                        }),
+                    }}
+                  />
+                  <FormInput
+                    data={{
+                      mode: "vertical",
+                      label: "Kecamatan",
+                      type: "text",
+                      class: "flex-1",
+                      required: true,
+                      value: data.Debitur.district,
+                      onChange: (e: string) =>
+                        setData({
+                          ...data,
+                          Debitur: { ...data.Debitur, district: e },
+                        }),
+                    }}
+                  />
+                  <FormInput
+                    data={{
+                      mode: "vertical",
+                      label: "Kelurahan",
+                      type: "text",
+                      class: "flex-1",
+                      required: true,
+                      value: data.Debitur.ward,
+                      onChange: (e: string) =>
+                        setData({
+                          ...data,
+                          Debitur: { ...data.Debitur, ward: e },
+                        }),
+                    }}
+                  />
+                  <FormInput
+                    data={{
+                      mode: "vertical",
+                      label: "Alamat",
+                      type: "textarea",
+                      class: "md:col-span-2",
+                      required: true,
+                      value: data.Debitur.address,
+                      onChange: (e: string) =>
+                        setData({
+                          ...data,
+                          Debitur: { ...data.Debitur, address: e },
+                        }),
+                    }}
+                  />
+                </div>
+                <div className="grid gap-4 content-start">
+                  <FormInput
+                    data={{
+                      mode: "vertical",
+                      label: "Kode Pos",
+                      type: "number",
+                      class: "flex-1",
+                      required: true,
+                      value: data.Debitur.pos_code,
+                      onChange: (e: string) =>
+                        setData({
+                          ...data,
+                          Debitur: { ...data.Debitur, pos_code: e },
+                        }),
+                    }}
+                  />
+                  <FormInput
+                    data={{
+                      mode: "vertical",
+                      label: "Geo Location",
+                      type: "text",
+                      class: "flex-1",
+                      required: true,
+                      value: data.geolocation,
+                      onChange: (e: string) =>
+                        setData({
+                          ...data,
+                          geolocation: e,
+                        }),
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="md:col-span-2 xl:col-span-3">
+            <SectionMarker title="Domisili" tone="amber" />
+          </div>
+          <div className="md:col-span-2 xl:col-span-3 rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 font-semibold text-slate-700">
             <Checkbox
               checked={data.dom_status}
               onChange={(e) =>
@@ -469,128 +478,131 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
             Domisili sama dengan KTP?
           </div>
           {!data.dom_status && (
-            <FormInput
-              data={{
-                mode: "vertical",
-                label: "Provinsi",
-                type: "text",
-                class: "flex-1",
-                value: data.province,
-                onChange: (e: string) =>
-                  setData({
-                    ...data,
-                    province: e,
-                  }),
-              }}
-            />
+            <div className="md:col-span-2 xl:col-span-3">
+              <div className={subpanelClass}>
+                <div className={addressSplitClass}>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <FormInput
+                      data={{
+                        mode: "vertical",
+                        label: "Provinsi",
+                        type: "text",
+                        class: "flex-1",
+                        value: data.province,
+                        onChange: (e: string) =>
+                          setData({
+                            ...data,
+                            province: e,
+                          }),
+                      }}
+                    />
+                    <FormInput
+                      data={{
+                        mode: "vertical",
+                        label: "Kota/Kab",
+                        type: "text",
+                        class: "flex-1",
+                        value: data.city,
+                        onChange: (e: string) =>
+                          setData({
+                            ...data,
+                            city: e,
+                          }),
+                      }}
+                    />
+                    <FormInput
+                      data={{
+                        mode: "vertical",
+                        label: "Kecamatan",
+                        type: "text",
+                        class: "flex-1",
+                        value: data.district,
+                        onChange: (e: string) =>
+                          setData({
+                            ...data,
+                            district: e,
+                          }),
+                      }}
+                    />
+                    <FormInput
+                      data={{
+                        mode: "vertical",
+                        label: "Kelurahan",
+                        type: "text",
+                        class: "flex-1",
+                        value: data.ward,
+                        onChange: (e: string) =>
+                          setData({
+                            ...data,
+                            ward: e,
+                          }),
+                      }}
+                    />
+                    <FormInput
+                      data={{
+                        mode: "vertical",
+                        label: "Alamat",
+                        type: "textarea",
+                        class: "md:col-span-2",
+                        value: data.address,
+                        onChange: (e: string) =>
+                          setData({
+                            ...data,
+                            address: e,
+                          }),
+                      }}
+                    />
+                  </div>
+                  <div className="grid gap-4 content-start">
+                    <FormInput
+                      data={{
+                        mode: "vertical",
+                        label: "Kode Pos",
+                        type: "number",
+                        class: "flex-1",
+                        value: data.pos_code,
+                        onChange: (e: string) =>
+                          setData({
+                            ...data,
+                            pos_code: e,
+                          }),
+                      }}
+                    />
+                    <FormInput
+                      data={{
+                        mode: "vertical",
+                        label: "Geo Location",
+                        type: "text",
+                        class: "flex-1",
+                        required: true,
+                        value: data.geolocation,
+                        onChange: (e: string) =>
+                          setData({
+                            ...data,
+                            geolocation: e,
+                          }),
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
-          {!data.dom_status && (
-            <FormInput
-              data={{
-                mode: "vertical",
-                label: "Kota/Kab",
-                type: "text",
-                class: "flex-1",
-                value: data.city,
-                onChange: (e: string) =>
-                  setData({
-                    ...data,
-                    city: e,
-                  }),
-              }}
-            />
-          )}
-          {!data.dom_status && (
-            <FormInput
-              data={{
-                mode: "vertical",
-                label: "Kecamatan",
-                type: "text",
-                class: "flex-1",
-                value: data.district,
-                onChange: (e: string) =>
-                  setData({
-                    ...data,
-                    district: e,
-                  }),
-              }}
-            />
-          )}
-          {!data.dom_status && (
-            <FormInput
-              data={{
-                mode: "vertical",
-                label: "Kelurahan",
-                type: "text",
-                class: "flex-1",
-                value: data.ward,
-                onChange: (e: string) =>
-                  setData({
-                    ...data,
-                    ward: e,
-                  }),
-              }}
-            />
-          )}
-          {!data.dom_status && (
-            <FormInput
-              data={{
-                mode: "vertical",
-                label: "Alamat",
-                type: "textarea",
-                class: "flex-1",
-                value: data.address,
-                onChange: (e: string) =>
-                  setData({
-                    ...data,
-                    address: e,
-                  }),
-              }}
-            />
-          )}
-          {!data.dom_status && (
-            <FormInput
-              data={{
-                mode: "vertical",
-                label: "Kode Pos",
-                type: "number",
-                class: "flex-1",
-                value: data.pos_code,
-                onChange: (e: string) =>
-                  setData({
-                    ...data,
-                    pos_code: e,
-                  }),
-              }}
-            />
-          )}
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "Geo Location",
-              type: "text",
-              class: "flex-1",
-              required: true,
-              value: data.geolocation,
-              onChange: (e: string) =>
-                setData({
-                  ...data,
-                  geolocation: e,
-                }),
-            }}
-          />
         </div>
       </Card>
       <Card
-        title={
-          <div>
-            <SolutionOutlined /> Data Rumah & Pekerjaan
-          </div>
-        }
-        style={{ marginTop: 5 }}
+        className="app-card overflow-hidden"
+        styles={{ body: compactCardBodyStyle }}
         loading={loading}
       >
-        <div className="flex gap-2 flex-wrap">
+        <div className="mb-4">
+          <SectionCardTitle
+            icon={<SolutionOutlined />}
+            title="Data Rumah & Pekerjaan"
+            tone="emerald"
+          />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <FormInput
             data={{
               mode: "vertical",
@@ -647,7 +659,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
               mode: "vertical",
               label: "Alamat Pekerjaan",
               type: "textarea",
-              class: "flex-1",
+              class: "md:col-span-2 xl:col-span-3",
               value: data.job_address,
               onChange: (e: string) =>
                 setData({
@@ -673,15 +685,18 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
         </div>
       </Card>
       <Card
-        title={
-          <div>
-            <TeamOutlined /> Data Keluarga
-          </div>
-        }
-        style={{ marginTop: 5 }}
+        className="app-card overflow-hidden"
+        styles={{ body: compactCardBodyStyle }}
         loading={loading}
       >
-        <div className="flex gap-2 flex-wrap">
+        <div className="mb-4">
+          <SectionCardTitle
+            icon={<TeamOutlined />}
+            title="Data Keluarga"
+            tone="violet"
+          />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <FormInput
             data={{
               mode: "vertical",
@@ -718,7 +733,9 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                 }),
             }}
           />
-          <Divider titlePlacement="left">Ahli Waris</Divider>
+          <div className="md:col-span-2 xl:col-span-3">
+            <SectionMarker title="Ahli Waris" tone="violet" />
+          </div>
           <FormInput
             data={{
               mode: "vertical",
@@ -814,7 +831,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
               mode: "vertical",
               label: "Alamat",
               type: "text",
-              class: "flex-1",
+              class: "md:col-span-2 xl:col-span-3",
               required: true,
               value: data.aw_address,
               onChange: (e: string) =>
@@ -839,7 +856,9 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                 }),
             }}
           />
-          <Divider titlePlacement="left">Keluarga Tidak Serumah</Divider>
+          <div className="md:col-span-2 xl:col-span-3">
+            <SectionMarker title="Keluarga Tidak Serumah" tone="rose" />
+          </div>
           <FormInput
             data={{
               mode: "vertical",
@@ -875,7 +894,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
               mode: "vertical",
               label: "Alamat",
               type: "textarea",
-              class: "flex-1",
+              class: "md:col-span-2 xl:col-span-3",
               required: true,
               value: data.f_address,
               onChange: (e: string) =>
@@ -904,15 +923,18 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
         </div>
       </Card>
       <Card
-        title={
-          <div>
-            <KeyOutlined /> Data Pensiunan
-          </div>
-        }
-        style={{ marginTop: 5 }}
+        className="app-card overflow-hidden"
+        styles={{ body: compactCardBodyStyle }}
         loading={loading}
       >
-        <div className="flex gap-2 flex-wrap">
+        <div className="mb-4">
+          <SectionCardTitle
+            icon={<KeyOutlined />}
+            title="Data Pensiunan"
+            tone="amber"
+          />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <FormInput
             data={{
               mode: "vertical",
@@ -1057,23 +1079,26 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
         </div>
       </Card>
       <Card
-        title={
-          <div>
-            <DollarCircleOutlined /> Data Pembiayaan
-          </div>
-        }
-        style={{ marginTop: 5 }}
+        className="app-card overflow-hidden"
+        styles={{ body: compactCardBodyStyle }}
         loading={loading}
       >
-        <div className="flex gap-2 flex-wrap">
-          <div className="w-full flex gap-2 flex-col sm:flex-row">
-            <div className="flex-1 flex gap-2 flex-wrap">
+        <div className="mb-4">
+          <SectionCardTitle
+            icon={<DollarCircleOutlined />}
+            title="Data Pembiayaan"
+            tone="cyan"
+          />
+        </div>
+        <div className="space-y-4">
+          <div className={subpanelClass}>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               <FormInput
                 data={{
                   mode: "vertical",
                   label: "Tanggal Permohonan",
                   type: "date",
-                  class: "flex-1",
+                  class: plainFieldClass,
                   required: true,
                   value: moment(data.created_at).format("YYYY-MM-DD"),
                   onChange: (e: string) =>
@@ -1086,9 +1111,24 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
               <FormInput
                 data={{
                   mode: "vertical",
+                  label: "Tanggal Lahir",
+                  type: "date",
+                  class: plainFieldClass,
+                  required: true,
+                  value: moment(data.Debitur.birthdate).format("YYYY-MM-DD"),
+                  onChange: (e: string) =>
+                    setData({
+                      ...data,
+                      Debitur: { ...data.Debitur, birthdate: new Date(e) },
+                    }),
+                }}
+              />
+              <FormInput
+                data={{
+                  mode: "vertical",
                   label: "Usia Pengajuan",
                   type: "text",
-                  class: "flex-1",
+                  class: plainFieldClass,
                   disabled: true,
                   value: (() => {
                     const { year, month, day } = GetFullAge(
@@ -1102,9 +1142,27 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
               <FormInput
                 data={{
                   mode: "vertical",
+                  label: "Gaji Bersih",
+                  type: "text",
+                  class: plainFieldClass,
+                  required: true,
+                  value: IDRFormat(data.Debitur.salary || 0),
+                  onChange: (e: string) =>
+                    setData({
+                      ...data,
+                      Debitur: {
+                        ...data.Debitur,
+                        salary: IDRToNumber(e || "0"),
+                      },
+                    }),
+                }}
+              />
+              <FormInput
+                data={{
+                  mode: "vertical",
                   label: "Jenis Pembiayaan",
                   type: "select",
-                  class: "w-full",
+                  class: plainFieldClass,
                   options: jenis.map((j) => ({ label: j.name, value: j.id })),
                   value: data.jenisPembiayaanId,
                   onChange: (e: string) => {
@@ -1126,7 +1184,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                   mode: "vertical",
                   label: "Kantor Bayar Asal",
                   type: "text",
-                  class: "flex-1",
+                  class: plainFieldClass,
                   required: true,
                   value: data.mutasi_from,
                   onChange: (e: string) =>
@@ -1142,7 +1200,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                   mode: "vertical",
                   label: "Kantor Bayar Tujuan",
                   type: "text",
-                  class: "flex-1",
+                  class: plainFieldClass,
                   value: data.mutasi_to,
                   onChange: (e: string) =>
                     setData({
@@ -1156,7 +1214,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                   mode: "vertical",
                   label: "Nomor Rekening",
                   type: "text",
-                  class: "flex-1",
+                  class: plainFieldClass,
                   value: data.Debitur.account_number,
                   onChange: (e: string) =>
                     setData({
@@ -1170,7 +1228,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                   mode: "vertical",
                   label: "Nama Bank (Rekening)",
                   type: "text",
-                  class: "flex-1",
+                  class: plainFieldClass,
                   value: data.Debitur.account_name,
                   onChange: (e: string) =>
                     setData({
@@ -1184,7 +1242,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                   mode: "vertical",
                   label: "Instansi Takeover",
                   type: "text",
-                  class: "flex-1",
+                  class: plainFieldClass,
                   value: data.takeover_from,
                   onChange: (e: string) =>
                     setData({
@@ -1198,7 +1256,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                   mode: "vertical",
                   label: "Est Tgl Takeover",
                   type: "date",
-                  class: "flex-1",
+                  class: plainFieldClass,
                   value: moment(data.takeover_date).format("YYYY-MM-DD"),
                   onChange: (e: string) =>
                     setData({
@@ -1208,229 +1266,256 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                 }}
               />
             </div>
-            <div className="flex-1 ">
-              <div className="flex-1">
-                <p>Produk Pembiayaan</p>
-                <Select
-                  className="w-full"
-                  options={sumdanAv.map((j) => ({
-                    label: j.name,
-                    options: j.ProdukPembiayaan.map((p) => ({
-                      label: `${p.name} - ${p.id}`,
-                      value: p.id,
-                    })),
-                  }))}
-                  value={data.produkPembiayaanId}
-                  onChange={(e: string) => {
-                    const find = sumdan
-                      .flatMap((s) => s.ProdukPembiayaan)
-                      .find((f) => f.id === e);
-                    if (find) {
-                      setData({
-                        ...data,
-                        produkPembiayaanId: e,
-                        ProdukPembiayaan: find,
-                        c_margin: find.c_margin,
-                        c_margin_sumdan: find.Sumdan.c_margin,
-                        margin_type: find.margin_type,
-                        c_adm: find.c_adm,
-                        c_adm_sumdan: find.Sumdan.c_adm,
-                        c_insurance: find.c_insurance,
-                        c_gov: find.Sumdan.c_gov,
-                        c_account: find.Sumdan.c_account,
-                        c_stamp: find.Sumdan.c_stamps,
-                        c_infomation: find.Sumdan.c_information,
-                        c_provisi: find.Sumdan.c_provisi,
-                        rounded: find.Sumdan.rounded,
-                        rounded_sumdan: find.Sumdan.rounded_sumdan,
-                        tbo: find.Sumdan.tbo,
-                      });
-                    }
-                  }}
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <FormInput
-                  data={{
-                    mode: "vertical",
-                    label: "Tenor",
-                    type: "number",
-                    class: "flex-1",
-                    value: data.tenor,
-                    onChange: (e: string) =>
-                      setData({ ...data, tenor: Number(e) }),
-                  }}
-                />
-                <FormInput
-                  data={{
-                    mode: "vertical",
-                    label: "Max Tenor",
-                    type: "number",
-                    class: "flex-1",
-                    disabled: true,
-                    value: temp.max_tenor,
-                  }}
-                />
-                <FormInput
-                  data={{
-                    mode: "vertical",
-                    label: "Plafond",
-                    type: "text",
-                    class: "flex-1",
-                    value: IDRFormat(data.plafond),
-                    onChange: (e: string) =>
-                      setData({
-                        ...data,
-                        plafond: IDRToNumber(e || "0"),
-                      }),
-                  }}
-                />
-                <FormInput
-                  data={{
-                    mode: "vertical",
-                    label: "Max Plafond",
-                    type: "text",
-                    class: "flex-1",
-                    disabled: true,
-                    value: IDRFormat(temp.max_plafond || 0),
-                  }}
-                />
-                <FormInput
-                  data={{
-                    mode: "vertical",
-                    label: "Margin",
-                    type: "number",
-                    class: "flex-1",
-                    value: data.c_margin,
-                    onChange: (e: string) =>
-                      setData({ ...data, c_margin: Number(e) }),
-                  }}
-                />
-                <FormInput
-                  data={{
-                    mode: "vertical",
-                    label: "Margin Mitra",
-                    type: "number",
-                    class: "flex-1",
-                    value: data.c_margin_sumdan,
-                    onChange: (e: string) =>
-                      setData({ ...data, c_margin_sumdan: Number(e) }),
-                  }}
-                />
-                <FormInput
-                  data={{
-                    mode: "vertical",
-                    label: "Jenis Margin",
-                    type: "select",
-                    class: "flex-1",
-                    options: [
-                      { label: "ANUITAS", value: "ANUITAS" },
-                      { label: "EFEKTIF", value: "EFEKTIF" },
-                      { label: "FLAT", value: "FLAT" },
-                    ],
-                    value: data.margin_type,
-                    onChange: (e: string) =>
-                      setData({ ...data, margin_type: e as EMarginType }),
-                  }}
-                />
-                <FormInput
-                  data={{
-                    mode: "vertical",
-                    label: "Pembulatan",
-                    type: "text",
-                    class: "flex-1",
-                    value: IDRFormat(data.rounded),
-                    onChange: (e: string) =>
-                      setData({
-                        ...data,
-                        rounded: IDRToNumber(e || "0"),
-                      }),
-                  }}
-                />
-                <FormInput
-                  data={{
-                    mode: "vertical",
-                    label: "Pembulatan Mitra",
-                    type: "text",
-                    class: "flex-1",
-                    value: IDRFormat(data.rounded_sumdan),
-                    onChange: (e: string) =>
-                      setData({
-                        ...data,
-                        rounded_sumdan: IDRToNumber(e || "0"),
-                      }),
-                  }}
-                />
-              </div>
+          </div>
+          <div className={subpanelClass}>
+            <SectionMarker title="Produk & Rekomendasi" tone="cyan" compact />
+            <div className="mt-3">
+              <p className="mb-2 text-sm font-semibold text-slate-700">
+                Produk Pembiayaan
+              </p>
+              <Select
+                size="large"
+                className="w-full"
+                options={sumdanAv.map((j) => ({
+                  label: j.name,
+                  options: j.ProdukPembiayaan.map((p) => ({
+                    label: `${p.name} - ${p.id}`,
+                    value: p.id,
+                  })),
+                }))}
+                value={data.produkPembiayaanId}
+                onChange={(e: string) => {
+                  const find = sumdan
+                    .flatMap((s) => s.ProdukPembiayaan)
+                    .find((f) => f.id === e);
+                  if (find) {
+                    setData({
+                      ...data,
+                      produkPembiayaanId: e,
+                      ProdukPembiayaan: find,
+                      c_margin: find.c_margin,
+                      c_margin_sumdan: find.Sumdan.c_margin,
+                      margin_type: find.margin_type,
+                      c_adm: find.c_adm,
+                      c_adm_sumdan: find.Sumdan.c_adm,
+                      c_insurance: find.c_insurance,
+                      c_gov: find.Sumdan.c_gov,
+                      c_account: find.Sumdan.c_account,
+                      c_stamp: find.Sumdan.c_stamps,
+                      c_infomation: find.Sumdan.c_information,
+                      c_provisi: find.Sumdan.c_provisi,
+                      rounded: find.Sumdan.rounded,
+                      rounded_sumdan: find.Sumdan.rounded_sumdan,
+                      tbo: find.Sumdan.tbo,
+                    });
+                  }
+                }}
+              />
+            </div>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <FormInput
+                data={{
+                  mode: "vertical",
+                  label: "Tenor",
+                  type: "number",
+                  class: plainFieldClass,
+                  value: data.tenor,
+                  onChange: (e: string) =>
+                    setData({ ...data, tenor: Number(e) }),
+                }}
+              />
+              <FormInput
+                data={{
+                  mode: "vertical",
+                  label: "Max Tenor",
+                  type: "number",
+                  class: plainFieldClass,
+                  disabled: true,
+                  value: temp.max_tenor,
+                }}
+              />
+              <FormInput
+                data={{
+                  mode: "vertical",
+                  label: "Plafond",
+                  type: "text",
+                  class: plainFieldClass,
+                  value: IDRFormat(data.plafond),
+                  onChange: (e: string) =>
+                    setData({
+                      ...data,
+                      plafond: IDRToNumber(e || "0"),
+                    }),
+                }}
+              />
+              <FormInput
+                data={{
+                  mode: "vertical",
+                  label: "Max Plafond",
+                  type: "text",
+                  class: plainFieldClass,
+                  disabled: true,
+                  value: IDRFormat(temp.max_plafond || 0),
+                }}
+              />
+              <FormInput
+                data={{
+                  mode: "vertical",
+                  label: "Margin",
+                  type: "number",
+                  class: plainFieldClass,
+                  value: data.c_margin,
+                  onChange: (e: string) =>
+                    setData({ ...data, c_margin: Number(e) }),
+                }}
+              />
+              <FormInput
+                data={{
+                  mode: "vertical",
+                  label: "Margin Mitra",
+                  type: "number",
+                  class: plainFieldClass,
+                  value: data.c_margin_sumdan,
+                  onChange: (e: string) =>
+                    setData({ ...data, c_margin_sumdan: Number(e) }),
+                }}
+              />
+              <FormInput
+                data={{
+                  mode: "vertical",
+                  label: "Jenis Margin",
+                  type: "select",
+                  class: plainFieldClass,
+                  options: [
+                    { label: "ANUITAS", value: "ANUITAS" },
+                    { label: "EFEKTIF", value: "EFEKTIF" },
+                    { label: "FLAT", value: "FLAT" },
+                  ],
+                  value: data.margin_type,
+                  onChange: (e: string) =>
+                    setData({ ...data, margin_type: e as EMarginType }),
+                }}
+              />
+              <FormInput
+                data={{
+                  mode: "vertical",
+                  label: "Pembulatan",
+                  type: "text",
+                  class: plainFieldClass,
+                  value: IDRFormat(data.rounded),
+                  onChange: (e: string) =>
+                    setData({
+                      ...data,
+                      rounded: IDRToNumber(e || "0"),
+                    }),
+                }}
+              />
+              <FormInput
+                data={{
+                  mode: "vertical",
+                  label: "Pembulatan Mitra",
+                  type: "text",
+                  class: plainFieldClass,
+                  value: IDRFormat(data.rounded_sumdan),
+                  onChange: (e: string) =>
+                    setData({
+                      ...data,
+                      rounded_sumdan: IDRToNumber(e || "0"),
+                    }),
+                }}
+              />
             </div>
           </div>
         </div>
-        <Divider titlePlacement="left">Rincian Biaya</Divider>
-        <div className="flex gap-4 flex-col sm:flex-row items-end">
-          <div className="flex-1 flex-col gap-1">
-            <div className="flex justify-between border-b border-dashed my-1">
-              <div className="flex-1">Administrasi</div>
-              <div className="flex gap-2 flex-2">
-                <Input
-                  size="small"
-                  style={{ width: 80 }}
-                  suffix={<span className="text-xs italic opacity-70">%</span>}
-                  value={data.c_adm}
-                  onChange={(e) =>
-                    setData({ ...data, c_adm: Number(e.target.value || 0) })
-                  }
-                  type={"number"}
-                />
-                <Input
-                  size="small"
-                  style={{ width: 80 }}
-                  suffix={<span className="text-xs italic opacity-70">%</span>}
-                  value={data.c_adm_sumdan}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      c_adm_sumdan: Number(e.target.value || 0),
-                    })
-                  }
-                  type={"number"}
-                />
-                <Input
-                  size="small"
-                  disabled
-                  value={IDRFormat(
-                    (data.plafond * (data.c_adm + data.c_adm_sumdan)) / 100,
-                  )}
-                  style={{ textAlign: "right", color: "black" }}
-                />
+        <div className="pt-4 pb-2 md:pb-4">
+          <SectionMarker title="Rincian Biaya & Hasil Pembiayaan" tone="cyan" />
+        </div>
+        <div className="grid gap-3 xl:grid-cols-[minmax(0,1.02fr)_minmax(360px,0.98fr)] xl:items-start">
+          <div className="space-y-3.5 rounded-2xl border border-slate-200 bg-slate-50/75 p-3.5 md:p-4">
+            <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-2.5">
+              <div className="space-y-1">
+                <div className="text-sm font-semibold text-slate-900">
+                  Rincian biaya
+                </div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">
+                  Komponen potongan pembiayaan
+                </div>
+              </div>
+              <div className="shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-right">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Total biaya
+                </div>
+                <div className="mt-0.5 text-base font-bold text-slate-700">
+                  {IDRFormat(GetBiaya(data))}
+                </div>
               </div>
             </div>
-            <div className="flex justify-between border-b border-dashed my-1">
-              <div className="flex-1">Asuransi</div>
-              <div className="flex gap-2 flex-2">
-                <Input
-                  size="small"
-                  style={{ width: 80 }}
-                  suffix={<span className="text-xs italic opacity-70">%</span>}
-                  value={data.c_insurance}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      c_insurance: Number(e.target.value || 0),
-                    })
-                  }
-                  type={"number"}
-                />
-                <Input
-                  size="small"
-                  disabled
-                  value={IDRFormat((data.plafond * data.c_insurance) / 100)}
-                  style={{ textAlign: "right", color: "black" }}
-                />
-              </div>
-            </div>
-            <div className="flex justify-between border-b border-dashed my-1">
-              <div className="flex-1">Tatalaksana</div>
-              <div className="flex gap-2 flex-2">
+
+            <div className="space-y-2.5">
+              <BiayaRow label="Administrasi">
+                <div className="grid flex-1 gap-2 sm:grid-cols-[72px_72px_minmax(120px,160px)] md:justify-end">
+                  <Input
+                    size="small"
+                    suffix={
+                      <span className="text-xs italic opacity-70">%</span>
+                    }
+                    value={data.c_adm}
+                    onChange={(e) =>
+                      setData({ ...data, c_adm: Number(e.target.value || 0) })
+                    }
+                    type="number"
+                  />
+                  <Input
+                    size="small"
+                    suffix={
+                      <span className="text-xs italic opacity-70">%</span>
+                    }
+                    value={data.c_adm_sumdan}
+                    onChange={(e) =>
+                      setData({
+                        ...data,
+                        c_adm_sumdan: Number(e.target.value || 0),
+                      })
+                    }
+                    type="number"
+                  />
+                  <Input
+                    size="small"
+                    disabled
+                    value={IDRFormat(
+                      (data.plafond * (data.c_adm + data.c_adm_sumdan)) / 100,
+                    )}
+                    style={{ textAlign: "right", color: "black" }}
+                  />
+                </div>
+              </BiayaRow>
+
+              <BiayaRow label="Asuransi">
+                <div className="grid flex-1 gap-2 sm:grid-cols-[72px_minmax(120px,160px)] md:justify-end">
+                  <Input
+                    size="small"
+                    suffix={
+                      <span className="text-xs italic opacity-70">%</span>
+                    }
+                    value={data.c_insurance}
+                    onChange={(e) =>
+                      setData({
+                        ...data,
+                        c_insurance: Number(e.target.value || 0),
+                      })
+                    }
+                    type="number"
+                  />
+                  <Input
+                    size="small"
+                    disabled
+                    value={IDRFormat((data.plafond * data.c_insurance) / 100)}
+                    style={{ textAlign: "right", color: "black" }}
+                  />
+                </div>
+              </BiayaRow>
+
+              <BiayaRow label="Tatalaksana">
                 <Input
                   size="small"
                   value={IDRFormat(data.c_gov)}
@@ -1442,11 +1527,9 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                     })
                   }
                 />
-              </div>
-            </div>
-            <div className="flex justify-between border-b border-dashed my-1">
-              <div className="flex-1">Buka Rekening</div>
-              <div className="flex gap-2 flex-2">
+              </BiayaRow>
+
+              <BiayaRow label="Buka Rekening">
                 <Input
                   size="small"
                   value={IDRFormat(data.c_account)}
@@ -1458,11 +1541,9 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                     })
                   }
                 />
-              </div>
-            </div>
-            <div className="flex justify-between border-b border-dashed my-1">
-              <div className="flex-1">Provisi</div>
-              <div className="flex gap-2 flex-2">
+              </BiayaRow>
+
+              <BiayaRow label="Provisi">
                 <Input
                   size="small"
                   value={IDRFormat(data.c_provisi)}
@@ -1474,11 +1555,9 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                     })
                   }
                 />
-              </div>
-            </div>
-            <div className="flex justify-between border-b border-dashed my-1">
-              <div className="flex-1">Data Informasi</div>
-              <div className="flex gap-2 flex-2">
+              </BiayaRow>
+
+              <BiayaRow label="Data Informasi">
                 <Input
                   size="small"
                   value={IDRFormat(data.c_infomation)}
@@ -1490,146 +1569,157 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                     })
                   }
                 />
-              </div>
-            </div>
-            <div className="flex justify-between border-b border-dashed my-1">
-              <div className="flex-1">Materai</div>
-              <div className="flex gap-2 flex-2">
+              </BiayaRow>
+
+              <BiayaRow label="Materai">
                 <Input
                   size="small"
                   disabled
                   value={IDRFormat(data.c_stamp)}
                   style={{ textAlign: "right", color: "black" }}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      c_stamp: IDRToNumber(e.target.value || "0"),
-                    })
-                  }
                 />
-              </div>
-            </div>
-            <div className="flex justify-between border-b border-dashed my-1">
-              <div className="flex-1">Mutasi</div>
-              <div className="flex gap-2 flex-2">
+              </BiayaRow>
+
+              <BiayaRow label="Mutasi">
                 <Input
                   size="small"
                   disabled
                   value={IDRFormat(data.c_mutasi)}
                   style={{ textAlign: "right", color: "black" }}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      c_mutasi: IDRToNumber(e.target.value || "0"),
-                    })
-                  }
                 />
-              </div>
-            </div>
-            <div className="flex justify-between border-b border-dashed my-1">
-              <div className="flex-1">Blokir Angsuran</div>
-              <div className="flex gap-2 flex-2">
-                <Input
-                  size="small"
-                  style={{ width: 80 }}
-                  suffix={<span className="text-xs italic opacity-70">%</span>}
-                  value={data.c_blokir}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      c_blokir: Number(e.target.value || 0),
-                    })
-                  }
-                  type={"number"}
-                />
-                <Input
-                  size="small"
-                  disabled
-                  value={IDRFormat(data.c_blokir * temp.angsuran)}
-                  style={{ textAlign: "right", color: "black" }}
-                />
-              </div>
-            </div>
-            <div className="flex justify-between border-t mt-3 text-red-500 font-bold">
-              <div className="flex-1">Total Biaya</div>
-              <div className="text-right">{IDRFormat(GetBiaya(data))}</div>
+              </BiayaRow>
+
+              <BiayaRow label="Blokir Angsuran">
+                <div className="grid flex-1 gap-2 sm:grid-cols-[72px_minmax(120px,160px)] md:justify-end">
+                  <Input
+                    size="small"
+                    suffix={
+                      <span className="text-xs italic opacity-70">%</span>
+                    }
+                    value={data.c_blokir}
+                    onChange={(e) =>
+                      setData({
+                        ...data,
+                        c_blokir: Number(e.target.value || 0),
+                      })
+                    }
+                    type="number"
+                  />
+                  <Input
+                    size="small"
+                    disabled
+                    value={IDRFormat(data.c_blokir * temp.angsuran)}
+                    style={{ textAlign: "right", color: "black" }}
+                  />
+                </div>
+              </BiayaRow>
             </div>
           </div>
-          <div className="flex-1">
-            <div className="flex justify-between my-1 italic">
-              <span>Angsuran</span>
-              <span>{IDRFormat(temp.angsuran)}</span>
+
+          <div className="space-y-3 xl:w-full">
+            <div className="grid gap-2.5 sm:grid-cols-2">
+              <FinanceSummaryTile
+                label="Angsuran"
+                value={IDRFormat(temp.angsuran)}
+                tone="slate"
+              />
+              <FinanceSummaryTile
+                label="Sisa Gaji"
+                value={IDRFormat(data.Debitur.salary - temp.angsuran)}
+                tone="emerald"
+              />
             </div>
-            <div className="flex justify-between my-1 italic">
-              <span>Sisa Gaji</span>
-              <span>{IDRFormat(data.Debitur.salary - temp.angsuran)}</span>
-            </div>
-            <div className="flex justify-between my-1 border-b rounded italic">
-              <span>Debt Service Ratio</span>
-              <span>
-                {(temp.angsuran / (data.Debitur.salary / 100)).toFixed(2)}% /{" "}
-                {data.ProdukPembiayaan?.Sumdan?.dsr ?? 0}%
-              </span>
-            </div>
-            <div className="my-5"></div>
-            <div className="flex justify-between border-b border-dashed my-1 font-bold text-blue-600">
-              <span>Terima Kotor</span>
-              <span>{IDRFormat(data.plafond - GetBiaya(data))}</span>
-            </div>
-            <div className="flex gap-2 justify-between items-center my-1">
-              <div className="flex-1">Bpp</div>
-              <div className="flex gap-2 flex-2">
-                <Input
-                  size="small"
-                  value={IDRFormat(data.c_bpp || 0)}
-                  style={{ textAlign: "right", color: "red" }}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      c_bpp: IDRToNumber(e.target.value || "0"),
-                    })
-                  }
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/75 p-3.5">
+              <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-2.5">
+                <div className="space-y-1">
+                  <div className="text-sm font-semibold text-slate-900">
+                    Hasil pembiayaan
+                  </div>
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">
+                    Ringkasan dana diterima
+                  </div>
+                </div>
+                <div className="shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-right">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    DSR
+                  </div>
+                  <div className="mt-0.5 text-sm font-bold leading-5 text-slate-700">
+                    {(temp.angsuran / (data.Debitur.salary / 100)).toFixed(2)}%
+                    / {data.ProdukPembiayaan?.Sumdan?.dsr ?? 0}%
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 space-y-2.5">
+                <FinanceResultRow
+                  label="Terima Kotor"
+                  value={IDRFormat(data.plafond - GetBiaya(data))}
+                  tone="sky"
+                  strong
+                />
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-2.5">
+                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Potongan tambahan
+                  </div>
+                  <div className="space-y-2">
+                    <FinanceEditableRow label="BPP">
+                      <Input
+                        size="small"
+                        value={IDRFormat(data.c_bpp || 0)}
+                        style={{ textAlign: "right", color: "#b91c1c" }}
+                        onChange={(e) =>
+                          setData({
+                            ...data,
+                            c_bpp: IDRToNumber(e.target.value || "0"),
+                          })
+                        }
+                      />
+                    </FinanceEditableRow>
+                    <FinanceEditableRow label="Nominal Takeover">
+                      <Input
+                        size="small"
+                        value={IDRFormat(data.c_takeover || 0)}
+                        style={{ textAlign: "right", color: "#b91c1c" }}
+                        onChange={(e) =>
+                          setData({
+                            ...data,
+                            c_takeover: IDRToNumber(e.target.value || "0"),
+                          })
+                        }
+                      />
+                    </FinanceEditableRow>
+                  </div>
+                </div>
+
+                <FinanceResultRow
+                  label="Terima Bersih"
+                  value={IDRFormat(
+                    data.plafond -
+                      (GetBiaya(data) + data.c_bpp + data.c_takeover),
+                  )}
+                  tone="emerald"
+                  strong
                 />
               </div>
-            </div>
-            <div className="flex gap-2 justify-between items-center my-1">
-              <div className="flex-1">Nominal Takeover</div>
-              <div className="flex gap-2 flex-2">
-                <Input
-                  size="small"
-                  value={IDRFormat(data.c_takeover || 0)}
-                  style={{ textAlign: "right", color: "red" }}
-                  onChange={(e) =>
-                    setData({
-                      ...data,
-                      c_takeover: IDRToNumber(e.target.value || "0"),
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <div className="flex justify-between border-b border-dashed my-1 font-bold text-green-600">
-              <span>Terima Bersih</span>
-              <span>
-                {IDRFormat(
-                  data.plafond -
-                    (GetBiaya(data) + data.c_bpp + data.c_takeover),
-                )}
-              </span>
             </div>
           </div>
         </div>
       </Card>
       <Card
-        title={
-          <div>
-            <SignatureOutlined /> Account Officer
-          </div>
-        }
-        style={{ marginTop: 5 }}
+        className="app-card overflow-hidden"
+        styles={{ body: compactCardBodyStyle }}
         loading={loading}
       >
-        <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
+        <div className="mb-4">
+          <SectionCardTitle
+            icon={<SignatureOutlined />}
+            title="Account Officer"
+            tone="emerald"
+          />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <FormInput
             data={{
               mode: "vertical",
@@ -1691,20 +1781,23 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
         </div>
       </Card>
       <Card
-        title={
-          <div>
-            <FolderOutlined /> Berkas Pembiayaan
-          </div>
-        }
-        style={{ marginTop: 5 }}
+        className="app-card overflow-hidden"
+        styles={{ body: compactCardBodyStyle }}
         loading={loading}
       >
-        <div className="flex flex-col gap-2">
+        <div className="mb-4">
+          <SectionCardTitle
+            icon={<FolderOutlined />}
+            title="Berkas Pembiayaan"
+            tone="rose"
+          />
+        </div>
+        <div className="max-w-4xl space-y-5">
           <FormInput
             data={{
               label: "Berkas SLIK (PDF)",
               type: "upload",
-              class: "flex-1",
+              class: "w-full max-w-2xl",
               accept: "application/pdf",
               value: data.file_slik,
               onChange: (e: string) => setData({ ...data, file_slik: e }),
@@ -1714,7 +1807,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
             data={{
               label: "Berkas Pengajuan (PDF)",
               type: "upload",
-              class: "flex-1",
+              class: "w-full max-w-2xl",
               accept: "application/pdf",
               value: data.file_submission,
               onChange: (e: string) => setData({ ...data, file_submission: e }),
@@ -1724,7 +1817,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
             data={{
               label: "Berkas Wawancara (MP4)",
               type: "upload",
-              class: "flex-1",
+              class: "w-full max-w-2xl",
               accept: "video/mp4",
               value: data.video_interview,
               onChange: (e: string) => setData({ ...data, video_interview: e }),
@@ -1734,7 +1827,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
             data={{
               label: "Berkas Asuransi (MP4)",
               type: "upload",
-              class: "flex-1",
+              class: "w-full max-w-2xl",
               accept: "video/mp4",
               value: data.video_insurance,
               onChange: (e: string) => setData({ ...data, video_insurance: e }),
@@ -1744,7 +1837,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
             data={{
               label: "Berkas Akad Kredit (PDF)",
               type: "upload",
-              class: "flex-1",
+              class: "w-full max-w-2xl",
               accept: "application/pdf",
               value: data.file_contract,
               onChange: (e: string) => setData({ ...data, file_contract: e }),
@@ -1772,6 +1865,155 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
           </Button>
         </div>
       </Card>
+    </div>
+  );
+}
+
+function SectionCardTitle({
+  icon,
+  title,
+  tone,
+}: {
+  icon: ReactNode;
+  title: string;
+  tone: "sky" | "emerald" | "violet" | "amber" | "cyan" | "rose";
+}) {
+  const toneMap = {
+    sky: "text-slate-900",
+    emerald: "text-slate-900",
+    violet: "text-slate-900",
+    amber: "text-slate-900",
+    cyan: "text-slate-900",
+    rose: "text-slate-900",
+  };
+
+  return (
+    <div className={`flex max-w-full items-center gap-2.5 ${toneMap[tone]}`}>
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-emerald-100 bg-emerald-50 text-sm text-emerald-600">
+        {icon}
+      </span>
+      <span className="min-w-0 text-base font-semibold leading-6">{title}</span>
+    </div>
+  );
+}
+
+function SectionMarker({
+  title,
+  tone,
+  compact = false,
+}: {
+  title: string;
+  tone: "slate" | "amber" | "violet" | "rose" | "cyan";
+  compact?: boolean;
+}) {
+  const toneMap = {
+    slate: "border-slate-200 text-slate-700",
+    amber: "border-slate-200 text-slate-700",
+    violet: "border-slate-200 text-slate-700",
+    rose: "border-slate-200 text-slate-700",
+    cyan: "border-slate-200 text-slate-700",
+  };
+
+  return (
+    <div
+      className={`border-b px-0 font-semibold ${toneMap[tone]} ${
+        compact ? "pb-1.5 text-sm" : "pb-2 text-sm sm:text-[15px]"
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-emerald-100 bg-emerald-50 text-xs text-emerald-600">
+          <SolutionOutlined />
+        </span>
+        <span>{title}</span>
+      </div>
+    </div>
+  );
+}
+
+function BiayaRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+      <div className="grid gap-2.5 md:grid-cols-[160px_minmax(0,1fr)] md:items-center md:gap-3">
+        <div className="min-w-0">
+          <div className="text-sm font-semibold leading-5 text-slate-900">
+            {label}
+          </div>
+        </div>
+        <div className="min-w-0">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function FinanceSummaryTile({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: "slate" | "emerald";
+}) {
+  const toneMap = {
+    slate: "border-slate-200 bg-white text-slate-800",
+    emerald: "border-slate-200 bg-white text-slate-800",
+  };
+
+  return (
+    <div className={`rounded-xl border p-3 ${toneMap[tone]}`}>
+      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+        {label}
+      </div>
+      <div className="mt-1.5 text-lg font-bold leading-tight">{value}</div>
+    </div>
+  );
+}
+
+function FinanceResultRow({
+  label,
+  value,
+  tone,
+  strong = false,
+}: {
+  label: string;
+  value: string;
+  tone: "sky" | "emerald";
+  strong?: boolean;
+}) {
+  const toneMap = {
+    sky: "border-slate-200 bg-white text-slate-700",
+    emerald: "border-slate-200 bg-white text-slate-700",
+  };
+
+  return (
+    <div
+      className={`grid gap-1.5 rounded-xl border px-3 py-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center ${toneMap[tone]}`}
+    >
+      <div className="text-[11px] font-semibold uppercase tracking-[0.14em]">
+        {label}
+      </div>
+      <div
+        className={`${strong ? "text-lg" : "text-base"} font-bold sm:text-right`}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function FinanceEditableRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+      <div className="grid gap-2 sm:grid-cols-[120px_minmax(0,1fr)] sm:items-center">
+        <div className="text-sm font-medium text-slate-700">{label}</div>
+        <div>{children}</div>
+      </div>
     </div>
   );
 }

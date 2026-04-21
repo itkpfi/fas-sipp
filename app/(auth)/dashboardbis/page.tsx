@@ -38,6 +38,24 @@ interface ISumdan extends Sumdan {
   ProdukPembiayaan: IProduk[];
 }
 
+const compactCurrencyFormatter = new Intl.NumberFormat("id-ID", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+const formatDashboardCurrency = (value: number) => {
+  if (Math.abs(value) < 1_000_000_000) {
+    return `Rp. ${IDRFormat(value)}`;
+  }
+
+  return `Rp. ${compactCurrencyFormatter.format(value)}`;
+};
+
+const getCurrencyDisplayMeta = (value: number) => ({
+  compact: formatDashboardCurrency(value),
+  full: `Rp. ${IDRFormat(value)}`,
+});
+
 const getProdukDapem = (produk: IProduk[] = []) =>
   produk
     .flatMap((item) => item.Dapem ?? [])
@@ -63,6 +81,11 @@ export default function Page() {
   const [expandedCabangIdByArea, setExpandedCabangIdByArea] = useState<
     Record<string, string | null>
   >({});
+
+  const resetExpansionState = () => {
+    setExpandedAreaId(null);
+    setExpandedCabangIdByArea({});
+  };
 
   const getData = async () => {
     setLoading(true);
@@ -118,7 +141,16 @@ export default function Page() {
   };
 
   useEffect(() => {
-    void getAreaOptions();
+    fetch("/api/area?limit=1000")
+      .then((res) => res.json())
+      .then((json) => {
+        setAreaOptions(
+          (json.data || []).map((area: IArea) => ({
+            label: area.name,
+            value: area.id,
+          })),
+        );
+      });
   }, []);
 
   useEffect(() => {
@@ -126,11 +158,6 @@ export default function Page() {
       await getData();
     }, 200);
     return () => clearTimeout(timeout);
-  }, [pageProps.page, pageProps.limit, pageProps.backdate, pageProps.areaId]);
-
-  useEffect(() => {
-    setExpandedAreaId(null);
-    setExpandedCabangIdByArea({});
   }, [pageProps.page, pageProps.limit, pageProps.backdate, pageProps.areaId]);
 
   const totalPlafond = summaryAreas
@@ -156,6 +183,12 @@ export default function Page() {
 
   const overallProgress =
     totalTarget > 0 ? (totalPlafond / totalTarget) * 100 : 0;
+
+  const totalPlafondDisplay = getCurrencyDisplayMeta(totalPlafond);
+  const totalTargetDisplay = getCurrencyDisplayMeta(totalTarget);
+  const averageAreaDisplay = getCurrencyDisplayMeta(
+    pageProps.total ? totalPlafond / pageProps.total : 0,
+  );
 
   const getCabangSummary = (cabang: ICabang) => {
     const noa = cabang.User.flatMap((user) => user.AODapem);
@@ -265,11 +298,13 @@ export default function Page() {
           <div className="relative z-10 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <HeroMetric
               label="Total pencapaian"
-              value={`Rp. ${IDRFormat(totalPlafond)}`}
+              value={totalPlafondDisplay.compact}
+              fullValue={totalPlafondDisplay.full}
             />
             <HeroMetric
               label="Total target"
-              value={`Rp. ${IDRFormat(totalTarget)}`}
+              value={totalTargetDisplay.compact}
+              fullValue={totalTargetDisplay.full}
             />
             <HeroMetric label="Total NOA" value={`${totalNoa}`} />
             <HeroMetric
@@ -300,10 +335,11 @@ export default function Page() {
             <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
               Rata-rata area
             </div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">
-              Rp.{" "}
-              {IDRFormat(pageProps.total ? totalPlafond / pageProps.total : 0)}
-            </div>
+            <MetricValue
+              className="mt-2 text-3xl font-bold text-slate-900"
+              value={averageAreaDisplay.compact}
+              fullValue={averageAreaDisplay.full}
+            />
           </div>
           <div className="app-stat-tile">
             <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
@@ -332,24 +368,27 @@ export default function Page() {
                 placeholder="Pilih area spesifik"
                 options={areaOptions}
                 value={pageProps.areaId}
-                onChange={(value) =>
+                onChange={(value) => {
+                  resetExpansionState();
                   setPageProps((prev) => ({
                     ...prev,
                     page: 1,
                     areaId: value,
-                  }))
-                }
+                  }));
+                }}
+                onClear={resetExpansionState}
                 className="min-w-[220px]"
               />
               <RangePicker
                 size="large"
-                onChange={(date, dateStr) =>
+                onChange={(date, dateStr) => {
+                  resetExpansionState();
                   setPageProps((prev) => ({
                     ...prev,
                     page: 1,
                     backdate: dateStr,
-                  }))
-                }
+                  }));
+                }}
                 style={{ width: 260 }}
               />
             </div>
@@ -586,13 +625,14 @@ export default function Page() {
                 total={pageProps.total}
                 showSizeChanger
                 pageSizeOptions={[4, 6, 8, 12]}
-                onChange={(page, pageSize) =>
+                onChange={(page, pageSize) => {
+                  resetExpansionState();
                   setPageProps((prev) => ({
                     ...prev,
                     page,
                     limit: pageSize,
-                  }))
-                }
+                  }));
+                }}
               />
             </div>
           </section>
@@ -626,13 +666,49 @@ export default function Page() {
   );
 }
 
-function HeroMetric({ label, value }: { label: string; value: string }) {
+function MetricValue({
+  value,
+  fullValue,
+  className,
+}: {
+  value: string;
+  fullValue?: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={className}
+      title={fullValue ?? value}
+    >
+      <div className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap tracking-[-0.03em] [text-wrap:balance]">
+        {value}
+      </div>
+      {fullValue && fullValue !== value ? (
+        <div className="mt-1 text-xs font-medium text-inherit/70">{fullValue}</div>
+      ) : null}
+    </div>
+  );
+}
+
+function HeroMetric({
+  label,
+  value,
+  fullValue,
+}: {
+  label: string;
+  value: string;
+  fullValue?: string;
+}) {
   return (
     <div className="rounded-[24px] border border-white/12 bg-white/10 p-4 backdrop-blur xl:min-h-[112px]">
       <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-100/82">
         {label}
       </div>
-      <div className="mt-2 text-2xl font-semibold text-white">{value}</div>
+      <MetricValue
+        className="mt-2 text-xl font-semibold text-white sm:text-2xl"
+        value={value}
+        fullValue={fullValue}
+      />
     </div>
   );
 }
