@@ -256,6 +256,7 @@ model Dapem {
   rounded         Int
   rounded_sumdan  Int         @default(0)
   margin_type     EMarginType
+  insurance_type  String?
 
   takeover_from String?
   takeover_date DateTime?

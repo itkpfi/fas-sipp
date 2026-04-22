@@ -71,7 +71,7 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
     })();
     setInterval(async () => {
       await getNotif();
-    }, 1000 * 30);
+    }, 1000 * 5);
   }, []);
 
   const handleLogout = async () => {
@@ -89,7 +89,9 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
 
     return MenuPermission(
       listMenuUI,
-      JSON.parse(user.Role.permission || "[]").map((p: { path: string }) => p.path),
+      JSON.parse(user.Role.permission || "[]").map(
+        (p: { path: string }) => p.path,
+      ),
     );
   }, [user]);
 
@@ -122,7 +124,9 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
   const defaultOpenMenuKeys = useMemo(() => {
     const segments = selectedMenuKey.split("/").filter(Boolean);
 
-    return segments.slice(0, -1).map((_, index) => `/${segments.slice(0, index + 1).join("/")}`);
+    return segments
+      .slice(0, -1)
+      .map((_, index) => `/${segments.slice(0, index + 1).join("/")}`);
   }, [selectedMenuKey]);
 
   useEffect(() => {
@@ -308,7 +312,11 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
           }}
         >
           <div className="flex items-center gap-2 ml-2">
-            <img width={30} src={process.env.NEXT_PUBLIC_APP_LOGO || ""} alt="Logo aplikasi" />
+            <img
+              width={30}
+              src={process.env.NEXT_PUBLIC_APP_LOGO || ""}
+              alt="Logo aplikasi"
+            />
             <p className=" font-bold text-xl">
               {process.env.NEXT_PUBLIC_APP_SHORTNAME}
             </p>
