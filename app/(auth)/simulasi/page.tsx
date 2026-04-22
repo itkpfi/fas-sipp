@@ -119,7 +119,8 @@ export default function Page() {
 
   const totalBiaya = GetBiaya(data);
   const terimaKotor = data.plafon - totalBiaya;
-  const terimaBersih = data.plafon - (totalBiaya + data.c_bpp + data.c_takeover);
+  const terimaBersih =
+    data.plafon - (totalBiaya + data.c_bpp + data.c_takeover);
   const sisaGaji = data.salary - data.angsuran;
   const dsr = data.salary > 0 ? (data.angsuran / data.salary) * 100 : 0;
 
@@ -133,20 +134,36 @@ export default function Page() {
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-[24px] border border-white/16 bg-white/12 p-4 backdrop-blur">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">Plafond</div>
-            <div className="mt-2 text-2xl font-bold text-white">{IDRFormat(data.plafon || 0)}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">
+              Plafond
+            </div>
+            <div className="mt-2 text-2xl font-bold text-white">
+              {IDRFormat(data.plafon || 0)}
+            </div>
           </div>
           <div className="rounded-[24px] border border-white/16 bg-white/12 p-4 backdrop-blur">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">Angsuran</div>
-            <div className="mt-2 text-2xl font-bold text-white">{IDRFormat(data.angsuran || 0)}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">
+              Angsuran
+            </div>
+            <div className="mt-2 text-2xl font-bold text-white">
+              {IDRFormat(data.angsuran || 0)}
+            </div>
           </div>
           <div className="rounded-[24px] border border-white/16 bg-white/12 p-4 backdrop-blur">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">Total biaya</div>
-            <div className="mt-2 text-2xl font-bold text-white">{IDRFormat(totalBiaya)}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">
+              Total biaya
+            </div>
+            <div className="mt-2 text-2xl font-bold text-white">
+              {IDRFormat(totalBiaya)}
+            </div>
           </div>
           <div className="rounded-[24px] border border-white/16 bg-white/12 p-4 backdrop-blur">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">Terima bersih</div>
-            <div className="mt-2 text-2xl font-bold text-white">{IDRFormat(terimaBersih)}</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">
+              Terima bersih
+            </div>
+            <div className="mt-2 text-2xl font-bold text-white">
+              {IDRFormat(terimaBersih)}
+            </div>
           </div>
         </div>
       </section>
@@ -165,7 +182,9 @@ export default function Page() {
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
                   Data pemohon
                 </p>
-                <h2 className="text-xl font-semibold text-slate-900">Informasi dasar simulasi</h2>
+                <h2 className="text-xl font-semibold text-slate-900">
+                  Informasi dasar simulasi
+                </h2>
               </div>
             </div>
 
@@ -183,70 +202,76 @@ export default function Page() {
             />
 
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          <FormInput
-            data={{
-              label: "Nomor Pensiun",
-              type: "text",
-              mode: "vertical",
-              class: "flex-1",
-              value: data.nopen,
-              onChange: (e: string) => setData({ ...data, nopen: e }),
-              suffix: (
-                <Button
-                  size="middle"
-                  type="primary"
-                  icon={<SearchOutlined />}
-                  loading={loading}
-                  onClick={() => handleSearch()}
-                ></Button>
-              ),
-            }}
-          />
-          <FormInput
-            data={{
-              label: "Nama Lengkap",
-              type: "text",
-              mode: "vertical",
-              class: "flex-1",
-              value: data.fullname,
-              onChange: (e: string) => setData({ ...data, fullname: e }),
-            }}
-          />
-          <FormInput
-            data={{
-              label: "Tanggal Lahir",
-              type: "date",
-              mode: "vertical",
-              class: "flex-1",
-              value: moment(data.birthdate).format("YYYY-MM-DD"),
-              onChange: (e: string) =>
-                setData({ ...data, birthdate: new Date(e) }),
-            }}
-          />
+              <FormInput
+                data={{
+                  label: "Nomor Pensiun",
+                  type: "text",
+                  mode: "vertical",
+                  class: "flex-1",
+                  value: data.nopen,
+                  onChange: (e: string) => setData({ ...data, nopen: e }),
+                  suffix: (
+                    <Button
+                      size="middle"
+                      type="primary"
+                      icon={<SearchOutlined />}
+                      loading={loading}
+                      onClick={() => handleSearch()}
+                    ></Button>
+                  ),
+                }}
+              />
+              <FormInput
+                data={{
+                  label: "Nama Lengkap",
+                  type: "text",
+                  mode: "vertical",
+                  class: "flex-1",
+                  value: data.fullname,
+                  onChange: (e: string) => setData({ ...data, fullname: e }),
+                }}
+              />
+              <FormInput
+                data={{
+                  label: "Tanggal Lahir",
+                  type: "date",
+                  mode: "vertical",
+                  class: "flex-1",
+                  value: moment(data.birthdate).format("YYYY-MM-DD"),
+                  onChange: (e: string) =>
+                    setData({ ...data, birthdate: new Date(e) }),
+                }}
+              />
             </div>
 
             <div className="rounded-[24px] border border-slate-200 bg-slate-50/85 p-4">
-              <p className="text-sm font-semibold text-slate-700">Usia Pemohon</p>
+              <p className="text-sm font-semibold text-slate-700">
+                Usia Pemohon
+              </p>
               <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              <Input
-                disabled
-                style={{ color: "black" }}
-                value={GetFullAge(data.birthdate, data.created_at).year}
-                suffix={<span className="text-xs italic opacity-70">Thn</span>}
-              />
-              <Input
-                disabled
-                style={{ color: "black" }}
-                value={GetFullAge(data.birthdate, data.created_at).month}
-                suffix={<span className="text-xs italic opacity-70">Bln</span>}
-              />
-              <Input
-                disabled
-                style={{ color: "black" }}
-                value={GetFullAge(data.birthdate, data.created_at).day}
-                suffix={<span className="text-xs italic opacity-70">Hr</span>}
-              />
-            </div>
+                <Input
+                  disabled
+                  style={{ color: "black" }}
+                  value={GetFullAge(data.birthdate, data.created_at).year}
+                  suffix={
+                    <span className="text-xs italic opacity-70">Thn</span>
+                  }
+                />
+                <Input
+                  disabled
+                  style={{ color: "black" }}
+                  value={GetFullAge(data.birthdate, data.created_at).month}
+                  suffix={
+                    <span className="text-xs italic opacity-70">Bln</span>
+                  }
+                />
+                <Input
+                  disabled
+                  style={{ color: "black" }}
+                  value={GetFullAge(data.birthdate, data.created_at).day}
+                  suffix={<span className="text-xs italic opacity-70">Hr</span>}
+                />
+              </div>
             </div>
 
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -290,7 +315,8 @@ export default function Page() {
                   class: "flex-1",
                   value: data.margin,
                   disabled: !hasAccess("proses"),
-                  onChange: (e: string) => setData({ ...data, margin: Number(e) }),
+                  onChange: (e: string) =>
+                    setData({ ...data, margin: Number(e) }),
                 }}
               />
             </div>
@@ -301,7 +327,9 @@ export default function Page() {
               </div>
 
               <div>
-                <p className="mb-2 text-sm font-semibold text-slate-700">Produk Pembiayaan</p>
+                <p className="mb-2 text-sm font-semibold text-slate-700">
+                  Produk Pembiayaan
+                </p>
                 <Select
                   size="large"
                   className="w-full"
@@ -318,7 +346,9 @@ export default function Page() {
                       .flatMap((s) => s.ProdukPembiayaan)
                       .find((f) => f.id === e);
                     if (find) {
-                      const findSumdan = sumdan.find((s) => s.id === find.sumdanId);
+                      const findSumdan = sumdan.find(
+                        (s) => s.id === find.sumdanId,
+                      );
                       if (findSumdan) {
                         setData({
                           ...data,
@@ -341,83 +371,94 @@ export default function Page() {
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
-            <FormInput
-              data={{
-                label: "Tenor",
-                type: "number",
-                mode: "vertical",
-                class: "flex-1",
-                value: data.tenor,
-                onChange: (e: string) => setData({ ...data, tenor: Number(e) }),
-              }}
-            />
-            <FormInput
-              data={{
-                label: "Max Tenor",
-                type: "number",
-                mode: "vertical",
-                class: "flex-1",
-                disabled: true,
-                value: data.max_tenor,
-              }}
-            />
+                <FormInput
+                  data={{
+                    label: "Tenor",
+                    type: "number",
+                    mode: "vertical",
+                    class: "flex-1",
+                    value: data.tenor,
+                    onChange: (e: string) =>
+                      setData({ ...data, tenor: Number(e) }),
+                  }}
+                />
+                <FormInput
+                  data={{
+                    label: "Max Tenor",
+                    type: "number",
+                    mode: "vertical",
+                    class: "flex-1",
+                    disabled: true,
+                    value: data.max_tenor,
+                  }}
+                />
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
-            <FormInput
-              data={{
-                label: "Plafond",
-                type: "text",
-                mode: "vertical",
-                class: "flex-1",
-                value: IDRFormat(data.plafon || 0),
-                onChange: (e: string) =>
-                  setData({ ...data, plafon: IDRToNumber(e || "0") }),
-              }}
-            />
-            <FormInput
-              data={{
-                label: "Max Plafond",
-                type: "text",
-                mode: "vertical",
-                class: "flex-1",
-                disabled: true,
-                value: IDRFormat(data.max_plafond || 0),
-              }}
-            />
+                <FormInput
+                  data={{
+                    label: "Plafond",
+                    type: "text",
+                    mode: "vertical",
+                    class: "flex-1",
+                    value: IDRFormat(data.plafon || 0),
+                    onChange: (e: string) =>
+                      setData({ ...data, plafon: IDRToNumber(e || "0") }),
+                  }}
+                />
+                <FormInput
+                  data={{
+                    label: "Max Plafond",
+                    type: "text",
+                    mode: "vertical",
+                    class: "flex-1",
+                    disabled: true,
+                    value: IDRFormat(data.max_plafond || 0),
+                  }}
+                />
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
-            <FormInput
-              data={{
-                label: "Angsuran",
-                type: "text",
-                mode: "vertical",
-                class: "flex-1",
-                disabled: true,
-                value: IDRFormat(data.angsuran || 0),
-              }}
-            />
-            <FormInput
-              data={{
-                label: "Max Angsuran",
-                type: "text",
-                mode: "vertical",
-                class: "flex-1",
-                disabled: true,
-                value: IDRFormat((data.salary * data.Sumdan.dsr) / 100 || 0),
-                onChange: (e: string) =>
-                  setData({ ...data, salary: IDRToNumber(e || "0") }),
-              }}
-            />
+                <FormInput
+                  data={{
+                    label: "Angsuran",
+                    type: "text",
+                    mode: "vertical",
+                    class: "flex-1",
+                    disabled: true,
+                    value: IDRFormat(data.angsuran || 0),
+                  }}
+                />
+                <FormInput
+                  data={{
+                    label: "Max Angsuran",
+                    type: "text",
+                    mode: "vertical",
+                    class: "flex-1",
+                    disabled: true,
+                    value: IDRFormat(
+                      (data.salary * data.Sumdan.dsr) / 100 || 0,
+                    ),
+                    onChange: (e: string) =>
+                      setData({ ...data, salary: IDRToNumber(e || "0") }),
+                  }}
+                />
               </div>
             </div>
 
             <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
-              <Button danger icon={<HistoryOutlined />} onClick={() => setData(defaultData)}>
+              <Button
+                danger
+                icon={<HistoryOutlined />}
+                onClick={() => setData(defaultData)}
+              >
                 Reset
               </Button>
-              <Button type="primary" icon={<PrinterOutlined />} onClick={() => setOpen(true)}>
+              <Button
+                type="primary"
+                icon={<PrinterOutlined />}
+                onClick={() => setOpen(true)}
+              >
                 Cetak
               </Button>
             </div>
@@ -434,12 +475,20 @@ export default function Page() {
           <div className="space-y-5">
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="app-stat-tile">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Sisa gaji</div>
-                <div className="mt-2 text-3xl font-bold text-slate-900">{IDRFormat(sisaGaji)}</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  Sisa gaji
+                </div>
+                <div className="mt-2 text-3xl font-bold text-slate-900">
+                  {IDRFormat(sisaGaji)}
+                </div>
               </div>
               <div className="app-stat-tile">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Debt service ratio</div>
-                <div className="mt-2 text-3xl font-bold text-slate-900">{dsr.toFixed(2)}%</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  Debt service ratio
+                </div>
+                <div className="mt-2 text-3xl font-bold text-slate-900">
+                  {dsr.toFixed(2)}%
+                </div>
               </div>
             </div>
 
@@ -450,173 +499,191 @@ export default function Page() {
 
               <div className="space-y-3">
                 <div className="grid gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,21rem)] lg:items-center">
-                  <div className="min-w-0 text-sm font-medium text-slate-700">Biaya Administrasi</div>
+                  <div className="min-w-0 text-sm font-medium text-slate-700">
+                    Biaya Administrasi
+                  </div>
                   <div className="grid w-full gap-2 md:grid-cols-[5.25rem_minmax(0,1fr)]">
-            <Input
-              className="w-full"
-              size="middle"
-              disabled={!hasAccess("proses")}
-              suffix={<span className="text-xs italic opacity-70">%</span>}
-              value={data.c_adm}
-              onChange={(e) =>
-                setData({ ...data, c_adm: Number(e.target.value || "0") })
-              }
-              type={"number"}
-            />
-            <Input
-              className="w-full"
-              size="middle"
-              disabled
-              value={IDRFormat((data.plafon * data.c_adm) / 100)}
-              style={{ textAlign: "right", color: "black" }}
-            />
-          </div>
+                    <Input
+                      className="w-full"
+                      size="middle"
+                      disabled={!hasAccess("proses")}
+                      suffix={
+                        <span className="text-xs italic opacity-70">%</span>
+                      }
+                      value={data.c_adm}
+                      onChange={(e) =>
+                        setData({
+                          ...data,
+                          c_adm: Number(e.target.value || "0"),
+                        })
+                      }
+                      type={"number"}
+                    />
+                    <Input
+                      className="w-full"
+                      size="middle"
+                      disabled
+                      value={IDRFormat((data.plafon * data.c_adm) / 100)}
+                      style={{ textAlign: "right", color: "black" }}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,21rem)] lg:items-center">
-                  <div className="min-w-0 text-sm font-medium text-slate-700">Biaya Asuransi</div>
+                  <div className="min-w-0 text-sm font-medium text-slate-700">
+                    Biaya Asuransi
+                  </div>
                   <div className="grid w-full gap-2 md:grid-cols-[5.25rem_minmax(0,1fr)]">
-            <Input
-              className="w-full"
-              size="middle"
-              disabled={!hasAccess("proses")}
-              suffix={<span className="text-xs italic opacity-70">%</span>}
-              value={data.c_insurance}
-              onChange={(e) =>
-                setData({
-                  ...data,
-                  c_insurance: Number(e.target.value || "0"),
-                })
-              }
-              type={"number"}
-            />
-            <Input
-              className="w-full"
-              size="middle"
-              disabled
-              value={IDRFormat((data.plafon * data.c_insurance) / 100)}
-              style={{ textAlign: "right", color: "black" }}
-            />
-          </div>
+                    <Input
+                      className="w-full"
+                      size="middle"
+                      disabled={!hasAccess("proses")}
+                      suffix={
+                        <span className="text-xs italic opacity-70">%</span>
+                      }
+                      value={data.c_insurance}
+                      onChange={(e) =>
+                        setData({
+                          ...data,
+                          c_insurance: Number(e.target.value || "0"),
+                        })
+                      }
+                      type={"number"}
+                    />
+                    <Input
+                      className="w-full"
+                      size="middle"
+                      disabled
+                      value={IDRFormat((data.plafon * data.c_insurance) / 100)}
+                      style={{ textAlign: "right", color: "black" }}
+                    />
+                  </div>
                 </div>
 
                 <SimulasiRow label="Biaya Tatalaksana">
-            <Input
-              className="w-full lg:min-w-[13rem]"
-              size="middle"
-              disabled={!hasAccess}
-              value={IDRFormat(data.c_gov)}
-              style={{ textAlign: "right", color: "black" }}
-              onChange={(e) =>
-                setData({ ...data, c_gov: IDRToNumber(e.target.value || "0") })
-              }
-            />
+                  <Input
+                    className="w-full lg:min-w-[13rem]"
+                    size="middle"
+                    disabled={!hasAccess}
+                    value={IDRFormat(data.c_gov)}
+                    style={{ textAlign: "right", color: "black" }}
+                    onChange={(e) =>
+                      setData({
+                        ...data,
+                        c_gov: IDRToNumber(e.target.value || "0"),
+                      })
+                    }
+                  />
                 </SimulasiRow>
 
                 <SimulasiRow label="Biaya Buka Rekening">
-            <Input
-              className="w-full lg:min-w-[13rem]"
-              size="middle"
-              disabled={!hasAccess}
-              value={IDRFormat(data.c_account)}
-              style={{ textAlign: "right", color: "black" }}
-              onChange={(e) =>
-                setData({
-                  ...data,
-                  c_account: IDRToNumber(e.target.value || "0"),
-                })
-              }
-            />
+                  <Input
+                    className="w-full lg:min-w-[13rem]"
+                    size="middle"
+                    disabled={!hasAccess}
+                    value={IDRFormat(data.c_account)}
+                    style={{ textAlign: "right", color: "black" }}
+                    onChange={(e) =>
+                      setData({
+                        ...data,
+                        c_account: IDRToNumber(e.target.value || "0"),
+                      })
+                    }
+                  />
                 </SimulasiRow>
 
                 <SimulasiRow label="Biaya Provisi">
-            <Input
-              className="w-full lg:min-w-[13rem]"
-              size="middle"
-              disabled={!hasAccess}
-              value={IDRFormat(data.c_provisi)}
-              style={{ textAlign: "right", color: "black" }}
-              onChange={(e) =>
-                setData({
-                  ...data,
-                  c_provisi: IDRToNumber(e.target.value || "0"),
-                })
-              }
-            />
+                  <Input
+                    className="w-full lg:min-w-[13rem]"
+                    size="middle"
+                    disabled={!hasAccess}
+                    value={IDRFormat(data.c_provisi)}
+                    style={{ textAlign: "right", color: "black" }}
+                    onChange={(e) =>
+                      setData({
+                        ...data,
+                        c_provisi: IDRToNumber(e.target.value || "0"),
+                      })
+                    }
+                  />
                 </SimulasiRow>
 
                 <SimulasiRow label="Biaya Data Informasi">
-            <Input
-              className="w-full lg:min-w-[13rem]"
-              size="middle"
-              disabled={!hasAccess}
-              value={IDRFormat(data.c_information)}
-              style={{ textAlign: "right", color: "black" }}
-              onChange={(e) =>
-                setData({
-                  ...data,
-                  c_information: IDRToNumber(e.target.value || "0"),
-                })
-              }
-            />
+                  <Input
+                    className="w-full lg:min-w-[13rem]"
+                    size="middle"
+                    disabled={!hasAccess}
+                    value={IDRFormat(data.c_information)}
+                    style={{ textAlign: "right", color: "black" }}
+                    onChange={(e) =>
+                      setData({
+                        ...data,
+                        c_information: IDRToNumber(e.target.value || "0"),
+                      })
+                    }
+                  />
                 </SimulasiRow>
 
                 <SimulasiRow label="Biaya Materai">
-            <Input
-              className="w-full lg:min-w-[13rem]"
-              size="middle"
-              disabled={!hasAccess}
-              value={IDRFormat(data.c_stamp)}
-              style={{ textAlign: "right", color: "black" }}
-              onChange={(e) =>
-                setData({
-                  ...data,
-                  c_stamp: IDRToNumber(e.target.value || "0"),
-                })
-              }
-            />
+                  <Input
+                    className="w-full lg:min-w-[13rem]"
+                    size="middle"
+                    disabled={!hasAccess}
+                    value={IDRFormat(data.c_stamp)}
+                    style={{ textAlign: "right", color: "black" }}
+                    onChange={(e) =>
+                      setData({
+                        ...data,
+                        c_stamp: IDRToNumber(e.target.value || "0"),
+                      })
+                    }
+                  />
                 </SimulasiRow>
 
                 <SimulasiRow label="Biaya Mutasi">
-            <Input
-              className="w-full lg:min-w-[13rem]"
-              size="middle"
-              disabled={!hasAccess}
-              value={IDRFormat(data.c_mutasi)}
-              style={{ textAlign: "right", color: "black" }}
-              onChange={(e) =>
-                setData({
-                  ...data,
-                  c_mutasi: IDRToNumber(e.target.value || "0"),
-                })
-              }
-            />
+                  <Input
+                    className="w-full lg:min-w-[13rem]"
+                    size="middle"
+                    disabled={!hasAccess}
+                    value={IDRFormat(data.c_mutasi)}
+                    style={{ textAlign: "right", color: "black" }}
+                    onChange={(e) =>
+                      setData({
+                        ...data,
+                        c_mutasi: IDRToNumber(e.target.value || "0"),
+                      })
+                    }
+                  />
                 </SimulasiRow>
 
                 <div className="grid gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,21rem)] lg:items-center">
-                  <div className="min-w-0 text-sm font-medium text-slate-700">Blokir Angsuran</div>
+                  <div className="min-w-0 text-sm font-medium text-slate-700">
+                    Blokir Angsuran
+                  </div>
                   <div className="grid w-full gap-2 md:grid-cols-[5.25rem_minmax(0,1fr)]">
-            <Input
-              className="w-full"
-              size="middle"
-              suffix={<span className="text-xs italic opacity-70">%</span>}
-              value={data.c_blokir}
-              onChange={(e) =>
-                setData({
-                  ...data,
-                  c_blokir: IDRToNumber(e.target.value || "0"),
-                })
-              }
-              type={"number"}
-            />
-            <Input
-              className="w-full"
-              size="middle"
-              disabled
-              value={IDRFormat(data.c_blokir * data.angsuran)}
-              style={{ textAlign: "right", color: "black" }}
-            />
-          </div>
+                    <Input
+                      className="w-full"
+                      size="middle"
+                      suffix={
+                        <span className="text-xs italic opacity-70">X</span>
+                      }
+                      value={data.c_blokir}
+                      onChange={(e) =>
+                        setData({
+                          ...data,
+                          c_blokir: IDRToNumber(e.target.value || "0"),
+                        })
+                      }
+                      type={"number"}
+                    />
+                    <Input
+                      className="w-full"
+                      size="middle"
+                      disabled
+                      value={IDRFormat(data.c_blokir * data.angsuran)}
+                      style={{ textAlign: "right", color: "black" }}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid gap-1 rounded-2xl border border-rose-200 bg-rose-50/90 px-4 py-3 font-semibold text-rose-600 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
@@ -637,33 +704,33 @@ export default function Page() {
               </div>
 
               <SimulasiRow label="BPP">
-            <Input
-              className="w-full lg:min-w-[13rem]"
-              size="middle"
-              value={IDRFormat(data.c_bpp || 0)}
-              style={{ textAlign: "right", color: "black" }}
-              onChange={(e) =>
-                setData({
-                  ...data,
-                  c_bpp: IDRToNumber(e.target.value || "0"),
-                })
-              }
-            />
+                <Input
+                  className="w-full lg:min-w-[13rem]"
+                  size="middle"
+                  value={IDRFormat(data.c_bpp || 0)}
+                  style={{ textAlign: "right", color: "black" }}
+                  onChange={(e) =>
+                    setData({
+                      ...data,
+                      c_bpp: IDRToNumber(e.target.value || "0"),
+                    })
+                  }
+                />
               </SimulasiRow>
 
               <SimulasiRow label="Nominal Takeover">
-            <Input
-              className="w-full lg:min-w-[13rem]"
-              size="middle"
-              value={IDRFormat(data.c_takeover || 0)}
-              style={{ textAlign: "right", color: "black" }}
-              onChange={(e) =>
-                setData({
-                  ...data,
-                  c_takeover: IDRToNumber(e.target.value || "0"),
-                })
-              }
-            />
+                <Input
+                  className="w-full lg:min-w-[13rem]"
+                  size="middle"
+                  value={IDRFormat(data.c_takeover || 0)}
+                  style={{ textAlign: "right", color: "black" }}
+                  onChange={(e) =>
+                    setData({
+                      ...data,
+                      c_takeover: IDRToNumber(e.target.value || "0"),
+                    })
+                  }
+                />
               </SimulasiRow>
 
               <div className="grid gap-1 rounded-2xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 font-semibold text-emerald-700 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
@@ -673,11 +740,15 @@ export default function Page() {
             </div>
 
             <div className="rounded-[24px] border border-slate-200 bg-slate-50/72 p-4 md:p-5">
-              <Divider style={{ marginTop: 0, marginBottom: 12 }}>Informasi Tambahan</Divider>
+              <Divider style={{ marginTop: 0, marginBottom: 12 }}>
+                Informasi Tambahan
+              </Divider>
               <div className="space-y-3 text-sm italic text-slate-700">
                 <div className="grid gap-1 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                   <div>Sisa Gaji</div>
-                  <div className="font-semibold sm:text-right">{IDRFormat(sisaGaji)}</div>
+                  <div className="font-semibold sm:text-right">
+                    {IDRFormat(sisaGaji)}
+                  </div>
                 </div>
                 <div className="grid gap-1 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                   <div>Debt Service Ratio</div>
@@ -705,7 +776,9 @@ function SimulasiRow({
   return (
     <div className="grid gap-3 rounded-2xl border border-dashed border-slate-200 bg-white/88 px-4 py-3 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,16rem)] lg:items-center">
       <div className="min-w-0 text-sm font-medium text-slate-700">{label}</div>
-      <div className="flex w-full flex-col gap-2 lg:w-auto lg:justify-end">{children}</div>
+      <div className="flex w-full flex-col gap-2 lg:w-auto lg:justify-end">
+        {children}
+      </div>
     </div>
   );
 }

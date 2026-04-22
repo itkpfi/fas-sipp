@@ -336,7 +336,7 @@ export default function Page() {
               Rata-rata area
             </div>
             <MetricValue
-              className="mt-2 text-3xl font-bold text-slate-900"
+              className="mt-2 text-2xl font-bold text-slate-900"
               value={averageAreaDisplay.compact}
               fullValue={averageAreaDisplay.full}
             />
@@ -676,15 +676,14 @@ function MetricValue({
   className?: string;
 }) {
   return (
-    <div
-      className={className}
-      title={fullValue ?? value}
-    >
+    <div className={className} title={fullValue ?? value}>
       <div className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap tracking-[-0.03em] [text-wrap:balance]">
         {value}
       </div>
       {fullValue && fullValue !== value ? (
-        <div className="mt-1 text-xs font-medium text-inherit/70">{fullValue}</div>
+        <div className="mt-1 text-xs font-medium text-inherit/70">
+          {fullValue}
+        </div>
       ) : null}
     </div>
   );

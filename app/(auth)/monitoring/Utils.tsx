@@ -1240,7 +1240,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
               <FormInput
                 data={{
                   mode: "vertical",
-                  label: "Instansi Takeover",
+                  label: "Pembiayaan Sebelumnya",
                   type: "text",
                   class: plainFieldClass,
                   value: data.takeover_from,
@@ -1254,7 +1254,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
               <FormInput
                 data={{
                   mode: "vertical",
-                  label: "Est Tgl Takeover",
+                  label: "Est Tgl Pelunasan",
                   type: "date",
                   class: plainFieldClass,
                   value: moment(data.takeover_date).format("YYYY-MM-DD"),
@@ -1262,6 +1262,26 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                     setData({
                       ...data,
                       takeover_date: new Date(e),
+                    }),
+                }}
+              />
+              <FormInput
+                data={{
+                  mode: "vertical",
+                  label: "Asuransi",
+                  type: "select",
+                  options: [
+                    { label: "BUMI PUTERA", value: "BUMI PUTERA" },
+                    { label: "CIU", value: "CIU" },
+                    { label: "VICTORIA", value: "VICTORIA" },
+                    { label: "RELIANCE", value: "RELIANCE" },
+                  ],
+                  class: plainFieldClass,
+                  value: data.insurance_type,
+                  onChange: (e: string) =>
+                    setData({
+                      ...data,
+                      insurance_type: e,
                     }),
                 }}
               />
@@ -1594,7 +1614,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                   <Input
                     size="small"
                     suffix={
-                      <span className="text-xs italic opacity-70">%</span>
+                      <span className="text-xs italic opacity-70">X</span>
                     }
                     value={data.c_blokir}
                     onChange={(e) =>
@@ -2040,6 +2060,7 @@ const defaultData: IDapem = {
   rounded: 0,
   rounded_sumdan: 0,
   margin_type: "ANUITAS",
+  insurance_type: "",
 
   takeover_from: null,
   takeover_date: null,
