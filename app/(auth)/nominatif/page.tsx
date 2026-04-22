@@ -67,6 +67,7 @@ export default function Page() {
     search: "",
     sumdanId: "",
     jenisPembiayaanId: "",
+    insurance_type: "",
     takeover_status: "",
     mutasi_status: "",
     flagging_status: "",
@@ -98,6 +99,7 @@ export default function Page() {
       page: 1,
       sumdanId: "",
       jenisPembiayaanId: "",
+      insurance_type: "",
       takeover_status: "",
       mutasi_status: "",
       flagging_status: "",
@@ -119,6 +121,8 @@ export default function Page() {
     if (pageProps.sumdanId) params.append("sumdanId", pageProps.sumdanId);
     if (pageProps.jenisPembiayaanId)
       params.append("jenisPembiayaanId", pageProps.jenisPembiayaanId);
+    if (pageProps.insurance_type)
+      params.append("insurance_type", pageProps.insurance_type);
     if (pageProps.backdate) params.append("backdate", pageProps.backdate);
     if (pageProps.takeover_status)
       params.append("takeover_status", pageProps.takeover_status);
@@ -154,6 +158,7 @@ export default function Page() {
     pageProps.search,
     pageProps.sumdanId,
     pageProps.jenisPembiayaanId,
+    pageProps.insurance_type,
     pageProps.backdate,
     pageProps.takeover_status,
     pageProps.mutasi_status,
@@ -791,8 +796,8 @@ export default function Page() {
           {hasAccess("update") && (
             <Button
               icon={<EditOutlined />}
-              size="small"
               type="primary"
+              className="app-table-action-btn"
               onClick={() =>
                 setSelected({ ...selected, proses: true, selected: record })
               }
@@ -804,7 +809,7 @@ export default function Page() {
             <Button
               icon={<FolderOutlined />}
               type="primary"
-              size="small"
+              className="app-table-action-btn"
               onClick={() =>
                 setSelected({ ...selected, upsert: true, selected: record })
               }
@@ -817,15 +822,20 @@ export default function Page() {
 
   return (
     <Card
+      className="app-master-card"
       title={
-        <div className="flex gap-2 font-bold text-xl">
-          <FileProtectOutlined /> Daftar Nominatif
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50 text-emerald-600">
+            <FileProtectOutlined />
+          </div>
+          <div>
+            <p className="text-xl font-bold text-slate-900">Daftar Nominatif</p>
+          </div>
         </div>
       }
-      styles={{ body: { padding: 5 } }}
     >
-      <div className="flex justify-between my-1 gap-2 overflow-auto">
-        <div className="flex gap-2">
+      <div className="app-report-toolbar gap-3 overflow-auto">
+        <div className="flex flex-wrap gap-2">
           <FilterData
             buttonSize="middle"
             buttonClassName="app-master-action"
@@ -900,6 +910,30 @@ export default function Page() {
                             ...pageProps,
                             page: 1,
                             jenisPembiayaanId: e || "",
+                          })
+                        }
+                        allowClear
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div className="app-filter-field">
+                      <p>Asuransi</p>
+                      <Select
+                        size="middle"
+                        className="app-master-select"
+                        placeholder="Pilih Asuransi..."
+                        options={[
+                          { label: "BUMI PUTERA", value: "BUMI PUTERA" },
+                          { label: "CIU", value: "CIU" },
+                          { label: "VICTORIA", value: "VICTORIA" },
+                          { label: "RELIANCE", value: "RELIANCE" },
+                        ]}
+                        value={pageProps.insurance_type || undefined}
+                        onChange={(e) =>
+                          setPageProps({
+                            ...pageProps,
+                            page: 1,
+                            insurance_type: e || "",
                           })
                         }
                         allowClear
@@ -1056,11 +1090,11 @@ export default function Page() {
             }
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
           <Button
             icon={<PrinterOutlined />}
-            size="small"
             type="primary"
+            className="app-master-action"
             onClick={() =>
               ExportToExcel(
                 [
@@ -1076,8 +1110,8 @@ export default function Page() {
             Excel
           </Button>
           <Input.Search
-            size="small"
-            style={{ width: 170 }}
+            size="large"
+            className="app-master-search md:w-[220px]"
             placeholder="Cari nama..."
             onChange={(e) =>
               setPageProps({ ...pageProps, search: e.target.value })
@@ -1087,12 +1121,12 @@ export default function Page() {
       </div>
 
       <Table
+        className="app-master-table"
         columns={columns}
         dataSource={pageProps.data}
-        size="small"
+        size="middle"
         loading={loading}
         rowKey={"id"}
-        bordered
         scroll={{ x: "max-content", y: "60vh" }}
         pagination={{
           current: pageProps.page,
@@ -1158,7 +1192,7 @@ export default function Page() {
           );
 
           return (
-            <Table.Summary.Row className="text-xs bg-blue-400">
+            <Table.Summary.Row className="bg-slate-100 text-xs">
               <Table.Summary.Cell index={0} colSpan={2} className="text-center">
                 <b>SUMMARY</b>
               </Table.Summary.Cell>

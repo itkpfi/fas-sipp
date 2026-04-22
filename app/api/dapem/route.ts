@@ -17,6 +17,7 @@ export const GET = async (request: NextRequest) => {
   const approv_status = request.nextUrl.searchParams.get("approv_status");
   const jenisPembiayaanId =
     request.nextUrl.searchParams.get("jenisPembiayaanId");
+  const insurance_type = request.nextUrl.searchParams.get("insurance_type");
   const sumdanId = request.nextUrl.searchParams.get("sumdanId");
   const document_status = request.nextUrl.searchParams.get("document_status");
   const guarantee_status = request.nextUrl.searchParams.get("guarantee_status");
@@ -83,6 +84,7 @@ export const GET = async (request: NextRequest) => {
           : { approv_status: approv_status as ESubmissionStatus }
         : {}),
       ...(jenisPembiayaanId && { jenisPembiayaanId: jenisPembiayaanId }),
+      ...(insurance_type && { insurance_type }),
       ...(sumdanId && { ProdukPembiayaan: { sumdanId: sumdanId } }),
       ...(document_status && {
         document_status: document_status as EDocStatus,
@@ -199,6 +201,7 @@ export const GET = async (request: NextRequest) => {
           : { approv_status: approv_status as ESubmissionStatus }
         : {}),
       ...(jenisPembiayaanId && { jenisPembiayaanId: jenisPembiayaanId }),
+      ...(insurance_type && { insurance_type }),
       ...(sumdanId && { ProdukPembiayaan: { sumdanId: sumdanId } }),
       ...(document_status && {
         document_status: document_status as EDocStatus,

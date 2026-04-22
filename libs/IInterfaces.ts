@@ -83,6 +83,7 @@ export interface IUserDapem extends User {
   Cabang: ICabang;
 }
 export interface IDapem extends Dapem {
+  insurance_type: any;
   Debitur: Debitur;
   ProdukPembiayaan: IProdukPembiayaan;
   CreatedBy: IUserDapem;
