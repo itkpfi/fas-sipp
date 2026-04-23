@@ -1801,6 +1801,7 @@ const defaultData: IDapem = {
   rounded: 0,
   rounded_sumdan: 0,
   margin_type: "ANUITAS",
+  insurance_type: "DEPLOY",
 
   takeover_from: null,
   takeover_date: null,
