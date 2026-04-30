@@ -147,11 +147,22 @@ export const GET = async (request: NextRequest) => {
           },
         },
       },
+      MOC: {
+        include: {
+          Cabang: {
+            include: {
+              Area: true,
+            },
+          },
+          SPVRelation: { include: { SPV: true } },
+        },
+      },
       Berkas: true,
       Jaminan: true,
       Angsuran: true,
       Dropping: true,
       Pelunasan: true,
+      AgentFronting: true,
     },
   });
 
@@ -249,6 +260,7 @@ export const POST = async (req: NextRequest) => {
     Debitur,
     CreatedBy,
     AO,
+    MOC,
     ProdukPembiayaan,
     JenisPembiayaan,
     Berkas,
@@ -256,6 +268,7 @@ export const POST = async (req: NextRequest) => {
     Angsuran,
     Dropping,
     Pelunasan,
+    AgentFronting,
     ...saved
   } = data;
   try {
@@ -288,6 +301,7 @@ export const PUT = async (req: NextRequest) => {
     Debitur,
     CreatedBy,
     AO,
+    MOC,
     ProdukPembiayaan,
     JenisPembiayaan,
     Berkas,
@@ -295,6 +309,7 @@ export const PUT = async (req: NextRequest) => {
     Angsuran,
     Dropping,
     Pelunasan,
+    AgentFronting,
     ...saved
   } = data;
   try {
@@ -375,11 +390,21 @@ export const PATCH = async (req: NextRequest) => {
           },
         },
       },
+      MOC: {
+        include: {
+          Cabang: {
+            include: {
+              Area: true,
+            },
+          },
+        },
+      },
       Berkas: true,
       Jaminan: true,
       Angsuran: true,
       Dropping: true,
       Pelunasan: true,
+      AgentFronting: true,
     },
   });
   if (!id)

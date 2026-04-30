@@ -15,6 +15,8 @@ export const GET = async (request: NextRequest) => {
   const pkwt_status = request.nextUrl.searchParams.get("pkwt_status") || "";
   const position = request.nextUrl.searchParams.get("position") || "";
   const sumdanId = request.nextUrl.searchParams.get("sumdanId") || "";
+  const agentFrontingId =
+    request.nextUrl.searchParams.get("agentFrontingId") || "";
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
   const session = await getSession();
@@ -46,6 +48,7 @@ export const GET = async (request: NextRequest) => {
           : {}),
       ...(pkwt_status && { pkwt_status: pkwt_status }),
       ...(position && { position: position }),
+      ...(agentFrontingId && { agentFrontingId: agentFrontingId }),
       status: true,
     },
     skip: skip,
@@ -59,6 +62,18 @@ export const GET = async (request: NextRequest) => {
       },
       Sumdan: true,
       Role: true,
+      SPVRelation: {
+        include: {
+          User: { include: { Cabang: true } },
+          SPV: { include: { Cabang: true } },
+        },
+      },
+      SPVRelations: {
+        include: {
+          User: { include: { Cabang: true } },
+          SPV: { include: { Cabang: true } },
+        },
+      },
     },
   });
 
@@ -84,6 +99,7 @@ export const GET = async (request: NextRequest) => {
           : {}),
       ...(pkwt_status && { pkwt_status: pkwt_status }),
       ...(position && { position: position }),
+      ...(agentFrontingId && { agentFrontingId: agentFrontingId }),
       status: true,
     },
   });
@@ -96,8 +112,19 @@ export const GET = async (request: NextRequest) => {
 };
 
 export const POST = async (request: NextRequest) => {
-  const body: User = await request.json();
-  const { id, nip, password, ...saved } = body;
+  const body = await request.json();
+  const {
+    id,
+    nip,
+    password,
+    Cabang,
+    Sumdan,
+    Role,
+    SPVRelation,
+    SPVRelations,
+    AgentFronting,
+    ...saved
+  } = body;
   try {
     const find = await prisma.user.findFirst({
       where: { username: saved.username },
@@ -111,9 +138,25 @@ export const POST = async (request: NextRequest) => {
     const generateId = await generateUserId();
     const generateNIP = await generateUserNIP(saved.cabangId);
     const pass = await bcrypt.hash(password, 10);
-    await prisma.user.create({
-      data: { id: generateId, nip: generateNIP, password: pass, ...saved },
+
+    await prisma.$transaction(async (tx) => {
+      const spv = await tx.sPVRelation.upsert({
+        where: { spvId: SPVRelation.spvId },
+        update: {},
+        create: { spvId: SPVRelation.spvId },
+      });
+      await tx.user.create({
+        data: {
+          id: generateId,
+          nip: generateNIP,
+          password: pass,
+          sPVRelationId: spv.id,
+          ...saved,
+        },
+      });
+      return true;
     });
+
     return NextResponse.json({
       status: 201,
       msg: "Berhasil menyimpan data user.",
@@ -128,8 +171,17 @@ export const POST = async (request: NextRequest) => {
 };
 
 export const PUT = async (request: NextRequest) => {
-  const body: User = await request.json();
-  const { id, ...updated } = body;
+  const body = await request.json();
+  const {
+    id,
+    Cabang,
+    Sumdan,
+    Role,
+    SPVRelation,
+    SPVRelations,
+    AgentFronting,
+    ...updated
+  } = body;
   try {
     const find = await prisma.user.findFirst({ where: { id } });
 
@@ -141,10 +193,18 @@ export const PUT = async (request: NextRequest) => {
       }
     }
 
-    await prisma.user.update({
-      where: { id: id },
-      data: { ...updated, updated_at: new Date() },
+    await prisma.$transaction(async (tx) => {
+      const spv = await tx.sPVRelation.upsert({
+        where: { spvId: SPVRelation.spvId },
+        create: { spvId: SPVRelation.spvId },
+        update: {},
+      });
+      await tx.user.update({
+        where: { id: id },
+        data: { ...updated, sPVRelationId: spv.id, updated_at: new Date() },
+      });
     });
+
     return NextResponse.json({
       status: 200,
       msg: "Berhasil memperbarui data user.",

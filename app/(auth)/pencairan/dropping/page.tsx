@@ -668,6 +668,11 @@ const ProsesDropping = ({
           : data.Dapem.map((d) => ({
               ...d,
               dropping_status: "APPROVED",
+              Debitur: {
+                ...d.Debitur,
+                pay_office: d.mutasi_to,
+                pay_office_cabang: d.pay_office_cabang,
+              },
             })),
       process_at: !record.status ? new Date() : data.process_at,
     };

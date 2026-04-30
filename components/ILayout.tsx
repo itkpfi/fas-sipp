@@ -44,8 +44,10 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
   });
   const appLogoSrc = process.env.NEXT_PUBLIC_APP_LOGO || "/logsvg.svg";
 
-  const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 600;
-  const isDesktopViewport = typeof window !== "undefined" && window.innerWidth >= 600;
+  const isMobileViewport =
+    typeof window !== "undefined" && window.innerWidth < 600;
+  const isDesktopViewport =
+    typeof window !== "undefined" && window.innerWidth >= 600;
 
   const getNotif = async () => {
     await fetch("/api/notif")
@@ -53,7 +55,8 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
       .then((res) => {
         let c = 0;
         if (user && res.data) {
-          if (crossAccess("update", "/monitoring")) c += res.data.draft + res.data.akad;
+          if (crossAccess("update", "/monitoring"))
+            c += res.data.draft + res.data.akad;
           if (crossAccess("read", "/proses/verif")) c += res.data.verif;
           if (crossAccess("read", "/proses/slik")) c += res.data.slik;
           if (crossAccess("read", "/proses/approv")) c += res.data.approv;
@@ -76,7 +79,7 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
       await getNotif();
       timer = setInterval(async () => {
         await getNotif();
-      }, 1000 * 30);
+      }, 1000 * 5);
     })();
 
     return () => {
@@ -99,7 +102,9 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
 
     return MenuPermission(
       listMenuUI,
-      JSON.parse(user.Role.permission || "[]").map((p: { path: string }) => p.path),
+      JSON.parse(user.Role.permission || "[]").map(
+        (p: { path: string }) => p.path,
+      ),
     );
   }, [user]);
 
@@ -204,11 +209,11 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
             inlineCollapsed={collapsed}
             mode="inline"
             className={`${styles.sidebarMenu} ${collapsed ? styles.sidebarMenuCollapsed : ""}`}
-              style={{
-                width: collapsed ? (isDesktopViewport ? 80 : 0) : 250,
-                height: collapsed ? "calc(100vh - 72px)" : "calc(100vh - 208px)",
-                overflow: "auto",
-              }}
+            style={{
+              width: collapsed ? (isDesktopViewport ? 80 : 0) : 250,
+              height: collapsed ? "calc(100vh - 72px)" : "calc(100vh - 208px)",
+              overflow: "auto",
+            }}
             items={menuItems}
             selectedKeys={[selectedMenuKey]}
             openKeys={openMenuKeys}
@@ -228,8 +233,12 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
                 className={styles.headerBrandLogo}
               />
               <div>
-                <p className={styles.headerBrandName}>{process.env.NEXT_PUBLIC_APP_SHORTNAME}</p>
-                <p className={styles.headerBrandMeta}>Workspace operasional pembiayaan pensiunan</p>
+                <p className={styles.headerBrandName}>
+                  {process.env.NEXT_PUBLIC_APP_SHORTNAME}
+                </p>
+                <p className={styles.headerBrandMeta}>
+                  Workspace operasional pembiayaan pensiunan
+                </p>
               </div>
             </div>
 
@@ -239,18 +248,78 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
                 placement="bottomRight"
                 popupRender={() => (
                   <div className={styles.notificationPanel}>
-                    <Notify crossAccess={crossAccess("update", "/monitoring")} url="/monitoring" name="DRAFT" count={notif.draft} />
-                    <Notify crossAccess={crossAccess("update", "/monitoring")} url="/monitoring" name="AKAD" count={notif.akad} />
-                    <Notify crossAccess={crossAccess("read", "/proses/verif")} url="/proses/verif" name="VERIF" count={notif.verif} />
-                    <Notify crossAccess={crossAccess("read", "/proses/slik")} url="/proses/slik" name="SLIK" count={notif.slik} />
-                    <Notify crossAccess={crossAccess("read", "/proses/approv")} url="/proses/approv" name="APPROV" count={notif.approv} />
-                    <Notify crossAccess={crossAccess("read", "/pencairan/print")} url="/pencairan/print" name="CETAK SI" count={notif.printSI} />
-                    <Notify crossAccess={crossAccess("read", "/pencairan/dropping")} url="/pencairan/dropping" name="DROPPING" count={notif.SI} />
-                    <Notify crossAccess={crossAccess("read", "/ttpb/print")} url="/ttpb/print" name="CETAK SD" count={notif.printSD} />
-                    <Notify crossAccess={crossAccess("read", "/ttpb/dropping")} url="/ttpb/dropping" name="Penyerahan Document" count={notif.SD} />
-                    <Notify crossAccess={crossAccess("read", "/ttpj/print")} url="/ttpj/print" name="CETAK TTPJ" count={notif.printTTPJ} />
-                    <Notify crossAccess={crossAccess("read", "/ttpj/dropping")} url="/ttpj/dropping" name="Penyerahan Jaminan" count={notif.TTPJ} />
-                    <Notify crossAccess={crossAccess("read", "/pelunasan")} url="/pelunasan" name="Pelunasan" count={notif.pelunasan} />
+                    <Notify
+                      crossAccess={crossAccess("update", "/monitoring")}
+                      url="/monitoring"
+                      name="DRAFT"
+                      count={notif.draft}
+                    />
+                    <Notify
+                      crossAccess={crossAccess("update", "/monitoring")}
+                      url="/monitoring"
+                      name="AKAD"
+                      count={notif.akad}
+                    />
+                    <Notify
+                      crossAccess={crossAccess("read", "/proses/verif")}
+                      url="/proses/verif"
+                      name="VERIF"
+                      count={notif.verif}
+                    />
+                    <Notify
+                      crossAccess={crossAccess("read", "/proses/slik")}
+                      url="/proses/slik"
+                      name="SLIK"
+                      count={notif.slik}
+                    />
+                    <Notify
+                      crossAccess={crossAccess("read", "/proses/approv")}
+                      url="/proses/approv"
+                      name="APPROV"
+                      count={notif.approv}
+                    />
+                    <Notify
+                      crossAccess={crossAccess("read", "/pencairan/print")}
+                      url="/pencairan/print"
+                      name="CETAK SI"
+                      count={notif.printSI}
+                    />
+                    <Notify
+                      crossAccess={crossAccess("read", "/pencairan/dropping")}
+                      url="/pencairan/dropping"
+                      name="DROPPING"
+                      count={notif.SI}
+                    />
+                    <Notify
+                      crossAccess={crossAccess("read", "/ttpb/print")}
+                      url="/ttpb/print"
+                      name="CETAK SD"
+                      count={notif.printSD}
+                    />
+                    <Notify
+                      crossAccess={crossAccess("read", "/ttpb/dropping")}
+                      url="/ttpb/dropping"
+                      name="Penyerahan Document"
+                      count={notif.SD}
+                    />
+                    <Notify
+                      crossAccess={crossAccess("read", "/ttpj/print")}
+                      url="/ttpj/print"
+                      name="CETAK TTPJ"
+                      count={notif.printTTPJ}
+                    />
+                    <Notify
+                      crossAccess={crossAccess("read", "/ttpj/dropping")}
+                      url="/ttpj/dropping"
+                      name="Penyerahan Jaminan"
+                      count={notif.TTPJ}
+                    />
+                    <Notify
+                      crossAccess={crossAccess("read", "/pelunasan")}
+                      url="/pelunasan"
+                      name="Pelunasan"
+                      count={notif.pelunasan}
+                    />
                   </div>
                 )}
               >
@@ -282,9 +351,7 @@ export default function ILayout({ children }: { children: React.ReactNode }) {
         </Header>
 
         <Content className={styles.content} style={{ overflow: "auto" }}>
-          <div className={styles.contentInner}>
-            {children}
-          </div>
+          <div className={styles.contentInner}>{children}</div>
         </Content>
       </Layout>
 

@@ -14,7 +14,6 @@ import {
 } from "@/components/utils/PembiayaanUtil";
 import { ICashDesc, IDapem } from "@/libs/IInterfaces";
 import {
-  BankOutlined,
   DollarOutlined,
   FolderOpenOutlined,
   KeyOutlined,
@@ -31,7 +30,7 @@ import {
   JenisPembiayaan,
   Sumdan,
 } from "@prisma/client";
-import { Col, Row, Spin } from "antd";
+import { Col, Divider, Row, Spin } from "antd";
 import React, { useEffect, useState } from "react";
 
 interface IDapemDashboard extends Dapem {
@@ -74,122 +73,63 @@ export default function Page() {
     })();
   }, []);
 
-  const totalDropping = data.droppingall.reduce((acc, curr) => acc + curr.plafond, 0);
-  const monthlyDropping = data.droppingmonthly.reduce((acc, curr) => acc + curr.plafond, 0);
-  const approvedAccounts = data.droppingall.filter((d) => d.dropping_status === "APPROVED").length;
-  const outstanding = data.droppingall
-    .filter((f) => f.dropping_status === "APPROVED")
-    .reduce((acc, curr) => acc + GetSisaPokokMargin(curr as IDapem).principal, 0);
-  const collectionCount = data.droppingall
-    .filter((d) => d.dropping_status === "APPROVED")
-    .reduce((acc, curr) => acc + GetSisaPokokMargin(curr as IDapem).prevcount, 0);
-  const collectionValue = data.droppingall
-    .filter((d) => d.dropping_status === "APPROVED")
-    .reduce((acc, curr) => acc + GetSisaPokokMargin(curr as IDapem).prevvalueall, 0);
-  const runningInstallment = data.droppingall
-    .filter((d) => d.dropping_status === "APPROVED")
-    .reduce((acc, curr) => acc + GetSisaPokokMargin(curr as IDapem).install, 0);
-
-  const pendingCash = (() => {
-    const dataTb = data.droppingall.filter(
-      (d) => d.cash_status !== "APPROVED" && d.dropping_status === "APPROVED",
-    );
-    return dataTb.reduce((acc, curr) => {
-      const angs = GetAngsuran(
-        curr.plafond,
-        curr.tenor,
-        curr.c_margin + curr.c_margin_sumdan,
-        curr.margin_type,
-        curr.rounded,
-      ).angsuran;
-      const biaya = GetBiaya(curr as IDapem) + curr.c_takeover + curr.c_blokir * angs;
-      const tbDiberikan = curr.cash_desc ? (JSON.parse(curr.cash_desc) as ICashDesc[]) : [];
-      const tb = curr.plafond - biaya;
-
-      return acc + (tb - tbDiberikan.reduce((accu, curru) => accu + curru.amount, 0));
-    }, 0);
-  })();
-
   return (
     <Spin spinning={false}>
-      <div className="space-y-6 p-1 md:p-2">
-        <section className="app-page-hero space-y-5 p-6 md:p-7">
-          <div className="relative z-10">
-            <h1 className="text-3xl font-bold tracking-[-0.03em] text-white md:text-4xl">
-              Dashboard Pembiayaan
-            </h1>
-          </div>
-
-          <div className="relative z-10 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <HeroMetric label="Total pencairan" value={`Rp. ${IDRFormat(totalDropping)}`} />
-            <HeroMetric label="Bulan berjalan" value={`Rp. ${IDRFormat(monthlyDropping)}`} />
-            <HeroMetric label="Outstanding" value={`Rp. ${IDRFormat(outstanding)}`} />
-            <HeroMetric label="NOA aktif" value={`${approvedAccounts}`} />
-          </div>
-        </section>
-
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="app-stat-tile">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Tunggakan</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">{collectionCount}x</div>
-          </div>
-          <div className="app-stat-tile">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Nilai tunggakan</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">Rp. {IDRFormat(collectionValue)}</div>
-          </div>
-          <div className="app-stat-tile">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Tagihan berjalan</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">Rp. {IDRFormat(runningInstallment)}</div>
-          </div>
-          <div className="app-stat-tile">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Pending terima bersih</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">Rp. {IDRFormat(pendingCash)}</div>
-          </div>
-        </section>
-
-        <section className="app-card p-4 md:p-5">
-          <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="app-section-title text-xl">Ringkasan operasional</h2>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="p-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <StaticticItem
             name="Data Pencairan"
-            all={`Rp. ${IDRFormat(totalDropping)}`}
-            month={`+ Rp. ${IDRFormat(monthlyDropping)}`}
-            tone="emerald"
+            all={`Rp. ${IDRFormat(
+              data.droppingall.reduce((acc, curr) => acc + curr.plafond, 0),
+            )}`}
+            month={`+ Rp. ${IDRFormat(
+              data.droppingmonthly.reduce((acc, curr) => acc + curr.plafond, 0),
+            )}`}
           />
           <StaticticItem
             name="Number Of Account"
-            all={`${data.droppingall.length} NOA`}
-            month={`+ ${data.droppingmonthly.length} NOA`}
+            all={data.droppingall.length.toString() + " NOA"}
+            month={"+ " + data.droppingmonthly.length.toString() + " NOA"}
+            color="text-gray-700"
             icon={<TeamOutlined />}
-            tone="slate"
           />
           <StaticticItemCustom
             name="Data Instansi"
-            icon={<BankOutlined />}
             all={
-              <div className="flex flex-col gap-2 text-sm text-slate-700">
-                <div className="flex justify-between gap-3">
-                  <span>Taspen</span>
-                  <span className="font-semibold">
-                    {data.droppingall.filter((f) => f.Debitur.group_skep === "TASPEN").length} NOA
-                  </span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span>Asabri</span>
-                  <span className="font-semibold">
-                    {data.droppingall.filter((f) => f.Debitur.group_skep === "ASABRI").length} NOA
-                  </span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span>Lainnya</span>
-                  <span className="font-semibold">
+              <div className="flex flex-col text-sm text-gray-700">
+                <div className="flex gap-2">
+                  <span className="w-30">Taspen</span>
+                  <span className="w-4">:</span>
+                  <span>
                     {
                       data.droppingall.filter(
-                        (f) => f.Debitur.group_skep && !["TASPEN", "ASABRI"].includes(f.Debitur.group_skep),
+                        (f) => f.Debitur.group_skep === "TASPEN",
+                      ).length
+                    }{" "}
+                    NOA
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="w-30">Asabri</span>
+                  <span className="w-4">:</span>
+                  <span>
+                    {
+                      data.droppingall.filter(
+                        (f) => f.Debitur.group_skep === "ASABRI",
+                      ).length
+                    }{" "}
+                    NOA
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="w-30">Lainnya</span>
+                  <span className="w-4">:</span>
+                  <span>
+                    {
+                      data.droppingall.filter(
+                        (f) =>
+                          f.Debitur.group_skep &&
+                          !["TASPEN", "ASABRI"].includes(f.Debitur.group_skep),
                       ).length
                     }{" "}
                     NOA
@@ -197,319 +137,281 @@ export default function Page() {
                 </div>
               </div>
             }
-            tone="indigo"
+            color="text-gray-900"
           />
           <StaticticItem
             name="Outstanding"
-            all={`Rp. ${IDRFormat(outstanding)}`}
-            month={`NOA Aktif : ${approvedAccounts}`}
+            all={`Rp. ${IDRFormat(
+              data.droppingall
+                .filter((f) => f.dropping_status === "APPROVED")
+                .reduce(
+                  (acc, curr) =>
+                    acc + GetSisaPokokMargin(curr as IDapem).principal,
+                  0,
+                ),
+            )}`}
+            month={`NOA Aktif : ${data.droppingall.filter((d) => d.dropping_status === "APPROVED").length}`}
+            color="text-gray-700"
             icon={<MoneyCollectOutlined />}
-            tone="sky"
           />
           <StaticticItem
             name="Lunas & Tunggakan"
             all={`${data.droppingall.filter((d) => d.dropping_status === "PAID_OFF").length} NOA`}
-            month={`(${collectionCount}x) Rp. ${IDRFormat(collectionValue)}`}
+            month={`(${data.droppingall.filter((d) => d.dropping_status === "APPROVED").reduce((acc, curr) => acc + GetSisaPokokMargin(curr as IDapem).prevcount, 0)}x) Rp. ${IDRFormat(data.droppingall.filter((d) => d.dropping_status === "APPROVED").reduce((acc, curr) => acc + GetSisaPokokMargin(curr as IDapem).prevvalueall, 0))}`}
+            color="text-gray-700"
             classi="text-sm"
+            monthcolor="text-red-600"
             icon={<PayCircleOutlined />}
-            tone="amber"
           />
           <StaticticItem
             name="Tagihan Bulan Berjalan"
-            all={`${approvedAccounts} NOA | Rp. ${IDRFormat(runningInstallment)}`}
+            all={`${data.droppingall.filter((d) => d.dropping_status === "APPROVED").length} NOA | Rp. ${IDRFormat(data.droppingall.filter((d) => d.dropping_status === "APPROVED").reduce((acc, curr) => acc + GetSisaPokokMargin(curr as IDapem).install, 0))}`}
+            // month={`Rp. ${IDRFormat(data.droppingall.filter((d) => d.dropping_status === "APPROVED").reduce((acc, curr) => acc + GetSisaPokokMargin(curr as IDapem).prevvalueall, 0))}`}
+            color="text-gray-700"
             classi="text-sm"
+            monthcolor="text-red-600"
             icon={<MoneyCollectOutlined />}
-            tone="teal"
           />
           <StaticticItem
             name="Pending Takeover"
             all={`Rp. ${IDRFormat(
               data.droppingall
-                .filter((f) => f.takeover_status !== "APPROVED" && f.dropping_status === "APPROVED")
+                .filter(
+                  (f) =>
+                    f.takeover_status !== "APPROVED" &&
+                    f.dropping_status === "APPROVED",
+                )
                 .reduce((acc, curr) => acc + curr.c_takeover, 0),
             )}`}
             month={`${data.droppingall.filter((d) => d.takeover_status !== "APPROVED" && d.dropping_status === "APPROVED").length} NOA`}
+            color="text-gray-700"
             classi="text-sm"
             icon={<PayCircleOutlined />}
-            tone="violet"
           />
           <StaticticItem
             name="Pending Mutasi & Flagging"
-            all={`Mutasi ${data.droppingall.filter((d) => d.mutasi_status !== "APPROVED").length} NOA`}
-            month={`Flagging ${data.droppingall.filter((d) => d.flagging_status !== "APPROVED").length} NOA`}
+            all={`
+              Mutasi ${data.droppingall.filter((d) => d.mutasi_status !== "APPROVED").length} NOA `}
+            color="text-gray-700"
             classi="text-sm"
             icon={<SwapOutlined />}
-            tone="rose"
+            month={`Flagging ${data.droppingall.filter((d) => d.flagging_status !== "APPROVED").length} NOA`}
           />
           <StaticticItem
             name="Pending Terima Bersih"
-            all={`Rp. ${IDRFormat(pendingCash)}`}
-            month={`${data.droppingall.filter((d) => d.cash_status !== "APPROVED" && d.dropping_status === "APPROVED").length} NOA`}
+            all={`Rp. ${IDRFormat(
+              (() => {
+                const dataTb = data.droppingall.filter(
+                  (d) =>
+                    d.cash_status !== "APPROVED" &&
+                    d.dropping_status === "APPROVED",
+                );
+                const totalTB = dataTb.reduce((acc, curr) => {
+                  const angs = GetAngsuran(
+                    curr.plafond,
+                    curr.tenor,
+                    curr.c_margin + curr.c_margin_sumdan,
+                    curr.margin_type,
+                    curr.rounded,
+                  ).angsuran;
+                  const biaya =
+                    GetBiaya(curr as IDapem) +
+                    curr.c_takeover +
+                    curr.c_blokir * angs;
+                  const tbDiberikan = curr.cash_desc
+                    ? (JSON.parse(curr.cash_desc) as ICashDesc[])
+                    : [];
+                  const tb = curr.plafond - biaya;
+
+                  return (
+                    acc +
+                    (tb -
+                      tbDiberikan.reduce(
+                        (accu, curru) => accu + curru.amount,
+                        0,
+                      ))
+                  );
+                }, 0);
+                return totalTB;
+              })(),
+            )}`}
+            month={`${
+              data.droppingall.filter(
+                (d) =>
+                  d.cash_status !== "APPROVED" &&
+                  d.dropping_status === "APPROVED",
+              ).length
+            } NOA`}
+            color="text-gray-700"
             classi="text-sm"
             icon={<KeyOutlined />}
-            tone="cyan"
           />
           <StaticticItem
             name="Pending Berkas & Jaminan"
             all={`Jaminan ${data.droppingall.filter((d) => d.guarantee_status !== "MITRA" && d.dropping_status === "APPROVED").length} NOA`}
             month={`Berkas ${data.droppingall.filter((d) => d.document_status !== "MITRA" && d.dropping_status === "APPROVED").length} NOA`}
+            color="text-gray-700"
             classi="text-sm"
             icon={<FolderOpenOutlined />}
-            tone="slate"
           />
-          </div>
-        </section>
-
-        <section className="app-card p-4 md:p-5">
-          <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="app-section-title text-xl">Analisa grafik</h2>
-            </div>
-          </div>
-        <Row gutter={[16, 16]}>
+        </div>
+        <Row gutter={[12, 12]}>
           <Col xs={24} sm={12}>
-            <ChartCard title="Grafik Pembiayaan Perbulan">
-              <PencapaianChart data={data.prevmonth} />
-            </ChartCard>
+            <div className="bg-white p-3 rounded shadow">
+              <p className="font-bold text-lg">Grafik Pembiayaan Perbulan</p>
+              <div className="h-64 rounded-lg flex items-center justify-center mt-2">
+                <PencapaianChart data={data.prevmonth} />
+              </div>
+            </div>
           </Col>
           <Col xs={24} sm={12}>
-            <ChartCard title="Status Pembiayaan">
-              <StatusDapemChart
-                data={[
-                  {
-                    name: "APPROVED",
-                    value: data.alldata
-                      .filter((d) => d.dropping_status === "APPROVED")
-                      .reduce((acc, curr) => acc + curr.plafond, 0),
-                  },
-                  {
-                    name: "PAID OFF",
-                    value: data.alldata
-                      .filter((d) => d.dropping_status === "PAID_OFF")
-                      .reduce((acc, curr) => acc + curr.plafond, 0),
-                  },
-                  {
-                    name: "PENDING",
-                    value: data.alldata
-                      .filter((d) => d.dropping_status === "PENDING")
-                      .reduce((acc, curr) => acc + curr.plafond, 0),
-                  },
-                  {
-                    name: "PROCCESS",
-                    value: data.alldata
-                      .filter((d) => d.dropping_status === "PROCCESS")
-                      .reduce((acc, curr) => acc + curr.plafond, 0),
-                  },
-                  {
-                    name: "REJECTED",
-                    value: data.alldata
-                      .filter((d) => d.dropping_status === "REJECTED")
-                      .reduce((acc, curr) => acc + curr.plafond, 0),
-                  },
-                  {
-                    name: "CANCELED",
-                    value: data.alldata
-                      .filter((d) => d.dropping_status === "CANCEL")
-                      .reduce((acc, curr) => acc + curr.plafond, 0),
-                  },
-                ]}
-              />
-            </ChartCard>
+            <div className="bg-white p-3 rounded shadow">
+              <p className="font-bold text-lg">Status Pembiayaan</p>
+              <div className="h-64 rounded-lg flex items-center justify-center mt-2">
+                <StatusDapemChart
+                  data={[
+                    {
+                      name: "APPROVED",
+                      value: data.alldata
+                        .filter((d) => d.dropping_status === "APPROVED")
+                        .reduce((acc, curr) => acc + curr.plafond, 0),
+                    },
+                    {
+                      name: "PAID OFF",
+                      value: data.alldata
+                        .filter((d) => d.dropping_status === "PAID_OFF")
+                        .reduce((acc, curr) => acc + curr.plafond, 0),
+                    },
+                    {
+                      name: "PENDING",
+                      value: data.alldata
+                        .filter((d) => d.dropping_status === "PENDING")
+                        .reduce((acc, curr) => acc + curr.plafond, 0),
+                    },
+                    {
+                      name: "PROCCESS",
+                      value: data.alldata
+                        .filter((d) => d.dropping_status === "PROCCESS")
+                        .reduce((acc, curr) => acc + curr.plafond, 0),
+                    },
+                    {
+                      name: "REJECTED",
+                      value: data.alldata
+                        .filter((d) => d.dropping_status === "REJECTED")
+                        .reduce((acc, curr) => acc + curr.plafond, 0),
+                    },
+                    {
+                      name: "CANCELED",
+                      value: data.alldata
+                        .filter((d) => d.dropping_status === "CANCEL")
+                        .reduce((acc, curr) => acc + curr.plafond, 0),
+                    },
+                  ]}
+                />
+              </div>
+            </div>
           </Col>
           {user && !user.sumdanId && (
             <Col xs={24} sm={12}>
-              <ChartCard title="Grafik Pembiayaan By Mitra">
-                <BarChart
-                  data={data.bysumdan.map((j) => ({
-                    name: j.code,
-                    value: j.Dapem.reduce((acc, curr) => acc + curr.plafond, 0),
-                  }))}
-                />
-              </ChartCard>
+              <div className="bg-white p-3 rounded shadow">
+                <p className="font-bold text-lg">Grafik Pembiayaan By Mitra</p>
+                <div className="h-64 rounded-lg flex items-center justify-center mt-2">
+                  <BarChart
+                    data={data.bysumdan.map((j) => ({
+                      name: j.code,
+                      value: j.Dapem.reduce(
+                        (acc, curr) => acc + curr.plafond,
+                        0,
+                      ),
+                    }))}
+                  />
+                </div>
+              </div>
             </Col>
           )}
           <Col xs={24} sm={12}>
-            <ChartCard title="Grafik By Jenis Pembiayaan">
-              <StatusDapemChart
-                data={data.byjepem.map((j) => ({
-                  name: j.name,
-                  value: j.Dapem.reduce((acc, curr) => acc + curr.plafond, 0),
-                }))}
-              />
-            </ChartCard>
+            <div className="bg-white p-3 rounded shadow">
+              <p className="font-bold text-lg">Grafik By Jenis Pembiayaan</p>
+              <div className="h-64 rounded-lg flex items-center justify-center mt-2">
+                <StatusDapemChart
+                  data={data.byjepem.map((j) => ({
+                    name: j.name,
+                    value: j.Dapem.reduce((acc, curr) => acc + curr.plafond, 0),
+                  }))}
+                />
+              </div>
+            </div>
           </Col>
         </Row>
-        </section>
       </div>
     </Spin>
   );
 }
 
-const HeroMetric = ({ label, value }: { label: string; value: string }) => {
-  return (
-    <div className="rounded-[24px] border border-white/16 bg-white/12 p-4 backdrop-blur xl:min-h-[112px]">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-100/82">{label}</div>
-      <div className="mt-2 text-2xl font-bold text-white">{value}</div>
-    </div>
-  );
-};
-
-const ChartCard = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) => {
-  return (
-    <div className="rounded-[24px] border border-slate-200 bg-slate-50/70 p-4">
-      <p className="app-section-title text-lg">{title}</p>
-      <div className="mt-4 flex h-64 items-center justify-center rounded-[20px] bg-white/90 p-3">
-        {children}
-      </div>
-    </div>
-  );
-};
-
 const StaticticItem = ({
   name,
   all,
   month,
+  color,
   icon,
   classi,
-  tone,
+  monthcolor,
 }: {
   name: string;
   all: string;
   month?: string;
+  color?: string;
   icon?: React.ReactNode;
   classi?: string;
-  tone?: "emerald" | "slate" | "indigo" | "sky" | "amber" | "teal" | "violet" | "rose" | "cyan";
+  monthcolor?: string;
 }) => {
-  const toneMap = {
-    emerald: {
-      accent: "from-emerald-500/18 to-emerald-100",
-      icon: "bg-white text-emerald-700",
-      text: "text-emerald-700",
-      sub: "text-emerald-600",
-    },
-    slate: {
-      accent: "from-slate-500/14 to-slate-100",
-      icon: "bg-white text-slate-700",
-      text: "text-slate-800",
-      sub: "text-slate-500",
-    },
-    indigo: {
-      accent: "from-indigo-500/16 to-indigo-100",
-      icon: "bg-white text-indigo-700",
-      text: "text-slate-800",
-      sub: "text-indigo-600",
-    },
-    sky: {
-      accent: "from-sky-500/16 to-sky-100",
-      icon: "bg-white text-sky-700",
-      text: "text-slate-800",
-      sub: "text-sky-600",
-    },
-    amber: {
-      accent: "from-amber-500/16 to-amber-100",
-      icon: "bg-white text-amber-700",
-      text: "text-slate-800",
-      sub: "text-amber-600",
-    },
-    teal: {
-      accent: "from-teal-500/16 to-teal-100",
-      icon: "bg-white text-teal-700",
-      text: "text-slate-800",
-      sub: "text-teal-600",
-    },
-    violet: {
-      accent: "from-violet-500/16 to-violet-100",
-      icon: "bg-white text-violet-700",
-      text: "text-slate-800",
-      sub: "text-violet-600",
-    },
-    rose: {
-      accent: "from-rose-500/16 to-rose-100",
-      icon: "bg-white text-rose-700",
-      text: "text-slate-800",
-      sub: "text-rose-600",
-    },
-    cyan: {
-      accent: "from-cyan-500/16 to-cyan-100",
-      icon: "bg-white text-cyan-700",
-      text: "text-slate-800",
-      sub: "text-cyan-600",
-    },
-  };
-  const palette = toneMap[tone || "emerald"];
-
   return (
-    <div className="app-stat-tile relative overflow-hidden">
-      <div className={`absolute inset-x-0 top-0 h-[44px] bg-gradient-to-b ${palette.accent}`} />
-      <div className="relative space-y-3">
-        <div className="flex items-center gap-3">
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-[18px] shadow-[0_6px_18px_rgba(15,23,42,0.05)] ${palette.icon}`}>
-              {icon ? icon : <DollarOutlined />}
-          </div>
-          <p className="text-sm font-bold leading-5 text-slate-700">{name}</p>
+    <div className="bg-white rounded-lg p-3 card-shadow">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-gray-600 mb-1 font-bold">
+            {icon ? icon : <DollarOutlined />} {name}
+          </p>
+          <p
+            className={`${classi ? classi : "text-lg"} font-bold ${color ? color : "text-green-600"}`}
+          >
+            {all}
+          </p>
+          <Divider style={{ margin: 8, padding: 0 }} />
+          <p
+            className={`text-sm font-bold ${monthcolor ? monthcolor : "text-green-600"}`}
+          >
+            {month}
+          </p>
         </div>
-        <p className={`${classi ? classi : "text-lg"} font-bold ${palette.text}`}>{all}</p>
-        {month ? <p className={`text-sm font-semibold ${palette.sub}`}>{month}</p> : null}
       </div>
     </div>
   );
 };
-
 const StaticticItemCustom = ({
   name,
   all,
   month,
-  tone,
-  icon,
+  color,
 }: {
   name: string;
   all: string | React.ReactNode;
   month?: string | React.ReactNode;
-  tone?: "indigo" | "emerald" | "slate";
-  icon?: React.ReactNode;
+  color?: string;
 }) => {
-  const toneMap = {
-    indigo: {
-      accent: "from-indigo-500/16 to-indigo-100",
-      icon: "bg-white text-indigo-700",
-      text: "text-slate-800",
-      sub: "text-indigo-600",
-    },
-    emerald: {
-      accent: "from-emerald-500/16 to-emerald-100",
-      icon: "bg-white text-emerald-700",
-      text: "text-emerald-700",
-      sub: "text-emerald-600",
-    },
-    slate: {
-      accent: "from-slate-500/16 to-slate-100",
-      icon: "bg-white text-slate-700",
-      text: "text-slate-800",
-      sub: "text-slate-500",
-    },
-  };
-  const palette = toneMap[tone || "indigo"];
-
   return (
-    <div className="app-stat-tile relative overflow-hidden">
-      <div className={`absolute inset-x-0 top-0 h-[44px] bg-gradient-to-b ${palette.accent}`} />
-      <div className="relative space-y-3">
-        <div className="flex items-center gap-3">
+    <div className="bg-white rounded-lg p-3 card-shadow">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-sm text-gray-600 mb-1 font-bold">{name}</div>
           <div
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-[18px] shadow-[0_6px_18px_rgba(15,23,42,0.05)] ${palette.icon}`}
+            className={`text-xl font-bold ${color ? color : "text-green-500"}`}
           >
-            {icon ? icon : <DollarOutlined />}
+            {all}
           </div>
-          <p className="text-sm font-bold leading-5 text-slate-700">{name}</p>
+          <Divider style={{ margin: 8, padding: 0 }} />
+          <p className="text-sm font-bold text-green-500">{month}</p>
         </div>
-        <div className={`text-base font-semibold ${palette.text}`}>{all}</div>
-        {month ? <p className={`mt-3 text-sm font-semibold ${palette.sub}`}>{month}</p> : null}
       </div>
     </div>
   );

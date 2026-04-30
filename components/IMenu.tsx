@@ -269,6 +269,12 @@ export const listMenuUI: IMenuType[] = [
     needaccess: false,
   },
   {
+    label: "Agent Fronting",
+    key: "/agent",
+    icon: <BorderOuterOutlined />,
+    needaccess: true,
+  },
+  {
     label: "Master Data",
     key: "/master",
     icon: <RobotOutlined />,

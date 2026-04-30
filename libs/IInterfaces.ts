@@ -1,4 +1,5 @@
 import {
+  AgentFronting,
   Angsuran,
   Area,
   Berkas,
@@ -14,7 +15,9 @@ import {
   Pelunasan,
   ProdukPembiayaan,
   Role,
+  SPVRelation,
   Sumdan,
+  SumdanAgentFronting,
   User,
 } from "@prisma/client";
 
@@ -81,6 +84,8 @@ export interface ICabang extends Cabang {
 }
 export interface IUserDapem extends User {
   Cabang: ICabang;
+  SPVRelation: SPVRelation | null;
+  SPVRelations: SPVRelation[];
 }
 export interface IDapem extends Dapem {
   insurance_type: any;
@@ -88,12 +93,23 @@ export interface IDapem extends Dapem {
   ProdukPembiayaan: IProdukPembiayaan;
   CreatedBy: IUserDapem;
   AO: IUserDapem;
+  MOC: IUserDapem | null;
   Dropping: Dropping | null;
   Berkas: Berkas | null;
   Jaminan: Jaminan | null;
   JenisPembiayaan: JenisPembiayaan;
   Angsuran: Angsuran[];
   Pelunasan: Pelunasan;
+  AgentFronting: AgentFronting | null;
+}
+
+export interface ISumdanAgentFronting extends SumdanAgentFronting {
+  Sumdan: Sumdan[];
+}
+export interface IAgentFronting extends AgentFronting {
+  Dapem: IDapem[];
+  SumdanAgentFronting: ISumdanAgentFronting[];
+  User: IUser[];
 }
 
 export interface IDropping extends Dropping {
@@ -135,6 +151,11 @@ export interface ICategoryOfAccount extends CategoryOfAccount {
   Children: ICategoryOfAccount[];
   Parent: ICategoryOfAccount | null;
   JournalDetail: IJournalDetail[];
+}
+
+export interface ISPVRelation extends SPVRelation {
+  SPV: UserType;
+  User: UserType[];
 }
 // End Models
 

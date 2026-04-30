@@ -49,6 +49,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
   const [sumdan, setSumdan] = useState<ISumdanDapem[]>([]);
   const [sumdanAv, setSumdanAv] = useState<ISumdanDapem[]>([]);
   const [users, setUser] = useState<IUserDapem[]>([]);
+  const [agents, setAgents] = useState<IUserDapem[]>([]);
   const [temp, setItemp] = useState<ITemp>(defaultTemp);
   const { modal } = App.useApp();
   const user = useUser();
@@ -62,7 +63,7 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
           setData({
             ...data,
             Debitur: res.data,
-            mutasi_from: res.data.pay_office,
+            mutasi_from: `${res.data.pay_office || ""} ${res.data.pay_office_cabang || ""}`,
           });
         }
       });
@@ -103,6 +104,9 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
       await fetch("/api/user?limit=5000")
         .then((res) => res.json())
         .then((res) => setUser(res.data));
+      await fetch("/api/agent?limit=5000")
+        .then((res) => res.json())
+        .then((res) => setAgents(res.data));
       setLoading(false);
     })();
   }, []);
@@ -1199,13 +1203,40 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
                 data={{
                   mode: "vertical",
                   label: "Kantor Bayar Tujuan",
-                  type: "text",
+                  type: "select",
+                  options: [
+                    { label: "PT. POS", value: "PT. POS" },
+                    { label: "BPR DP TASPEN", value: "BPR DP TASPEN" },
+                    {
+                      label: "BANK MANDIRI TASPEN",
+                      value: "BANK MANDIRI TASPEN",
+                    },
+                    {
+                      label: "BANK RAKYAT INDONESIA",
+                      value: "BANK RAKYAT INDONESIA",
+                    },
+                    { label: "BANK SMBC", value: "BANK SMBC" },
+                  ],
                   class: plainFieldClass,
                   value: data.mutasi_to,
                   onChange: (e: string) =>
                     setData({
                       ...data,
                       mutasi_to: e,
+                    }),
+                }}
+              />
+              <FormInput
+                data={{
+                  mode: "vertical",
+                  label: "Cabang Kantor Bayar",
+                  type: "text",
+                  class: plainFieldClass,
+                  value: data.pay_office_cabang,
+                  onChange: (e: string) =>
+                    setData({
+                      ...data,
+                      pay_office_cabang: e,
                     }),
                 }}
               />
@@ -1739,66 +1770,133 @@ export default function UpsertPermohonan({ record }: { record?: IDapem }) {
             tone="emerald"
           />
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "Nama AO",
-              type: "select",
-              class: "flex-1",
-              required: true,
-              value: data.aoId,
-              options: users.map((u) => ({
-                label: `${u.fullname} (${u.Cabang.name})`,
-                value: u.id,
-              })),
-              onChange: (e: string) => {
-                const find = users.find((u) => u.id === e);
-                if (find) setData({ ...data, AO: find, aoId: e });
-              },
-            }}
-          />
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "No Telepon",
-              type: "text",
-              class: "flex-1",
-              disabled: true,
-              value: data.AO.phone,
-            }}
-          />
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "Posisi",
-              type: "text",
-              class: "flex-1",
-              disabled: true,
-              value: data.AO.position,
-            }}
-          />
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "Cabang",
-              type: "text",
-              class: "flex-1",
-              disabled: true,
-              value: data.AO.Cabang?.name,
-            }}
-          />
-          <FormInput
-            data={{
-              mode: "vertical",
-              label: "Area",
-              type: "text",
-              class: "flex-1",
-              disabled: true,
-              value: data.AO.Cabang?.Area?.name,
-            }}
-          />
-        </div>
+        <Card title="SPV">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <FormInput
+              data={{
+                mode: "vertical",
+                label: "Nama SPV",
+                type: "select",
+                class: "flex-1",
+                required: true,
+                value: data.aoId,
+                options: users.map((u) => ({
+                  label: `${u.fullname} (${u.Cabang.name})`,
+                  value: u.id,
+                })),
+                onChange: (e: string) => {
+                  const find = users.find((u) => u.id === e);
+                  if (find) setData({ ...data, AO: find, aoId: e });
+                },
+              }}
+            />
+            <FormInput
+              data={{
+                mode: "vertical",
+                label: "No Telepon",
+                type: "text",
+                class: "flex-1",
+                disabled: true,
+                value: data.AO.phone,
+              }}
+            />
+            <FormInput
+              data={{
+                mode: "vertical",
+                label: "Posisi",
+                type: "text",
+                class: "flex-1",
+                disabled: true,
+                value: data.AO.position,
+              }}
+            />
+            <FormInput
+              data={{
+                mode: "vertical",
+                label: "Cabang",
+                type: "text",
+                class: "flex-1",
+                disabled: true,
+                value: data.AO.Cabang?.name,
+              }}
+            />
+            <FormInput
+              data={{
+                mode: "vertical",
+                label: "Area",
+                type: "text",
+                class: "flex-1",
+                disabled: true,
+                value: data.AO.Cabang?.Area?.name,
+              }}
+            />
+          </div>
+        </Card>
+        <Card title="MOC">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <FormInput
+              data={{
+                mode: "vertical",
+                label: "Nama MOC",
+                type: "select",
+                class: "flex-1",
+                // required: true,
+                value: data.mocId,
+                disabled: !data.aoId,
+                options: users
+                  .filter((d) => d.SPVRelation?.spvId === data.aoId)
+                  .map((u) => ({
+                    label: `${u.fullname} (${u.Cabang.name})`,
+                    value: u.id,
+                  })),
+                onChange: (e: string | null | undefined) => {
+                  const find = users.find((u) => u.id === e);
+                  setData({ ...data, MOC: find || null, mocId: e || null });
+                },
+              }}
+            />
+            <FormInput
+              data={{
+                mode: "vertical",
+                label: "No Telepon",
+                type: "text",
+                class: "flex-1",
+                disabled: true,
+                value: data.MOC?.phone,
+              }}
+            />
+            <FormInput
+              data={{
+                mode: "vertical",
+                label: "Posisi",
+                type: "text",
+                class: "flex-1",
+                disabled: true,
+                value: data.MOC?.position,
+              }}
+            />
+            <FormInput
+              data={{
+                mode: "vertical",
+                label: "Cabang",
+                type: "text",
+                class: "flex-1",
+                disabled: true,
+                value: data.MOC?.Cabang?.name,
+              }}
+            />
+            <FormInput
+              data={{
+                mode: "vertical",
+                label: "Area",
+                type: "text",
+                class: "flex-1",
+                disabled: true,
+                value: data.MOC?.Cabang?.Area?.name,
+              }}
+            />
+          </div>
+        </Card>
       </Card>
       <Card
         className="app-card overflow-hidden"
@@ -2066,6 +2164,7 @@ const defaultData: IDapem = {
   takeover_date: null,
   mutasi_from: null,
   mutasi_to: null,
+  pay_office_cabang: null,
 
   dom_status: false,
   address: "",
@@ -2141,20 +2240,24 @@ const defaultData: IDapem = {
   JenisPembiayaan: {} as JenisPembiayaan,
   CreatedBy: {} as IUserDapem,
   AO: {} as IUserDapem,
+  MOC: {} as IUserDapem,
   Dropping: {} as Dropping,
   Berkas: {} as Berkas,
   Jaminan: {} as Jaminan,
   Pelunasan: {} as Pelunasan,
   Angsuran: [],
+  AgentFronting: null,
 
   nopen: "",
   produkPembiayaanId: "",
   jenisPembiayaanId: "",
   createdById: "",
   aoId: "",
+  mocId: "",
   droppingId: null,
   berkasId: null,
   jaminanId: null,
+  agentFrontingId: null,
 };
 
 interface ITemp {

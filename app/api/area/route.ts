@@ -48,7 +48,25 @@ export const GET = async (request: NextRequest) => {
             User: {
               where: { status: true, sumdanId: null },
               include: {
+                SPVRelation: { include: { SPV: true } },
                 AODapem: {
+                  where: {
+                    status: true,
+                    ...(user.sumdanId && {
+                      ProdukPembiayaan: { sumdanId: user.sumdanId },
+                    }),
+                    dropping_status: { in: ["APPROVED", "PAID_OFF"] },
+                    ...(backdate && {
+                      Dropping: {
+                        process_at: {
+                          gte: moment(backdate.split(",")[0]).toDate(),
+                          lte: moment(backdate.split(",")[1]).toDate(),
+                        },
+                      },
+                    }),
+                  },
+                },
+                MOCDapem: {
                   where: {
                     status: true,
                     ...(user.sumdanId && {

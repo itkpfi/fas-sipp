@@ -92,14 +92,15 @@ model Sumdan {
   pic1           String?
   pic2           String?
 
-  status           Boolean            @default(true)
-  created_at       DateTime           @default(now())
-  updated_at       DateTime           @default(now())
-  User             User[]
-  ProdukPembiayaan ProdukPembiayaan[]
-  Dropping         Dropping[]
-  Berkas           Berkas[]
-  Jaminan          Jaminan[]
+  status               Boolean               @default(true)
+  created_at           DateTime              @default(now())
+  updated_at           DateTime              @default(now())
+  User                 User[]
+  ProdukPembiayaan     ProdukPembiayaan[]
+  Dropping             Dropping[]
+  Berkas               Berkas[]
+  Jaminan              Jaminan[]
+  sumdanAgentFrontings SumdanAgentFronting[]
 }
 
 model Area {
@@ -145,19 +146,34 @@ model User {
   t_position  Int       @default(0)
   ptkp        String?
 
-  status        Boolean         @default(true)
-  created_at    DateTime        @default(now())
-  updated_at    DateTime        @default(now())
-  Role          Role            @relation(fields: [roleId], references: [id])
-  Cabang        Cabang          @relation(fields: [cabangId], references: [id])
-  Sumdan        Sumdan?         @relation(fields: [sumdanId], references: [id])
-  roleId        String
-  cabangId      String
-  sumdanId      String?
-  CreateDDapem  Dapem[]         @relation("CreateDapemRelation")
-  AODapem       Dapem[]         @relation("AODapemRelation")
-  JournalDetail JournalDetail[]
-  Pinjaman      Pinjaman[]
+  status        Boolean        @default(true)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @default(now())
+  Role          Role           @relation(fields: [roleId], references: [id])
+  Cabang        Cabang         @relation(fields: [cabangId], references: [id])
+  Sumdan        Sumdan?        @relation(fields: [sumdanId], references: [id])
+  AgentFronting AgentFronting? @relation(fields: [agentFrontingId], references: [id])
+
+  roleId          String
+  cabangId        String
+  sumdanId        String?
+  CreateDDapem    Dapem[]         @relation("CreateDapemRelation")
+  AODapem         Dapem[]         @relation("AODapemRelation")
+  MOCDapem        Dapem[]         @relation("MOCDapemRelation")
+  SPVRelations    SPVRelation[]   @relation("SPVRelation")
+  JournalDetail   JournalDetail[]
+  Pinjaman        Pinjaman[]
+  agentFrontingId String?
+  SPVRelation     SPVRelation?    @relation(fields: [sPVRelationId], references: [id])
+  sPVRelationId   String?
+}
+
+model SPVRelation {
+  id   String @id @default(uuid())
+  User User[]
+  SPV  User?  @relation("SPVRelation", fields: [spvId], references: [id])
+
+  spvId String @unique
 }
 
 model ProdukPembiayaan {
@@ -224,9 +240,10 @@ model Debitur {
   soul_code      Int?
   job_year       Int?
 
-  pay_office     String?
-  start_flagging String?
-  end_flagging   String?
+  pay_office        String?
+  pay_office_cabang String?
+  start_flagging    String?
+  end_flagging      String?
 
   mother_name    String?
   account_name   String?
@@ -258,10 +275,11 @@ model Dapem {
   margin_type     EMarginType
   insurance_type  String?
 
-  takeover_from String?
-  takeover_date DateTime?
-  mutasi_from   String?
-  mutasi_to     String?
+  takeover_from     String?
+  takeover_date     DateTime?
+  mutasi_from       String?
+  mutasi_to         String?
+  pay_office_cabang String?
 
   dom_status  Boolean
   address     String
@@ -337,20 +355,24 @@ model Dapem {
   JenisPembiayaan  JenisPembiayaan  @relation(fields: [jenisPembiayaanId], references: [id])
   CreatedBy        User             @relation("CreateDapemRelation", fields: [createdById], references: [id])
   AO               User             @relation("AODapemRelation", fields: [aoId], references: [id])
+  MOC              User?            @relation("MOCDapemRelation", fields: [mocId], references: [id])
   Dropping         Dropping?        @relation(fields: [droppingId], references: [id])
   Berkas           Berkas?          @relation(fields: [berkasId], references: [id])
   Jaminan          Jaminan?         @relation(fields: [jaminanId], references: [id])
+  AgentFronting    AgentFronting?   @relation(fields: [agentFrontingId], references: [id])
 
   nopen              String
   produkPembiayaanId String
   jenisPembiayaanId  String
   createdById        String
   aoId               String
+  mocId              String?
   droppingId         String?
   berkasId           String?
   jaminanId          String?
   Angsuran           Angsuran[]
   Pelunasan          Pelunasan?
+  agentFrontingId    String?
 }
 
 model Dropping {
@@ -507,4 +529,29 @@ model JournalDetail {
   journalEntryId      String
   categoryOfAccountId String
   userId              String?
+}
+
+model AgentFronting {
+  id          String  @id @default(uuid())
+  name        String
+  code        String
+  up          String
+  file        String?
+  description String?
+
+  status              Boolean               @default(true)
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @default(now())
+  Dapem               Dapem[]
+  User                User[]
+  SumdanAgentFronting SumdanAgentFronting[]
+}
+
+model SumdanAgentFronting {
+  id String @id @default(uuid())
+
+  Sumdan          Sumdan        @relation(fields: [sumdanId], references: [id])
+  AgentFronting   AgentFronting @relation(fields: [agentFrontingId], references: [id])
+  agentFrontingId String
+  sumdanId        String
 }

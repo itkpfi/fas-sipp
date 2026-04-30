@@ -4,7 +4,13 @@ import { FormInput } from "@/components";
 import { printPKWT } from "@/components/pdfutils/pkwt/PKWTStandar";
 import { FilterData } from "@/components/utils/CompUtils";
 import { IDRFormat, IDRToNumber } from "@/components/utils/PembiayaanUtil";
-import { IActionTable, IPageProps, UserType } from "@/libs/IInterfaces";
+import {
+  IActionTable,
+  IAgentFronting,
+  ICabang,
+  IPageProps,
+  UserType,
+} from "@/libs/IInterfaces";
 import { useAccess } from "@/libs/Permission";
 import {
   BankOutlined,
@@ -20,7 +26,7 @@ import {
   SearchOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Cabang, Role, Sumdan, User } from "@prisma/client";
+import { Cabang, Role, SPVRelation, Sumdan, User } from "@prisma/client";
 import {
   App,
   Button,
@@ -37,13 +43,13 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 
 export default function Page() {
-  const [upsert, setUpsert] = useState<IActionTable<UserType>>({
+  const [upsert, setUpsert] = useState<IActionTable<IUserType>>({
     upsert: false,
     delete: false,
     proses: false,
     selected: undefined,
   });
-  const [pageProps, setPageProps] = useState<IPageProps<UserType>>({
+  const [pageProps, setPageProps] = useState<IPageProps<IUserType>>({
     page: 1,
     limit: 10,
     total: 0,
@@ -58,6 +64,7 @@ export default function Page() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [cabangs, setCabangs] = useState<Cabang[]>([]);
   const [sumdans, setSumdans] = useState<Sumdan[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const { modal } = App.useApp();
   const { hasAccess } = useAccess("/master/users");
 
@@ -121,10 +128,13 @@ export default function Page() {
       const resS = await fetch("/api/sumdan");
       const resSJson = await resS.json();
       setSumdans(resSJson.data);
+      const resU = await fetch("/api/user");
+      const resUJson = await resU.json();
+      setUsers(resUJson.data.filter((d: any) => !d.spvRelationId));
     })();
   }, []);
 
-  const columns: TableProps<UserType>["columns"] = [
+  const columns: TableProps<IUserType>["columns"] = [
     {
       title: "ID",
       dataIndex: "id",
@@ -176,7 +186,10 @@ export default function Page() {
       render(value, record, index) {
         return (
           <div>
-            <Tag color={"blue"}>{record.position}</Tag>
+            <Tag color={"blue"}>
+              {record.position} |{" "}
+              {record.sPVRelationId ? record.SPVRelation?.SPV.fullname : ""}
+            </Tag>
             <div className="text-xs text-blue-400">
               <div>
                 <EnvironmentOutlined /> {record.Cabang.name}
@@ -248,7 +261,7 @@ export default function Page() {
           {hasAccess("write") && (
             <Button
               icon={<PrinterOutlined />}
-              onClick={() => printPKWT(record)}
+              onClick={() => printPKWT(record as UserType)}
               size="small"
               type="primary"
             ></Button>
@@ -507,6 +520,7 @@ export default function Page() {
         cabangs={cabangs}
         sumdans={sumdans}
         key={upsert.selected ? "upsert" + upsert.selected.id : "create"}
+        users={users}
       />
       <DeleteUser
         open={upsert.delete}
@@ -529,8 +543,9 @@ function UpsertUser({
   roles,
   cabangs,
   sumdans,
+  users,
 }: {
-  record?: User;
+  record?: IUserType;
   open: boolean;
   setOpen: Function;
   getData?: Function;
@@ -538,21 +553,13 @@ function UpsertUser({
   roles: Role[];
   cabangs: Cabang[];
   sumdans: Sumdan[];
+  users: User[];
 }) {
   const [data, setData] = useState(record ? record : defaultUser);
   const [loading, setLoading] = useState(false);
 
   const handleSave = async () => {
     setLoading(true);
-    if ("Cabang" in data) {
-      delete data.Cabang;
-    }
-    if ("Role" in data) {
-      delete data.Role;
-    }
-    if ("Sumdan" in data) {
-      delete data.Sumdan;
-    }
     await fetch("/api/user", {
       method: record ? "PUT" : "POST",
       body: JSON.stringify(data),
@@ -759,6 +766,25 @@ function UpsertUser({
           />
           <FormInput
             data={{
+              label: "Relasi SPV",
+              mode: "horizontal",
+              type: "select",
+              options: users.map((u) => ({
+                label: `${u.fullname} (${u.nip})`,
+                value: u.id,
+              })),
+              value: data.sPVRelationId,
+              onChange: (e: string) =>
+                setData({
+                  ...data,
+                  sPVRelationId: e,
+                  ...(e &&
+                    ({ SPVRelation: { id: "", spvId: e } } as unknown as ISPV)),
+                }),
+            }}
+          />
+          <FormInput
+            data={{
               label: "Status PKWT",
               mode: "horizontal",
               type: "select",
@@ -876,7 +902,21 @@ export function DeleteUser({
   );
 }
 
-const defaultUser: User = {
+interface ISPV extends SPVRelation {
+  SPV: UserType;
+  User: UserType[];
+}
+
+interface IUserType extends User {
+  AgentFronting: IAgentFronting | null;
+  Cabang: ICabang;
+  Role: Role;
+  Sumdan: Sumdan | null;
+  SPVRelation: ISPV | null;
+  SPVRelations: ISPV[];
+}
+
+const defaultUser: IUserType = {
   id: "",
   fullname: "",
   username: "",
@@ -898,6 +938,14 @@ const defaultUser: User = {
   t_transport: 0,
   t_position: 0,
   ptkp: null,
+  AgentFronting: null,
+  agentFrontingId: null,
+  Cabang: {} as ICabang,
+  SPVRelation: null,
+  SPVRelations: [],
+  Role: {} as Role,
+  Sumdan: null,
+  sPVRelationId: null,
 
   status: true,
   created_at: new Date(),

@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE `dapem` ADD COLUMN `mocId` VARCHAR(191) NULL,
+    ADD COLUMN `userId` VARCHAR(191) NULL;
+
+-- AddForeignKey
+ALTER TABLE `Dapem` ADD CONSTRAINT `Dapem_mocId_fkey` FOREIGN KEY (`mocId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Dapem` ADD CONSTRAINT `Dapem_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

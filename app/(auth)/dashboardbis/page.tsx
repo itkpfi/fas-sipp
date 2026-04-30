@@ -7,7 +7,7 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import { IDRFormat } from "@/components/utils/PembiayaanUtil";
-import { IPageProps } from "@/libs/IInterfaces";
+import { IPageProps, ISPVRelation } from "@/libs/IInterfaces";
 import {
   Area,
   Cabang,
@@ -22,6 +22,8 @@ const { RangePicker } = DatePicker;
 
 interface UserDapem extends User {
   AODapem: Dapem[];
+  MOCDapem: Dapem[];
+  SPVRelation: ISPVRelation;
 }
 interface ICabang extends Cabang {
   User: UserDapem[];
@@ -163,7 +165,11 @@ export default function Page() {
   const totalPlafond = summaryAreas
     .flatMap((area) => area.Cabang)
     .flatMap((cabang) => cabang.User)
-    .flatMap((user) => user.AODapem)
+    .flatMap((user) =>
+      user.MOCDapem.length !== 0
+        ? user.MOCDapem
+        : user.AODapem.filter((d) => d.mocId === null),
+    )
     .reduce((acc, curr) => acc + curr.plafond, 0);
 
   const totalTarget = summaryAreas
@@ -191,7 +197,11 @@ export default function Page() {
   );
 
   const getCabangSummary = (cabang: ICabang) => {
-    const noa = cabang.User.flatMap((user) => user.AODapem);
+    const noa = cabang.User.flatMap((user) =>
+      user.MOCDapem.length !== 0
+        ? user.MOCDapem
+        : user.AODapem.filter((d) => d.mocId === null),
+    );
     const pencapaian = noa.reduce((acc, curr) => acc + curr.plafond, 0);
     const target = cabang.User.reduce((acc, curr) => acc + curr.target, 0);
     const progress = target > 0 ? (pencapaian / target) * 100 : 0;
@@ -535,7 +545,13 @@ export default function Page() {
                                   ) : null}
 
                                   {cabang.User.map((user) => {
-                                    const userPencapaian = user.AODapem.reduce(
+                                    const userPencapaian = (
+                                      user.MOCDapem.length !== 0
+                                        ? user.MOCDapem
+                                        : user.AODapem.filter(
+                                            (d) => d.mocId === null,
+                                          )
+                                    ).reduce(
                                       (acc, curr) => acc + curr.plafond,
                                       0,
                                     );
@@ -554,11 +570,25 @@ export default function Page() {
                                             <div className="font-medium text-slate-900">
                                               {user.fullname}{" "}
                                               <span className="text-slate-500">
-                                                ({user.position})
+                                                ({user.position}{" "}
+                                                {user.SPVRelation
+                                                  ? "- " +
+                                                    user.SPVRelation.SPV
+                                                      .fullname
+                                                  : ""}
+                                                )
                                               </span>
                                             </div>
                                             <div className="mt-1 text-sm text-slate-600">
-                                              {user.AODapem.length} NOA · Target{" "}
+                                              {
+                                                (user.MOCDapem.length !== 0
+                                                  ? user.MOCDapem
+                                                  : user.AODapem.filter(
+                                                      (a) => a.mocId === null,
+                                                    )
+                                                ).length
+                                              }{" "}
+                                              NOA · Target{" "}
                                               {IDRFormat(user.target)}
                                             </div>
                                           </div>

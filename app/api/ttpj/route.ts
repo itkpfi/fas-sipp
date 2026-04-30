@@ -126,6 +126,7 @@ export const PUT = async (req: NextRequest) => {
           ProdukPembiayaan,
           JenisPembiayaan,
           AO,
+          MOC,
           CreatedBy,
           Debitur,
           Angsuran,
@@ -133,6 +134,7 @@ export const PUT = async (req: NextRequest) => {
           Jaminan,
           Dropping,
           Pelunasan,
+          AgentFronting,
           ...dpmData
         } = dpm;
         await prisma.dapem.update({ where: { id: dpm.id }, data: dpmData });
